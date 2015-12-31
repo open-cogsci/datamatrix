@@ -17,40 +17,163 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix import BaseColumn, Row
+from datamatrix.py3compat import *
+from datamatrix import Row
+from datamatrix._datamatrix._basecolumn import BaseColumn
+from datamatrix._datamatrix._mixedcolumn import MixedColumn
 import collections
 _id = 0
 
 class DataMatrix(object):
 
-	def __init__(self, length=0):
+	"""
+	desc:
+		A DataMatrix is a tabular data structure.
+	"""
+
+	def __init__(self, length=0, default_col_type=MixedColumn):
+
+		"""
+		desc:
+			Constructor.
+
+		keywords:
+			length:
+				desc:	The starting length of the DataMatrix.
+				type:	int
+		"""
 
 		global _id
 		object.__setattr__(self, u'_cols', collections.OrderedDict())
 		object.__setattr__(self, u'_rowid', list(range(length)))
+		object.__setattr__(self, u'_default_col_type', default_col_type)
 		object.__setattr__(self, u'_id', _id)
 		_id += 1
 
-	def fromdict(self, d={}):
+	@property
+	def columns(self):
 
-		from datamatrix import MixedColumn
+		return list(self._cols.items())
+
+	@property
+	def column_names(self):
+
+		return list(self._cols.keys())
+
+	@property
+	def rows(self):
+
+		return list(range(len(self)))
+
+	@property
+	def length(self):
+
+		return len(self._rowid)
+
+	@property
+	def default_col_type(self):
+
+		return self._default_col_type
+
+	# Private functions. These can also be called by the BaseColumn (and
+	# derived) classes.
+
+	def _fromdict(self, d={}):
+
+		"""
+		visible:
+			Merges a dict into the DataMatrix. Modifies the DataMatrix in place.
+
+		arguments:
+			d:	The dict to merge.
+
+		returns:
+			The modified DataMatrix.
+		"""
 
 		for name, col in d.items():
 			if len(col) > len(self):
 				self.length = len(col)
-			self[name] = MixedColumn
+			self[name] = self._default_col_type
 			self[name][:len(col)] = col
 		return self
 
-	@property
-	def columns(self):
-		return list(self._cols.items())
+	def _selectrowid(self, _rowid):
 
-	@property
-	def length(self):
-		return len(self._rowid)
+		"""
+		visible: False
 
-	def setlength(self, value):
+		desc:
+			Selects rows from the current DataMatrix by row id (i.e. not by
+			index).
+
+		arguments:
+			_rowid:		An iterable list of row ids.
+
+		returns:
+			type:	DataMatrix.
+		"""
+
+		dm = DataMatrix(len(_rowid))
+		object.__setattr__(dm, u'_rowid', _rowid)
+		object.__setattr__(dm, u'_id', self._id)
+		for name, col in self._cols.items():
+			dm._cols[name] = self._cols[name]._getrowidkey(_rowid)
+		return dm
+
+	def _slice(self, key):
+
+		"""
+		visible: False
+
+		desc:
+			Selects rows from the current DataMatrix by indices (i.e. not by
+			row id).
+
+		arguments:
+			key:		A slice object, or a list of indices.
+
+		returns:
+			type:	DataMatrix.
+		"""
+
+		if isinstance(key, slice):
+			_rowid = self._rowid[key]
+		else:
+			try:
+				_rowid = [self._rowid[row] for row in key]
+			except:
+				raise Exception('Invalid row indices')
+		dm = DataMatrix(len(_rowid))
+		object.__setattr__(dm, u'_rowid', _rowid)
+		object.__setattr__(dm, u'_id', self._id)
+		for name, col in self._cols.items():
+			dm._cols[name] = self._cols[name][key]
+		return dm
+
+	def _setlength(self, value):
+
+		"""
+		visible: False
+
+		desc: |
+			Changes the length of the current DataMatrix, adding or removing
+			rows as necessary.
+
+			*This modifies the current DataMatrix.*
+
+			__Note__: The preferred way to change the length is by setting the
+			length property:
+
+			~~~
+			dm.length = 10
+			~~~
+
+		arguments:
+			value:
+				desc:	The new length.
+				type:	int
+		"""
 
 		if value < len(self):
 			object.__setattr__(self, u'_rowid', self._rowid[:value])
@@ -64,8 +187,161 @@ class DataMatrix(object):
 			rowid = [rowid+startid for rowid in range(value-len(self))]
 			object.__setattr__(self, u'_rowid', self._rowid+rowid)
 			for name in self._cols:
-				self._cols[name].addrowid(rowid)
-		self.mutate()
+				self._cols[name]._addrowid(rowid)
+		self._mutate()
+
+	def _set_default_col_type(self, col_type):
+
+		"""
+		visible: False
+
+		desc:
+			Sets the default column type.
+
+		arguments:
+			col_type:	A column type (BaseColumn)
+		"""
+
+		if not isinstance(col_type, type) or not issubclass(col_type, BaseColumn):
+			raise Exception(u'Not a valid column type')
+		object.__setattr__(self, u'_default_col_type', col_type)
+
+	def _merge(self, other, _rowid):
+
+		"""
+		visible: False
+
+		desc:
+			Merges the current DataMatrix with another DataMatrix, preserving
+			only the rows indicated by _rowid.
+
+		arguments:
+			other:	Another DataMatrix.
+			_rowid:	A list of row ids.
+
+		returns:
+			type:	DataMatrix.
+		"""
+
+		if self != other:
+			raise Exception('Can only merge related datamatrices')
+		dm = DataMatrix(len(_rowid))
+		object.__setattr__(dm, u'_rowid', _rowid)
+		object.__setattr__(dm, u'_id', self._id)
+		for name, col in self._cols.items():
+			dm._cols[name] = self._cols[name]._merge(other._cols[name], _rowid)
+		return dm
+
+	def _mergedict(self, d={}):
+
+		"""
+		visible: False
+
+		desc: |
+			Merges a dict into the DataMatrix.
+
+			*This modifies the current DataMatrix.*
+
+		keywords:
+			d:
+				desc:	A dictionary, where each each key is a column name, and
+						each value is a sequence of column values, or a single
+						column value.
+				type:	dict
+
+		returns:
+			desc:	The current DataMatrix.
+		"""
+
+		for name, col in d.items():
+			if isinstance(col, basestring):
+				self.length = 1
+			elif len(col) > len(self):
+				self.length = len(col)
+			self[name] = self._default_col_type
+			self[name][:len(col)] = col
+		return self
+
+	def _mutate(self):
+
+		"""
+		visible: False
+
+		desc:
+			Changes the id of the current DataMatrix. This is done whenever the
+			DataMatrix has been modified.
+		"""
+
+		global _id
+		object.__setattr__(self, u'_id', self._id)
+		_id += 1
+
+	def _getcolbyobject(self, key):
+
+		"""
+		visible: False
+
+		desc:
+			Retrieves a column by object; that is, just return the object
+			itself.
+
+		arguments:
+			key:
+				type:	BaseColumn
+
+		returns:
+			type:	BaseColumn
+		"""
+
+		for col in self._cols.values():
+			if col is key:
+				return col
+		raise Exception('Column not found')
+
+	def _getcolbyname(self, key):
+
+		"""
+		visible: False
+
+		desc:
+			Retrieves a column by name.
+
+		arguments:
+			key:
+				type:	str
+
+		returns:
+			type:	BaseColumn
+		"""
+
+		for name, col in self._cols.items():
+			if name == key:
+				return col
+		raise Exception('Column not found')
+
+	def _getrow(self, key):
+
+		"""
+		visible: False
+
+		desc:
+			Retrieves a row by key.
+
+		arguments:
+			key:
+				type:	A key that a Row object understands.
+
+		returns:
+			type:	Row
+		"""
+
+		return Row(self, key)
+
+	# Implemented syntax
+
+	def __contains__(self, item):
+
+		return item in self._cols.keys()
 
 	def __len__(self):
 
@@ -82,43 +358,39 @@ class DataMatrix(object):
 	def __and__(self, other):
 
 		selection = set(self._rowid) & set(other._rowid)
-		return self.merge(other, sorted(selection))
+		return self._merge(other, sorted(selection))
 
 	def __or__(self, other):
 
 		selection = set(self._rowid) | set(other._rowid)
-		return self.merge(other, sorted(selection))
+		return self._merge(other, sorted(selection))
 
-	def merge(self, other, _rowid):
+	def __xor__(self, other):
 
-		if self != other:
-			raise Exception('Can only merge related datamatrices')
-		dm = DataMatrix(len(_rowid))
-		object.__setattr__(dm, u'_rowid', _rowid)
-		object.__setattr__(dm, u'_id', self._id)
-		for name, col in self._cols.items():
-			dm._cols[name] = self._cols[name].merge(other._cols[name], _rowid)
-		return dm
-
-	def selectrowid(self, _rowid):
-
-		dm = DataMatrix(len(_rowid))
-		object.__setattr__(dm, u'_rowid', _rowid)
-		object.__setattr__(dm, u'_id', self._id)
-		for name, col in self._cols.items():
-			dm._cols[name] = self._cols[name].getrowidkey(_rowid)
-		return dm
+		selection = set(self._rowid) ^ set(other._rowid)
+		return self._merge(other, sorted(selection))
 
 	def __setattr__(self, name, value):
 
 		if name == u'length':
-			self.setlength(value)
+			self._setlength(value)
+			return
+		if name == u'default_col_type':
+			self._set_default_col_type(value)
 			return
 		if isinstance(value, type) and issubclass(value, BaseColumn):
 			self._cols[name] = value(self)
 			return
+		if isinstance(value, BaseColumn):
+			if value._datamatrix is not self:
+				raise Exception(
+					u'This column does not belong to this DataMatrix')
+			self._cols[name] = value
+			return
+		if name not in self:
+			self._cols[name] = self._default_col_type(self)
 		self._cols[name][:] = value
-		self.mutate()
+		self._mutate()
 
 	def __setitem__(self, name, value):
 
@@ -131,48 +403,14 @@ class DataMatrix(object):
 	def __getitem__(self, key):
 
 		if isinstance(key, BaseColumn):
-			return self.getcolbyobject(key)
+			return self._getcolbyobject(key)
 		if isinstance(key, basestring):
-			return self.getcolbyname(key)
+			return self._getcolbyname(key)
 		if isinstance(key, int):
-		 	return self.getrow(key)
+		 	return self._getrow(key)
 		if isinstance(key, slice) or isinstance(key, collections.Sequence):
-			return self.slice(key)
+			return self._slice(key)
 		raise Exception('Cannot get %s' % key)
-
-	def slice(self, key):
-
-		if isinstance(key, slice):
-			_rowid = self._rowid[key]
-		else:
-			try:
-				_rowid = [self._rowid[row] for row in key]
-			except:
-				raise Exception('Invalid row indices')
-		dm = DataMatrix(len(_rowid))
-		object.__setattr__(dm, u'_rowid', _rowid)
-		object.__setattr__(dm, u'_id', self._id)
-		for name, col in self._cols.items():
-			dm._cols[name] = self._cols[name][key]
-		return dm
-
-	def getcolbyobject(self, key):
-
-		for col in self._cols.values():
-			if col is key:
-				return col
-		raise Exception('Column not found')
-
-	def getcolbyname(self, key):
-
-		for name, col in self._cols.items():
-			if name == key:
-				return col
-		raise Exception('Column not found')
-
-	def getrow(self, key):
-
-		return Row(self, key)
 
 	def __str__(self):
 
@@ -183,14 +421,10 @@ class DataMatrix(object):
 			t.add_column(name, col.tolist())
 		return str(t)
 
-	def mutate(self):
+	def __lshift__(self, other):
 
-		global _id
-		object.__setattr__(self, u'_id', self._id)
-		_id += 1
-
-	def __add__(self, other):
-
+		if isinstance(other, dict):
+			other = DataMatrix()._fromdict(other)
 		dm = DataMatrix(len(self)+len(other))
 		for name, col in self._cols.items():
 			dm[name] = col.__class__
@@ -202,17 +436,6 @@ class DataMatrix(object):
 		return dm
 
 	def __iter__(self):
-		object.__setattr__(self, u'_iterpos', 0)
-		return self
 
-	# Python 3 compatibility
-	def __next__(self):
-		return self.next()
-
-	def next(self):
-
-		if self._iterpos >= len(self):
-			raise StopIteration()
-		row = self[self._iterpos]
-		object.__setattr__(self, u'_iterpos', self._iterpos+1)
-		return row
+		for i in self.rows:
+			yield self[i]

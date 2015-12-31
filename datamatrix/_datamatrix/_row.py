@@ -17,9 +17,25 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from datamatrix.py3compat import *
+
 class Row(object):
 
+	"""
+	desc:
+		A single row from a DataMatrix.
+	"""
+
 	def __init__(self, datamatrix, index):
+
+		"""
+		desc:
+			Constructor.
+
+		arguments:
+			datamatrix:		A DataMatrix object.
+			index:			The row index.
+		"""
 
 		object.__setattr__(self, u'_datamatrix', datamatrix)
 		object.__setattr__(self, u'_index', index)
@@ -50,17 +66,5 @@ class Row(object):
 
 	def __iter__(self):
 
-		object.__setattr__(self, u'_itercols',
-			list(reversed(self._datamatrix.columns)))
-		return self
-
-	# Python 3 compatibility
-	def __next__(self):
-		return self.next()
-
-	def next(self):
-
-		if not self._itercols:
-			raise StopIteration()
-		name, col = self._itercols.pop()
-		return name, self[name]
+		for col in self._datamatrix.column_names:
+			yield col, self[col]

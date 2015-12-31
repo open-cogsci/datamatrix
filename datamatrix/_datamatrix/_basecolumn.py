@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from datamatrix.py3compat import *
 import collections
 import numbers
 import operator
@@ -24,65 +25,158 @@ import math
 
 class BaseColumn(object):
 
+	"""
+	desc:
+		The base class for all columns. You should not use this class directly,
+		but rather use MixedColumn or NumericColumn.
+	"""
+
 	def __init__(self, datamatrix):
+
+		"""
+		desc:
+			Constructor.
+
+		arguments:
+			datamatrix:	A DataMatrix object.
+		"""
 
 		self._datamatrix = datamatrix
 		self._rowid = self._datamatrix._rowid[:]
-		self._seq = [None]*len(datamatrix)
+		self._init_seq()
 
-	def __len__(self):
+	@property
+	def mean(self):
 
-		return len(self._seq)
+		n = self._numbers
+		if len(n) == 0:
+			return None
+		return sum(n) / len(n)
 
-	def __getitem__(self, key):
+	@property
+	def median(self):
 
-		if isinstance(key, int):
-			return self.getintkey(key)
-		if isinstance(key, slice):
-			return self.getslicekey(key)
-		if isinstance(key, collections.Sequence):
-			return self.getsequencekey(key)
-		raise Exception('Invalid assignment')
+		n = sorted(self._numbers)
+		if len(n) == 0:
+			return None
+		i = int(len(n)/2)
+		if len(n) % 2 == 1:
+			return n[i]
+		return .5*n[i]+.5*n[i-1]
 
-	def addrowid(self, _rowid):
+	@property
+	def std(self):
+
+		m = self.mean
+		n = self._numbers
+		return math.sqrt(sum((i-m)**2 for i in n)/(len(n)-1))
+
+	@property
+	def max(self):
+
+		return max(self._numbers)
+
+	@property
+	def min(self):
+
+		return min(self._numbers)
+
+	@property
+	def sum(self):
+
+		return sum(self._numbers)
+
+	def tolist(self):
+
+		"""
+		desc:
+			Creates a list object for this column.
+
+		returns:
+			type:	list
+		"""
+
+		return self._seq
+
+	# Private functions
+
+	@property
+	def _numbers(self):
+
+		return [float(val) for val in self._seq \
+			if isinstance(val, numbers.Number)]
+
+	def _init_seq(self):
+
+		"""
+		visible: False
+
+		desc:
+			Initializes the _seq property, which is an iterator that contains
+			the data.
+		"""
+
+		self._seq = [None]*len(self._datamatrix)
+
+	def _addrowid(self, _rowid):
+
+		"""
+		visible: False
+
+		desc:
+			Adds an empty row with the given row id.
+
+		arguments:
+			_rowid:	A row id
+		"""
 
 		self._rowid += _rowid
 		self._seq += [None]*len(_rowid)
 
-	def getintkey(self, key):
+	def _checktype(self, value):
 
-		return self._seq[key]
+		"""
+		visible: False
 
-	def getslicekey(self, key):
+		desc:
+			Checks wether a value has a suitable type for this column, converts
+			it if possible, and gives an error if necessary.
 
-		col = self.__class__(self._datamatrix)
-		col._rowid = self._rowid[key]
-		col._seq = self._seq[key]
-		return col
+		arguments:
+			value:	A value to check.
 
-	def getsequencekey(self, key):
+		returns:
+			A suitably typed value.
+		"""
 
-		col = self.__class__(self._datamatrix)
-		col._rowid = []
-		col._seq = []
-		for i in key:
-			col._rowid.append(self._rowid[i])
-			col._seq.append(self._seq[i])
-		return col
+		try:
+			value = float(value)
+		except:
+			pass
+		if value is None or isinstance(value, (numbers.Number, str)):
+			return value
+		if isinstance(value, bytes):
+			return safe_decode(value)
+		raise Exception('Invalid type: %s' % value)
 
-	def getrowidkey(self, key):
+	def _merge(self, other, _rowid):
 
-		col = self.__class__(self._datamatrix)
-		col._rowid = key
-		col._seq = []
-		for _rowid, val in zip(self._rowid, self._seq):
-			if _rowid in key:
-				col._seq.append(val)
-		return col
+		"""
+		visible: False
 
-	def merge(self, other, _rowid):
+		desc:
+			Merges this column with another column, selecting only the rows
+			indicated by _rowid.
 
-		col = self.__class__(self._datamatrix)
+		arguments:
+			other:	Another column.
+			_rowid:	A list of row ids to select.
+
+		returns:
+			type: BaseColumn
+		"""
+
+		col = self._empty_col()
 		col._rowid = _rowid
 		col._seq = []
 		for row in _rowid:
@@ -92,22 +186,24 @@ class BaseColumn(object):
 				col._seq.append(other._seq[other._rowid.index(row)])
 		return col
 
-	def __setitem__(self, key, value):
+	def _tosequence(self, value, length):
 
-		if isinstance(key, int):
-			self.setintkey(key, value)
-		elif isinstance(key, slice):
-			self.setslicekey(key, value)
-		elif isinstance(key, collections.Sequence):
-			self.setsequencekey(key, value)
-		else:
-			raise Exception('Invalid assignment')
-		self._datamatrix.mutate()
+		"""
+		visible: False
 
-	def tosequence(self, value, length):
+		desc:
+			Creates a sequence with a specific length from a given value (which
+			may already be a sequence).
 
-		if isinstance(value, float) or isinstance(value, int) or \
-			isinstance(value, basestring):
+		arguments:
+			value:	The value to turn into a sequence.
+			length:	The length of the sequence.
+
+		returns:
+			A sequence, that is, some iterable object.
+		"""
+
+		if isinstance(value, (numbers.Number, basestring)):
 			return [value]*length
 		try:
 			value = list(value)
@@ -115,84 +211,272 @@ class BaseColumn(object):
 			raise Exception('Cannot convert to sequence: %s' % value)
 		if len(value) != length:
 			raise Exception('Sequence has incorrect length: %s' % len(value))
-		return value
+		return [self._checktype(cell) for cell in value]
 
-	def setintkey(self, key, value):
+	def _getintkey(self, key):
 
-		self._seq[key] = value
+		"""
+		visible: False
 
-	def setslicekey(self, key, value):
+		desc:
+			Gets a value by index.
+
+		arguments:
+			key:	An index.
+
+		returns:
+			A value.
+		"""
+
+		return self._seq[key]
+
+	def _getslicekey(self, key):
+
+		"""
+		visible: False
+
+		desc:
+			Gets a slice of this column by a slice object.
+
+		arguments:
+			key:	A slice object.
+
+		returns:
+			BaseColunn
+		"""
+
+		col = self._empty_col()
+		col._rowid = self._rowid[key]
+		col._seq = self._seq[key]
+		return col
+
+	def _getsequencekey(self, key):
+
+		"""
+		visible: False
+
+		desc:
+			Gets a slice of this column by list or some other iterable.
+
+		arguments:
+			key:	A list or other iterable object.
+
+		returns:
+			BaseColunn
+		"""
+
+		col = self._empty_col()
+		col._rowid = []
+		col._seq = []
+		for i in key:
+			col._rowid.append(self._rowid[i])
+			col._seq.append(self._seq[i])
+		return col
+
+	def _getrowidkey(self, key):
+
+		"""
+		visible: False
+
+		desc:
+			Gets a slice of this column by a list of row ids.
+
+		arguments:
+			key:	A list of row ids.
+
+		returns:
+			BaseColunn
+		"""
+
+		col = self._empty_col()
+		col._rowid = key
+		col._seq = []
+		for _rowid, val in zip(self._rowid, self._seq):
+			if _rowid in key:
+				col._seq.append(val)
+		return col
+
+	def _setintkey(self, key, value):
+
+		"""
+		visible: False
+
+		desc:
+			Sets a value by index.
+
+		arguments:
+			key:	An index.
+			value:	The value to set.
+		"""
+
+		self._seq[key] = self._checktype(value)
+
+	def _setslicekey(self, key, value):
+
+		"""
+		visible: False
+
+		desc:
+			Sets a range of values by a slice object.
+
+		arguments:
+			key:	A slice object.
+			value:	The value to set. This can be an iterable that matches the
+					length of the slice.
+		"""
 
 		length = len(self._seq[key])
-		self._seq[key] = self.tosequence(value, length)
+		self._seq[key] = self._tosequence(value, length)
 
-	def setsequencekey(self, key, val):
+	def _setsequencekey(self, key, val):
 
-		for _key, _val in zip(key, self.tosequence(val, len(key))):
+		"""
+		visible: False
+
+		desc:
+			Sets a range of values by a list or other iterable.
+
+		arguments:
+			key:	A list or other iterable object.
+			value:	The value to set. This can be an iterable that matches the
+					length of the key.
+		"""
+
+		for _key, _val in zip(key, self._tosequence(val, len(key))):
 			if _key < 0 or _key >= len(self):
 				raise Exception('Outside of range')
 			self._seq[_key] = _val
 
-	def __str__(self):
+	def _compare(self, other, op):
 
-		return 'col%s' % str(self._seq)
+		"""
+		visible: False
 
-	def compare(self, other, op):
+		desc:
+			Selects rows from this column, and returns the entire DataMatrix.
+
+		arguments:
+			other:	A value to compare to.
+			op:		An operator to perform the comparison.
+
+		returns:
+			type:	DataMatrix
+		"""
 
 		_rowid = []
 		for rowid, val in zip(self._rowid, self._seq):
-			if op(val, other):
-				_rowid.append(rowid)
-		return self._datamatrix.selectrowid(_rowid)
+			try:
+				if op(val, other):
+					_rowid.append(rowid)
+			except:
+				pass
+		return self._datamatrix._selectrowid(_rowid)
+
+	def _operate(self, other, number_op, str_op=None):
+
+		"""
+		visible: False
+
+		desc:
+			Performs an operation on the entire column.
+
+		arguments:
+			other:		The value to use for the operation, e.g. a number to
+						multiply with.
+			number_op:	The operator to use for numeric values.
+			str_op:		The operator to use for string values, or None to
+						leave strings untouched.
+
+		returns:
+			A modified column.
+		"""
+
+		col = self._empty_col()
+		col._rowid = self._rowid
+		col._seq = []
+		for i, (_other, val) in enumerate(
+			zip(self._tosequence(other, len(self)), self._seq)):
+			if isinstance(val, numbers.Number) \
+				and isinstance(_other, numbers.Number):
+				col._seq.append(number_op(self._seq[i], _other))
+			elif str_op is not None:
+				col._seq.append(str_op(safe_decode(self._seq[i]),
+					safe_decode(_other)))
+			else:
+				col._seq.append(self._seq[i])
+		return col
+
+	def _empty_col(self):
+
+		"""
+		visible: False
+
+		desc:
+			Create an empty column of the same type as the current column.
+
+		returns:
+			BaseColumn
+		"""
+
+		return self.__class__(self._datamatrix)
+
+	# Implemented syntax
+
+	def __str__(self):
+
+		return u'col%s' % str(self._seq)
+
+	def __len__(self):
+
+		return len(self._seq)
+
+	def __getitem__(self, key):
+
+		if isinstance(key, int):
+			return self._getintkey(key)
+		if isinstance(key, slice):
+			return self._getslicekey(key)
+		if isinstance(key, collections.Sequence):
+			return self._getsequencekey(key)
+		raise Exception(u'Invalid key')
+
+	def __setitem__(self, key, value):
+
+		if isinstance(key, int):
+			self._setintkey(key, value)
+		elif isinstance(key, slice):
+			self._setslicekey(key, value)
+		elif isinstance(key, collections.Sequence):
+			self._setsequencekey(key, value)
+		else:
+			raise Exception('Invalid assignment')
+		self._datamatrix._mutate()
 
 	def __gt__(self, other):
-		return self.compare(other, operator.gt)
-
+		return self._compare(other, operator.gt)
 	def __ge__(self, other):
-		return self.compare(other, operator.ge)
-
+		return self._compare(other, operator.ge)
 	def __lt__(self, other):
-		return self.compare(other, operator.lt)
-
+		return self._compare(other, operator.lt)
 	def __le__(self, other):
-		return self.compare(other, operator.le)
-
+		return self._compare(other, operator.le)
 	def __eq__(self, other):
-		return self.compare(other, operator.eq)
-
+		return self._compare(other, operator.eq)
 	def __ne__(self, other):
-		return self.compare(other, operator.ne)
-
-	def tolist(self):
-
-		return self._seq
-
-	@property
-	def numbers(self):
-
-		return [float(val) for val in self._seq \
-			if isinstance(val, numbers.Number)]
-
-	@property
-	def mean(self):
-
-		if len(self) == 0:
-			return None
-		return sum(self.numbers) / len(self)
-
-	@property
-	def median(self):
-
-		if len(self) == 0:
-			return None
-		n = sorted(self.numbers)
-		if len(self) % 2 == 1:
-			return n[len(self)/2]
-		return .5*n[len(self)/2]+.5*n[len(self)/2-1]
-		raise NotImplementedError()
-
-	@property
-	def std(self):
-
-		m = self.mean
-		return math.sqrt(sum((i-m)**2 for i in self.numbers)/len(self))
+		return self._compare(other, operator.ne)
+	def __add__(self, other):
+		return self._operate(other, operator.add, operator.concat)
+	def __sub__(self, other):
+		return self._operate(other, operator.sub)
+	def __mul__(self, other):
+		return self._operate(other, operator.mul)
+	def __div__(self, other):
+		return self._operate(other, operator.truediv)
+	def __truediv__(self, other):
+		return self._operate(other, operator.truediv)
+	def __floordiv__(self, other):
+		return self._operate(other, operator.floordiv)
+	def __mod__(self, other):
+		return self._operate(other, operator.mod)
+	def __pow__(self, other):
+		return self._operate(other, operator.pow)

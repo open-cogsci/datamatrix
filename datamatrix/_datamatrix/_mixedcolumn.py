@@ -17,8 +17,14 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix import BaseColumn
+from datamatrix.py3compat import *
+from datamatrix._datamatrix._basecolumn import BaseColumn
 
 class MixedColumn(BaseColumn):
+
+	"""
+	desc:
+		A column that can contain numeric and string values.
+	"""
 
 	pass

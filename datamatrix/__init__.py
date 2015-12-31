@@ -18,6 +18,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix._datamatrix._row import Row
-from datamatrix._datamatrix._basecolumn import BaseColumn
-from datamatrix._datamatrix._datamatrix import DataMatrix
 from datamatrix._datamatrix._mixedcolumn import MixedColumn
+from datamatrix._datamatrix._numericcolumn import FloatColumn, IntColumn
+from datamatrix._datamatrix._seriescolumn import SeriesColumn
+from datamatrix._datamatrix._datamatrix import DataMatrix
