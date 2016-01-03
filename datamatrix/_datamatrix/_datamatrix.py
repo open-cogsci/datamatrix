@@ -405,6 +405,30 @@ class DataMatrix(object):
 		self._cols[name][:] = value
 		self._mutate()
 
+	def __delitem__(self, value):
+
+		# Delete column by object
+		if isinstance(value, BaseColumn):
+			for name, col in self._cols.items():
+				if col is value:
+					del self._cols[name]
+					return
+			else:
+				raise ValueError('Column not found: %s' % value)
+		# Delete column by name
+		if isinstance(value, basestring):
+			if value in self._cols:
+				del self._cols[value]
+				return
+			raise ValueError('Column not found: %s' % value)
+		# Delete row by index. The trick is to first get the slice that we want
+		# to delete, and then xor this with the current DataMatrix.
+		if isinstance(value, int):
+		 	value = value,
+		_slice = self[value] ^ self
+		object.__setattr__(self, u'_cols', _slice._cols)
+		object.__setattr__(self, u'_rowid', _slice._rowid)
+
 	def __setitem__(self, name, value):
 
 		self.__setattr__(name, value)
