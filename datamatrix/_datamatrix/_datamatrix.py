@@ -81,10 +81,12 @@ class DataMatrix(object):
 	def _fromdict(self, d={}):
 
 		"""
-		visible:
+		visible: False
+
+		desc:
 			Merges a dict into the DataMatrix. Modifies the DataMatrix in place.
 
-		arguments:
+		keywords:
 			d:	The dict to merge.
 
 		returns:
@@ -381,6 +383,11 @@ class DataMatrix(object):
 		if isinstance(value, type) and issubclass(value, BaseColumn):
 			self._cols[name] = value(self)
 			return
+		if isinstance(value, tuple) and len(value) == 2 \
+			and isinstance(value[0], type) and issubclass(value[0], BaseColumn):
+				cls, kwdict = value
+				self._cols[name] = cls(self, **kwdict)
+				return
 		if isinstance(value, BaseColumn):
 			if value._datamatrix is not self:
 				raise Exception(

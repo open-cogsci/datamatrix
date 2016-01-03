@@ -48,6 +48,15 @@ class BaseColumn(object):
 	@property
 	def mean(self):
 
+		"""
+		name:	mean
+
+		desc:
+			Arithmetic mean of all values. If there are non-numeric values,
+			these are ignored. If there are no numeric values, None or np.nan is
+			returned.
+		"""
+
 		n = self._numbers
 		if len(n) == 0:
 			return None
@@ -55,6 +64,15 @@ class BaseColumn(object):
 
 	@property
 	def median(self):
+
+		"""
+		name:	median
+
+		desc:
+			The median of all values. If there are non-numeric values,
+			these are ignored. If there are no numeric values, None or np.nan is
+			returned.
+		"""
 
 		n = sorted(self._numbers)
 		if len(n) == 0:
@@ -67,30 +85,77 @@ class BaseColumn(object):
 	@property
 	def std(self):
 
+		"""
+		name:	std
+
+		desc:
+			The standard deviation of all values. If there are non-numeric
+			values, these are ignored. If there are 0 or 1 numeric values, None
+			or np.nan is returned. The degrees of freedom are N-1.
+		"""
+
 		m = self.mean
 		n = self._numbers
+		if len(n) <= 1:
+			return None
 		return math.sqrt(sum((i-m)**2 for i in n)/(len(n)-1))
 
 	@property
 	def max(self):
 
-		return max(self._numbers)
+		"""
+		name:	max
+
+		desc:
+			The highest numeric value in the column, or None or np.nan if there
+			are no numeric values.
+		"""
+
+		n = self._numbers
+		if not len(n):
+			return None
+		return max(n)
 
 	@property
 	def min(self):
 
-		return min(self._numbers)
+		"""
+		name:	min
+
+		desc:
+			The lowest numeric value in the column, or None or np.nan if there
+			are no numeric values.
+		"""
+
+		n = self._numbers
+		if not len(n):
+			return None
+		return min(n)
 
 	@property
 	def sum(self):
 
-		return sum(self._numbers)
+		"""
+		name:	sum
+
+		desc:
+			The sum of all values in the column, or None or np.nan if there
+			are no numeric values.
+		"""
+
+		n = self._numbers
+		if not len(n):
+			return None
+		return sum(n)
 
 	def tolist(self):
 
 		"""
+		visible: False
+
 		desc:
-			Creates a list object for this column.
+			Creates a list object for this column. The preferred syntax is
+			list(dm), although this is slightly slower.
 
 		returns:
 			type:	list
@@ -338,7 +403,7 @@ class BaseColumn(object):
 
 		arguments:
 			key:	A list or other iterable object.
-			value:	The value to set. This can be an iterable that matches the
+			val:	The value to set. This can be an iterable that matches the
 					length of the key.
 		"""
 
@@ -384,6 +449,8 @@ class BaseColumn(object):
 			other:		The value to use for the operation, e.g. a number to
 						multiply with.
 			number_op:	The operator to use for numeric values.
+
+		keywords:
 			str_op:		The operator to use for string values, or None to
 						leave strings untouched.
 

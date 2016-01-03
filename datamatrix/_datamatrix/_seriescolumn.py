@@ -20,7 +20,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._basecolumn import BaseColumn
 
-class SeriesColumn(BaseColumn):
+class _SeriesColumn(BaseColumn):
 
 	"""
 	desc:
@@ -30,6 +30,20 @@ class SeriesColumn(BaseColumn):
 	dtype = float
 
 	def __init__(self, datamatrix, depth):
+
+		"""
+		desc:
+			Constructor. You generally don't call this constructor correctly,
+			but use the SeriesColumn helper function.
+
+		arguments:
+			datamatrix:
+				desc:	The DataMatrix to which this column belongs.
+				type:	DataMatrix
+			depth:
+				desc:	The depth, ie. the number of values per cell.
+				type:	int
+		"""
 
 		global np, nanmean, nanmedian, nanstd
 		try:
@@ -42,8 +56,43 @@ class SeriesColumn(BaseColumn):
 
 	def setallrows(self, value):
 
+		"""
+		desc:
+			Sets all rows to a value, or series of values.
+
+		arguments:
+			value:	A value, or series of values that has the same length as the
+					depth of the column.
+		"""
+
 		value = self._checktype(value)
 		self._seq[:] = value
+
+	@property
+	def depth(self):
+
+		"""
+		name: depth
+
+		desc:
+			A property to access and change the depth of the column.
+		"""
+
+		return self._depth
+
+	@depth.setter
+	def depth(self, depth):
+
+		if depth == self._depth:
+			return
+		if depth > self._depth:
+			seq = np.zeros( (len(self), depth), dtype=self.dtype)
+			seq[:,:self._depth] = self._seq
+			self._seq = seq
+			self._depth = depth
+			return
+		self._depth = depth
+		self._seq = self._seq[:,:depth]
 
 	@property
 	def mean(self):
@@ -81,6 +130,23 @@ class SeriesColumn(BaseColumn):
 
 		self._seq = np.zeros( (len(self._datamatrix), self._depth),
 			dtype=self.dtype)
+
+	def _operate(self, a, number_op, str_op=None):
+
+		# For a 1D array with the length of the datamatrix, we create an array
+		# in which the second dimension (i.e. the depth) is constant. This
+		# allows us to do by-row operations.
+		if isinstance(a, (list, tuple)):
+			a = np.array(a, dtype=self.dtype)
+		if isinstance(a, np.ndarray) and a.shape == (len(self), ):
+			a2 = np.empty( (len(self), self._depth),
+				dtype=self.dtype)
+			np.rot90(a2)[:] = a
+			a = a2
+		col = self._empty_col()
+		col._rowid = self._rowid
+		col._seq = number_op(self._seq, a)
+		return col
 
 	def _checktype(self, value):
 
@@ -134,11 +200,15 @@ class SeriesColumn(BaseColumn):
 
 		if isinstance(key, tuple) and len(key) == 2:
 			return self._seq[key]
-		return super(SeriesColumn, self).__getitem__(key)
+		return super(_SeriesColumn, self).__getitem__(key)
 
 	def __setitem__(self, key, value):
 
 		if isinstance(key, tuple) and len(key) == 2:
 			self._seq[key] = value
 			return
-		return super(SeriesColumn, self).__setitem__(key, value)
+		return super(_SeriesColumn, self).__setitem__(key, value)
+
+def SeriesColumn(depth):
+
+	return _SeriesColumn, {'depth' : depth}

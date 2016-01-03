@@ -59,16 +59,22 @@ class NumericColumn(BaseColumn):
 	@property
 	def max(self):
 
+		if not len(self._seq):
+			return np.nan
 		return np.nanmax(self._seq)
 
 	@property
 	def min(self):
 
+		if not len(self._seq):
+			return np.nan
 		return np.nanmin(self._seq)
 
 	@property
 	def sum(self):
 
+		if not len(self._seq):
+			return np.nan
 		return np.nansum(self._seq)
 
 	def tolist(self):
