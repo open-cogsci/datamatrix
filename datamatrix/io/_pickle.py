@@ -17,11 +17,36 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import datamatrix.monkeypatch
-from datamatrix._datamatrix._row import Row
-from datamatrix._datamatrix._mixedcolumn import MixedColumn
-from datamatrix._datamatrix._numericcolumn import FloatColumn, IntColumn
-from datamatrix._datamatrix._seriescolumn import SeriesColumn
-from datamatrix._datamatrix._datamatrix import DataMatrix
+from datamatrix.py3compat import *
+import pickle
 
-__version__ = '0.1.0'
+def readpickle(path):
+
+	"""
+	desc:
+		Reads a DataMatrix from a pickle file.
+
+	arguments:
+		path:	The path to the pickle file.
+
+	returns:
+		A DataMatrix.
+	"""
+
+	with open(path, 'rb') as picklefile:
+		return pickle.load(picklefile)
+
+
+def writepickle(dm, path):
+
+	"""
+	desc:
+		Writes a DataMatrix to a pickle file.
+
+	arguments:
+		dm:		The DataMatrix to write.
+		path:	The path to the pickle file.
+	"""
+
+	with open(path, 'wb') as picklefile:
+		pickle.dump(dm, picklefile)

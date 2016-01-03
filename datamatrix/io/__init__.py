@@ -17,11 +17,6 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import datamatrix.monkeypatch
-from datamatrix._datamatrix._row import Row
-from datamatrix._datamatrix._mixedcolumn import MixedColumn
-from datamatrix._datamatrix._numericcolumn import FloatColumn, IntColumn
-from datamatrix._datamatrix._seriescolumn import SeriesColumn
-from datamatrix._datamatrix._datamatrix import DataMatrix
-
-__version__ = '0.1.0'
+from datamatrix.py3compat import *
+from datamatrix.io._text import readtxt, writetxt
+from datamatrix.io._pickle import readpickle, writepickle

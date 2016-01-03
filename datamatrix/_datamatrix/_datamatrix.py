@@ -75,6 +75,14 @@ class DataMatrix(object):
 
 		return self._default_col_type
 
+	@property
+	def is_2d(self):
+
+		for name, col in self.columns:
+			if hasattr(col, u'depth'):
+				return False
+		return True
+
 	# Private functions. These can also be called by the BaseColumn (and
 	# derived) classes.
 
@@ -435,6 +443,8 @@ class DataMatrix(object):
 
 	def __getattr__(self, name):
 
+		if name in ('__getstate__', '_cols'):
+			raise AttributeError()
 		return self._cols[name]
 
 	def __getitem__(self, key):

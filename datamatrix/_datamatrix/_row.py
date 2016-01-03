@@ -40,12 +40,18 @@ class Row(object):
 		object.__setattr__(self, u'_datamatrix', datamatrix)
 		object.__setattr__(self, u'_index', index)
 
+	def __len__(self):
+
+		return len(self._datamatrix.columns)
+
 	def __getattr__(self, key):
 
 		return self._datamatrix[key][self._index]
 
 	def __getitem__(self, key):
 
+		if isinstance(key, int):
+			key = self._datamatrix.column_names[key]
 		return self._datamatrix[key][self._index]
 
 	def __setattr__(self, key, value):
@@ -54,6 +60,8 @@ class Row(object):
 
 	def __setitem__(self, key, value):
 
+		if isinstance(key, int):
+			key = self._datamatrix.column_names[key]
 		self._datamatrix[key][self._index] = value
 
 	def __str__(self):
