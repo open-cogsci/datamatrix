@@ -372,6 +372,12 @@ class DataMatrix(object):
 		selection = set(self._rowid) ^ set(other._rowid)
 		return self._merge(other, sorted(selection))
 
+	def __delattr__(self, name):
+
+		if name not in self._cols:
+			raise AttributeError(u'No column named %s' % name)
+		del self._cols[name]
+
 	def __setattr__(self, name, value):
 
 		if name == u'length':
