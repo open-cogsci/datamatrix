@@ -17,9 +17,31 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import datamatrix.monkeypatch
-from datamatrix._datamatrix._row import Row
-from datamatrix._datamatrix._mixedcolumn import MixedColumn
-from datamatrix._datamatrix._numericcolumn import FloatColumn, IntColumn
-from datamatrix._datamatrix._seriescolumn import SeriesColumn
-from datamatrix._datamatrix._datamatrix import DataMatrix
+def _monkey_patch_matplotlib():
+
+	"""
+	visible: False
+
+	desc:
+		This patch decorates the is_string_like function of matplotlib, because
+		this consider BaseColumn objects to be strings, with causes trouble when
+		plotting.
+	"""
+
+	try:
+		from matplotlib.axes import _base
+	except ImportError:
+		return
+
+	from datamatrix._datamatrix._basecolumn import BaseColumn
+
+	def decorate(fnc):
+		def inner(obj):
+			if isinstance(obj, BaseColumn):
+				return False
+			return fnc(obj)
+		return inner
+
+	_base.is_string_like = decorate(_base.is_string_like)
+
+_monkey_patch_matplotlib()
