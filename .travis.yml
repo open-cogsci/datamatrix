@@ -2,6 +2,12 @@ language: python
 python:
   - "2.7"
   - "3.4"
-install:
-  - pip install --user numpy scipy
+sudo: false
+virtualenv:
+  system_site_packages: true
+addons:
+  apt:
+    packages:
+    - python-numpy
+    - python-scipy
 script: nosetests testcases/*.py

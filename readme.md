@@ -2,9 +2,11 @@
 
 *An intuitive, Pythonic way to work with tabular data.*
 
-Sebastiaan Mathôt  /
-Copyright 2015-2016  /
+Sebastiaan Mathôt  <br />
+Copyright 2015-2016  <br />
 http://www.cogsci.nl/smathot
+
+[![Build Status](https://travis-ci.org/smathot/python-datamatrix.svg?branch=master)](https://travis-ci.org/smathot/python-datamatrix)
 
 ## About
 
