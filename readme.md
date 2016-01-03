@@ -2,8 +2,8 @@
 
 *An intuitive, Pythonic way to work with tabular data.*
 
-Sebastiaan Mathôt  \
-Copyright 2015-2016  \
+Sebastiaan Mathôt  /
+Copyright 2015-2016  /
 http://www.cogsci.nl/smathot
 
 ## About

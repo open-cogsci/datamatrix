@@ -3,6 +3,5 @@ python:
   - "2.7"
   - "3.4"
 install:
-  - pip install numpy scipy
-  - python setup.py install
-script: ./run_unittests.sh
+  - pip install --user numpy scipy
+script: nosetests testcases/*.py
