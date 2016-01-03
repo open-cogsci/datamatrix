@@ -95,6 +95,19 @@ class _SeriesColumn(BaseColumn):
 		self._seq = self._seq[:,:depth]
 
 	@property
+	def plottable(self):
+
+		"""
+		name: plottable
+
+		desc:
+			Gives a view of the traces where the axes have been swapped. This is
+			the format that matplotlib.pyplot.plot() expects.
+		"""
+
+		return np.swapaxes(self._seq, 0, 1)
+
+	@property
 	def mean(self):
 
 		return nanmean(self._seq, axis=0)
