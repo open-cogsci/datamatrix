@@ -1,0 +1,343 @@
+# -*- coding: utf-8 -*-
+
+"""
+This file is part of datamatrix.
+
+datamatrix is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+datamatrix is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
+from datamatrix.py3compat import *
+from datamatrix._datamatrix._seriescolumn import _SeriesColumn
+from datamatrix import FloatColumn
+from datamatrix.colors import tango
+import numpy as np
+from scipy.stats import nanmean, nanmedian, nanstd
+from scipy.interpolate import interp1d
+import warnings
+
+def reduce_(series, operation=nanmean):
+
+	"""
+	desc:
+		Transforms series to single values by applying an operation (typically
+		a mean) to each series.
+
+	arguments:
+		series:
+			desc:	The signal to reduce.
+			type:	SeriesColumn
+
+	keywords:
+		operation:
+			desc:	The operation function to use for the reduction. This
+					function should accept `series` as first argument, and
+					`axis=1` as keyword argument.
+
+	returns:
+		desc:	A reduction of the signal.
+		type:	FloatColumn
+	"""
+
+	a = operation(series, axis=1)
+	col = FloatColumn(series._datamatrix)
+	col[:] = a
+	return col
+
+
+def window(series, start=0, end=None):
+
+	"""
+	desc:
+		Extracts a window from a signal.
+
+	arguments:
+		series:
+			desc:	The signal to get a window from.
+			type:	SeriesColumn
+
+	keywords:
+		start:
+			desc:	The window start.
+			type:	int
+		end:
+			desc:	The window end, or None to go to the signal end.
+			type:	[int, None]
+
+	returns:
+		desc:	A window of the signal.
+		type:	SeriesColumn
+	"""
+
+	if end is None:
+		end = series.depth
+	a = series[:,start:end]
+	depth = a.shape[1]
+	window_series = _SeriesColumn(series._datamatrix, depth)
+	window_series[:] = a
+	return window_series
+
+
+def baseline(series, baseline, bl_start=-100, bl_end=None):
+
+	"""
+	desc:
+		Applies a baseline to a signal
+
+	arguments:
+		series:
+			desc:	The signal to apply a baseline to.
+			type:	SeriesColumn
+		baseline:
+			desc:	The signal to use as a baseline to.
+			type:	SeriesColumn
+
+	keywords:
+		bl_start:
+			desc:	The start of the window from `baseline` to use.
+			type:	int
+		bl_end:
+			desc:	The end of the window from `baseline` to use, or None to go
+					to the end.
+			type:	[int, None]
+
+	returns:
+		desc:	A baseline-correct version of the signal.
+		type:	SeriesColumn
+	"""
+
+	baseline = reduce_(window(baseline, start=bl_start, end=bl_end))
+	return series / baseline
+
+
+def blinkreconstruct(series, vt=5, maxdur=500, margin=10):
+
+	"""
+	Source:
+		Mathot, S. (2013). A simple way to reconstruct pupil size during eye
+		blinks. http://doi.org/10.6084/m9.figshare.688002
+
+	desc:
+		Reconstructs pupil size during blinks.
+
+	arguments:
+		series:
+			desc:	A signal to reconstruct.
+			type:	SeriesColumn
+
+	keywords:
+		vt:
+			desc:	A pupil velocity threshold. Lower tresholds more easily
+					trigger blinks.
+			type:	[int, float]
+		maxdur:
+			desc:	The maximum duration (in samples) for a blink. Longer
+					blinks are not reconstructed.
+			type:	int
+		margin:
+			desc:	The margin to take around missing data.
+			type:	int
+
+	returns:
+		desc:	A reconstructed singal.
+		type:	SeriesColumn
+	"""
+
+	return _apply_fnc(series, _blinkreconstruct, vt=vt, maxdur=500,
+		margin=margin)
+
+
+def smooth(series, winlen=11, wintype='hanning', correctlen=True):
+
+	"""
+	desc:
+		Source: <http://www.scipy.org/Cookbook/SignalSmooth>
+
+		Smooths a signal using a window with requested size.
+
+		This method is based on the convolution of a scaled window with the
+		signal. The signal is prepared by introducing reflected copies of the
+		signal (with the window size) in both ends so that transient parts are
+		minimized in the begining and end part of the output signal.
+
+	arguments:
+		series:
+			desc:	A signal to smooth.
+			type:	SeriesColumn
+
+	keywords:
+		winlen:
+			desc:	The width of the smoothing window. This should be an odd
+					integer.
+			type:	int
+		wintype:
+			desc:	The type of window from 'flat', 'hanning', 'hamming',
+					'bartlett', 'blackman'. A flat window produces a moving
+					average smoothing.
+			type:	str
+		correctlen:
+			desc:	Indicates whether the return string should be the same
+					length as the input string.
+			type:	bool
+
+	returns:
+		desc:	A smoothed signal.
+		type:	SeriesColumn
+	"""
+
+	return _apply_fnc(series, _smooth, winlen=winlen, wintype=wintype,
+		correctlen=correctlen)
+
+# Private functions
+
+def _apply_fnc(series, fnc, **kwdict):
+
+	"""
+	visible: False
+
+	desc:
+		Applies a function to each cell.
+
+	arguments:
+		series:
+			desc:	A signal to apply the function to.
+			type:	SeriesColumn
+		fnc:
+			desc:	The function to apply.
+
+	keyword-dict:
+		kwdict:		A dict with keyword arguments for fnc.
+
+	returns:
+		desc:	A new signal.
+		type:	SeriesColumn
+	"""
+
+	new_series = _SeriesColumn(series._datamatrix, depth=series.depth)
+	for i, cell in enumerate(series):
+		new_series[i] = fnc(cell, **kwdict)
+	return new_series
+
+def _blinkreconstruct(a, vt=5, maxdur=500, margin=10):
+
+	"""
+	visible: False
+
+	desc:
+		Reconstructs a single array.
+	"""
+
+	# Create a copy of the signal, a smoothed version, and calculate the
+	# velocity profile.
+	a = np.copy(a)
+	try:
+		strace = _smooth(a, winlen=21)
+	except Exception as e:
+		warnings.warn(str(e))
+		strace = a
+	vtrace = strace[1:]-strace[:-1]
+	# Start blink detection
+	ifrom = 0
+	lblink = []
+	while True:
+		# The onset of the blink is the moment at which the pupil velocity
+		# exceeds the threshold.
+		l = np.where(vtrace[ifrom:] < -vt)[0]
+		if len(l) == 0:
+			break # No blink detected
+		istart = l[0]+ifrom
+		if ifrom == istart:
+			break
+		# The reversal period is the moment at which the pupil starts to dilate
+		# again with a velocity above threshold.
+		l = np.where(vtrace[istart:] > vt)[0]
+		if len(l) == 0:
+			ifrom = istart
+			continue
+		imid = l[0]+istart
+		# The end blink period is the moment at which the pupil velocity drops
+		# back to zero again.
+		l = np.where(vtrace[imid:] < 0)[0]
+		if len(l) == 0:
+			ifrom = imid
+			continue
+		iend = l[0]+imid
+		ifrom = iend
+		# We generally underestimate the blink period, so compensate for this
+		if istart-margin >= 0:
+			istart -= margin
+		if iend+margin < len(a):
+			iend += margin
+		# We don't accept blinks that are too long, because blinks are not
+		# generally very long (although they can be).
+		if iend-istart > maxdur:
+			continue
+		lblink.append( (istart, iend) )
+	# Now reconstruct the trace during the blinks
+	for istart, iend in lblink:
+		# First create a list of (when possible) four data points that we can
+		# use for interpolation.
+		dur = iend - istart
+		l = []
+		if istart-dur >= 0:
+			l += [istart-dur]
+		l += [istart, iend]
+		if iend+dur < len(strace):
+			l += [iend+dur]
+		x = np.array(l)
+		# If the list is long enough we use cubic interpolation, otherwise we
+		# use linear interpolation
+		y = a[x]
+		if len(x) >= 4:
+			f2 = interp1d(x, y, kind='cubic')
+		else:
+			f2 = interp1d(x, y)
+		xInt = np.arange(istart, iend)
+		yInt = f2(xInt)
+		a[xInt] = yInt
+	return a
+
+
+def _smooth(a, winlen=11, wintype='hanning', correctlen=True):
+
+	"""
+	visible: False
+
+	desc:
+		Smooths a single array.
+	"""
+
+	if a.ndim != 1:
+		raise ValueError("smooth only accepts 1 dimension arrays.")
+	if a.size < winlen:
+		raise ValueError("Input vector needs to be bigger than window size.")
+	if winlen < 3:
+		return a
+	if not wintype in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+		raise ValueError(
+			"Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
+	s = np.r_[a[winlen-1:0:-1], a, a[-1:-winlen:-1]]
+	if wintype == 'flat': #moving average
+		w = np.ones(winlen, 'd')
+	else:
+		func = getattr(np, wintype)
+		w = func(winlen)
+	y = np.convolve(w/w.sum(), s, mode='valid')
+	if correctlen:
+		y = y[(winlen/2-1):-(winlen/2)]
+		# The output array can be one shorter than the input array
+		if len(y) > len(a):
+			y = y[:len(a)]
+		elif len(y) < len(a):
+			raise Exception('The output array is too short!')
+	return y
