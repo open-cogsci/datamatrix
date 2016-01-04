@@ -20,3 +20,4 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix.io._text import readtxt, writetxt
 from datamatrix.io._pickle import readpickle, writepickle
+from datamatrix.io._eyelink import readeyelink, EyeLinkParser
