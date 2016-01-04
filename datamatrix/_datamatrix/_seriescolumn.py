@@ -20,6 +20,12 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._basecolumn import BaseColumn
 
+try:
+	import numpy as np
+	from scipy.stats import nanmean, nanmedian, nanstd
+except ImportError:
+	np = None
+
 class _SeriesColumn(BaseColumn):
 
 	"""
@@ -45,11 +51,7 @@ class _SeriesColumn(BaseColumn):
 				type:	int
 		"""
 
-		global np, nanmean, nanmedian, nanstd
-		try:
-			import numpy as np
-			from scipy.stats import nanmean, nanmedian, nanstd
-		except ImportError:
+		if np is None:
 			raise Exception(u'NumPy and SciPy are required, but not installed.')
 		self._depth = depth
 		BaseColumn.__init__(self, datamatrix)
@@ -144,6 +146,29 @@ class _SeriesColumn(BaseColumn):
 		self._seq = np.zeros( (len(self._datamatrix), self._depth),
 			dtype=self.dtype)
 
+	def _ellipsize(self, a):
+
+		"""
+		visible: False
+
+		desc:
+			Creates an ellipsized represenation of an array.
+
+		arguments:
+			a:	An array.
+
+		returns:
+			A string with an ellipsized representation.
+		"""
+
+		return u'%s ... %s' % (str(a[:2])[:-1], str(a[-2:])[1:])
+
+	def _printable_list(self):
+
+		if self._depth <= 4:
+			return list(self._seq)
+		return [self._ellipsize(cell) for cell in self]
+
 	def _operate(self, a, number_op, str_op=None):
 
 		# For a 1D array with the length of the datamatrix, we create an array
@@ -151,6 +176,8 @@ class _SeriesColumn(BaseColumn):
 		# allows us to do by-row operations.
 		if isinstance(a, (list, tuple)):
 			a = np.array(a, dtype=self.dtype)
+		if isinstance(a, BaseColumn):
+			a = np.array(a._seq)
 		if isinstance(a, np.ndarray) and a.shape == (len(self), ):
 			a2 = np.empty( (len(self), self._depth),
 				dtype=self.dtype)

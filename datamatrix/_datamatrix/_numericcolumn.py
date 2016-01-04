@@ -20,6 +20,11 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._basecolumn import BaseColumn
 import operator
+try:
+	import numpy as np
+	from scipy.stats import nanmean, nanmedian, nanstd
+except ImportError:
+	np = None
 
 class NumericColumn(BaseColumn):
 
@@ -33,11 +38,7 @@ class NumericColumn(BaseColumn):
 
 	def __init__(self, datamatrix):
 
-		global np, nanmean, nanmedian, nanstd
-		try:
-			import numpy as np
-			from scipy.stats import nanmean, nanmedian, nanstd
-		except ImportError:
+		if np is None:
 			raise Exception(u'NumPy and SciPy are required, but not installed.')
 		super(NumericColumn, self).__init__(datamatrix)
 
@@ -77,7 +78,7 @@ class NumericColumn(BaseColumn):
 			return np.nan
 		return np.nansum(self._seq)
 
-	def tolist(self):
+	def _printable_list(self):
 
 		return list(self._seq)
 

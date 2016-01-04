@@ -461,11 +461,13 @@ class DataMatrix(object):
 
 	def __str__(self):
 
+		if len(self) > 20:
+			return str(self[:20]) + u'\n(+ %d rows not shown)' % (len(self)-20)
 		import prettytable
 		t = prettytable.PrettyTable()
 		t.add_column('#', self._rowid)
 		for name, col in self._cols.items():
-			t.add_column(name, col.tolist())
+			t.add_column(name, col._printable_list())
 		return str(t)
 
 	def __lshift__(self, other):
@@ -474,11 +476,20 @@ class DataMatrix(object):
 			other = DataMatrix()._fromdict(other)
 		dm = DataMatrix(len(self)+len(other))
 		for name, col in self._cols.items():
-			dm[name] = col.__class__
+			if hasattr(col, 'depth'):
+				dm[name] = col.__class__(dm, col.depth)
+			else:
+				dm[name] = col.__class__
 			dm[name][:len(self)] = self[name]
 		for name, col in other._cols.items():
 			if name not in dm._cols:
-				dm[name] = col.__class__
+				if hasattr(col, 'depth'):
+					dm[name] = col.__class__(dm, col.depth)
+				else:
+					dm[name] = col.__class__
+			elif hasattr(col, 'depth'):
+				dm[name].depth = max(col.depth, dm[name].depth)
+				other[name].depth = max(col.depth, dm[name].depth)
 			dm[name][len(self):] = other[name]
 		return dm
 

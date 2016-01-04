@@ -148,7 +148,15 @@ class BaseColumn(object):
 			return None
 		return sum(n)
 
-	def tolist(self):
+	# Private functions
+
+	@property
+	def _numbers(self):
+
+		return [float(val) for val in self._seq \
+			if isinstance(val, numbers.Number)]
+
+	def _printable_list(self):
 
 		"""
 		visible: False
@@ -162,14 +170,6 @@ class BaseColumn(object):
 		"""
 
 		return self._seq
-
-	# Private functions
-
-	@property
-	def _numbers(self):
-
-		return [float(val) for val in self._seq \
-			if isinstance(val, numbers.Number)]
 
 	def _init_seq(self):
 
