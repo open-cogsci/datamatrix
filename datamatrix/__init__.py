@@ -17,11 +17,13 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from datamatrix.py3compat import *
 import datamatrix.monkeypatch
 from datamatrix._datamatrix._row import Row
 from datamatrix._datamatrix._mixedcolumn import MixedColumn
 from datamatrix._datamatrix._numericcolumn import FloatColumn, IntColumn
 from datamatrix._datamatrix._seriescolumn import SeriesColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
+from datamatrix._cache import cached, iscached
 
 __version__ = '0.1.0'
