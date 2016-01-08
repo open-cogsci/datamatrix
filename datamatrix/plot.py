@@ -28,6 +28,7 @@ if '--clear-plot' in sys.argv and os.path.exists(plotfolder):
 	print('Removing plot folder (%s)' % plotfolder)
 	import shutil
 	shutil.rmtree(plotfolder)
+plt.style.use('ggplot')
 plt.rc('font', family='liberation sans', size=10)
 
 # Some pre-defined sizes
@@ -61,7 +62,7 @@ def new(size=r):
 	return fig
 
 
-def trace(series, x=None, color=blue[1]):
+def trace(series, x=None, color=blue[1], label=None):
 
 	"""
 	desc:
@@ -80,6 +81,9 @@ def trace(series, x=None, color=blue[1]):
 		color:
 			desc:	The color.
 			type:	str
+		label:
+			desc:	A label for the line, or None for no label.
+			type:	[str, None]
 	"""
 
 	y = series.mean
@@ -88,7 +92,7 @@ def trace(series, x=None, color=blue[1]):
 	if x is None:
 		x = np.arange(len(y))
 	plt.fill_between(x, ymin, ymax, color=color, alpha=.2)
-	plt.plot(x, y, color=color)
+	plt.plot(x, y, color=color, label=label)
 
 
 def regress(x, y, annotate=True, symbol='.', linestyle='--',
