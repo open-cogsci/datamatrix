@@ -24,14 +24,27 @@ import time
 import pickle
 import shutil
 
+cache_initialized = False
 skipcache = '--no-cache' in sys.argv
 cachefolder = '.cache'
-if '--clear-cache' in sys.argv and os.path.exists(cachefolder):
-	print('Removing cache folder (%s)' % cachefolder)
-	shutil.rmtree(cachefolder)
-if not os.path.exists(cachefolder):
-	print('Creating cache folder (%s)' % cachefolder)
-	os.mkdir(cachefolder)
+
+def init_cache():
+
+	"""
+	desc:
+		Initializes the cache system.
+	"""
+
+	global cache_initialized
+	cache_initialized = True
+	print(u'Initializing cache ...')
+	if '--clear-cache' in sys.argv and os.path.exists(cachefolder):
+		print(u'Removing cache folder (%s)' % cachefolder)
+		shutil.rmtree(cachefolder)
+	if not os.path.exists(cachefolder):
+		print(u'Creating cache folder (%s)' % cachefolder)
+		os.mkdir(cachefolder)
+
 
 def cached(func):
 
@@ -43,8 +56,10 @@ def cached(func):
 
 	def inner(*args, **kwargs):
 
-		isCached = True
+		iscached = True
 		if 'cacheid' in kwargs:
+			if not cache_initialized:
+				init_cache()
 			cachepath = os.path.join(cachefolder, kwargs['cacheid']) + '.pkl'
 			del kwargs['cacheid']
 		else:
@@ -56,8 +71,8 @@ def cached(func):
 				with open(cachepath, u'wb') as fd:
 					pickle.dump(a, fd)
 		else:
-			cTime = time.ctime(os.path.getctime(cachepath))
-			print('@cachedPickle: loading %s (created %s)' % (cachepath, cTime))
+			ctime = time.ctime(os.path.getctime(cachepath))
+			print('@cached: loading %s (created %s)' % (cachepath, ctime))
 			with open(cachepath, u'rb') as fd:
 				a = pickle.load(fd)
 		return a
