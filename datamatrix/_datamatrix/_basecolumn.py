@@ -42,7 +42,7 @@ class BaseColumn(object):
 		"""
 
 		self._datamatrix = datamatrix
-		self._rowid = self._datamatrix._rowid[:]
+		self._init_rowid()
 		self._init_seq()
 
 	@property
@@ -170,6 +170,18 @@ class BaseColumn(object):
 		"""
 
 		return self._seq
+
+	def _init_rowid(self):
+
+		"""
+		visible: False
+
+		desc:
+			Intializes the _rowid property, which is an iterator that contains
+			the row ids.
+		"""
+
+		self._rowid = self._datamatrix._rowid[:]
 
 	def _init_seq(self):
 

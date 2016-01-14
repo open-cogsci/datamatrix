@@ -18,7 +18,8 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
-from datamatrix._datamatrix._basecolumn import BaseColumn
+# from datamatrix._datamatrix._basecolumn import BaseColumn
+from datamatrix._datamatrix._numericcolumn import NumericColumn
 
 try:
 	import numpy as np
@@ -26,7 +27,7 @@ try:
 except ImportError:
 	np = None
 
-class _SeriesColumn(BaseColumn):
+class _SeriesColumn(NumericColumn):
 
 	"""
 	desc:
@@ -54,7 +55,7 @@ class _SeriesColumn(BaseColumn):
 		if np is None:
 			raise Exception(u'NumPy and SciPy are required, but not installed.')
 		self._depth = depth
-		BaseColumn.__init__(self, datamatrix)
+		NumericColumn.__init__(self, datamatrix)
 
 	def setallrows(self, value):
 
@@ -176,7 +177,7 @@ class _SeriesColumn(BaseColumn):
 		# allows us to do by-row operations.
 		if isinstance(a, (list, tuple)):
 			a = np.array(a, dtype=self.dtype)
-		if isinstance(a, BaseColumn):
+		if isinstance(a, NumericColumn):
 			a = np.array(a._seq)
 		if isinstance(a, np.ndarray) and a.shape == (len(self), ):
 			a2 = np.empty( (len(self), self._depth),
@@ -229,7 +230,7 @@ class _SeriesColumn(BaseColumn):
 	def _addrowid(self, _rowid):
 
 		old_length = len(self)
-		self._rowid += _rowid
+		self._rowid = np.concatenate((self._rowid, _rowid))
 		a = np.zeros( (len(self._rowid), self._depth), dtype=self.dtype)
 		a[:old_length] = self._seq
 		self._seq = a

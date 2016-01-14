@@ -83,6 +83,22 @@ class DataMatrix(object):
 				return False
 		return True
 
+	def rename(self, old, new):
+
+		"""
+		desc:
+			Renames a column. Modifies the DataMatrix in place.
+
+		arguments:
+			old:	The old name.
+			new:	The new name.
+		"""
+
+		col = self._cols[old]
+		del self._cols[old]
+		self._cols[new] = col
+		self._mutate()
+
 	# Private functions. These can also be called by the BaseColumn (and
 	# derived) classes.
 
@@ -129,6 +145,7 @@ class DataMatrix(object):
 		object.__setattr__(dm, u'_id', self._id)
 		for name, col in self._cols.items():
 			dm._cols[name] = self._cols[name]._getrowidkey(_rowid)
+			dm._cols[name]._datamatrix = dm
 		return dm
 
 	def _slice(self, key):
@@ -159,6 +176,7 @@ class DataMatrix(object):
 		object.__setattr__(dm, u'_id', self._id)
 		for name, col in self._cols.items():
 			dm._cols[name] = self._cols[name][key]
+			dm._cols[name]._datamatrix = dm
 		return dm
 
 	def _setlength(self, value):
@@ -240,6 +258,7 @@ class DataMatrix(object):
 		object.__setattr__(dm, u'_id', self._id)
 		for name, col in self._cols.items():
 			dm._cols[name] = self._cols[name]._merge(other._cols[name], _rowid)
+			dm._cols[name]._datamatrix = dm
 		return dm
 
 	def _mergedict(self, d={}):
@@ -466,8 +485,10 @@ class DataMatrix(object):
 		import prettytable
 		t = prettytable.PrettyTable()
 		t.add_column('#', self._rowid)
-		for name, col in self._cols.items():
+		for name, col in list(self._cols.items())[:5]:
 			t.add_column(name, col._printable_list())
+		if len(self._cols) > 5:
+			return str(t) + u'\n(+ %d columns not shown)' % (len(self._cols)-5)
 		return str(t)
 
 	def __lshift__(self, other):
@@ -481,6 +502,7 @@ class DataMatrix(object):
 			else:
 				dm[name] = col.__class__
 			dm[name][:len(self)] = self[name]
+			dm[name]._datamatrix = dm
 		for name, col in other._cols.items():
 			if name not in dm._cols:
 				if hasattr(col, 'depth'):
@@ -491,6 +513,7 @@ class DataMatrix(object):
 				dm[name].depth = max(col.depth, dm[name].depth)
 				other[name].depth = max(col.depth, dm[name].depth)
 			dm[name][len(self):] = other[name]
+			dm[name]._datamatrix = dm
 		return dm
 
 	def __iter__(self):

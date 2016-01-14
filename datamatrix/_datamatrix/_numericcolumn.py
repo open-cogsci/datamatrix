@@ -23,8 +23,10 @@ import operator
 try:
 	import numpy as np
 	from scipy.stats import nanmean, nanmedian, nanstd
+	nan = np.nan
 except ImportError:
 	np = None
+	nan = None
 
 class NumericColumn(BaseColumn):
 
@@ -35,6 +37,7 @@ class NumericColumn(BaseColumn):
 	"""
 
 	dtype = float
+	invalid = nan
 
 	def __init__(self, datamatrix):
 
@@ -82,9 +85,14 @@ class NumericColumn(BaseColumn):
 
 		return list(self._seq)
 
+	def _init_rowid(self):
+
+		self._rowid = np.array(self._datamatrix._rowid, dtype=int)
+
 	def _init_seq(self):
 
-		self._seq = np.zeros(len(self._datamatrix), dtype=self.dtype)
+		self._seq = np.empty(len(self._datamatrix), dtype=self.dtype)
+		self._seq[:] = self.invalid
 
 	def _checktype(self, value):
 
@@ -116,10 +124,31 @@ class NumericColumn(BaseColumn):
 	def _addrowid(self, _rowid):
 
 		old_length = len(self)
-		self._rowid += _rowid
-		a = np.zeros(len(self._rowid), dtype=self.dtype)
+		self._rowid = np.concatenate((self._rowid, _rowid))
+		a = np.empty(len(self._rowid), dtype=self.dtype)
 		a[:old_length] = self._seq
+		a[old_length:] = self.invalid
 		self._seq = a
+
+	def _getrowidkey(self, key):
+
+		col = self._empty_col()
+		col._rowid = key
+		i = np.in1d(self._rowid, key)
+		col._rowid = self._rowid[i]
+		col._seq = self._seq[i]
+		return col
+
+	def _merge(self, other, _rowid):
+
+		col = self._empty_col()
+		i_other = ~np.in1d(other._rowid, self._rowid) \
+			& np.in1d(other._rowid, _rowid)
+		i_self = np.in1d(self._rowid, _rowid)
+		col._rowid = np.concatenate(
+			(self._rowid[i_self], other._rowid[i_other]))
+		col._seq = np.concatenate((self._seq[i_self], other._seq[i_other]))
+		return col
 
 
 class FloatColumn(NumericColumn):
@@ -141,6 +170,7 @@ class IntColumn(NumericColumn):
 	"""
 
 	dtype = int
+	invalid = 0
 
 	def _tosequence(self, value, length):
 
