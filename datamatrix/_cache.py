@@ -27,6 +27,7 @@ import shutil
 cache_initialized = False
 skipcache = '--no-cache' in sys.argv
 cachefolder = '.cache'
+protocol = pickle.HIGHEST_PROTOCOL
 
 def init_cache():
 
@@ -65,11 +66,12 @@ def cached(func):
 		else:
 			cachepath = None
 		if skipcache or cachepath == None or not os.path.exists(cachepath):
+			print('@cached: calling %s' % func)
 			a = func(*args, **kwargs)
 			if cachepath != None:
 				print('@cached: saving %s' % cachepath)
 				with open(cachepath, u'wb') as fd:
-					pickle.dump(a, fd)
+					pickle.dump(a, fd, protocol)
 		else:
 			ctime = time.ctime(os.path.getctime(cachepath))
 			print('@cached: loading %s (created %s)' % (cachepath, ctime))

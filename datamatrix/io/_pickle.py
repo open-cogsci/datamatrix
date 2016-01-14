@@ -37,7 +37,7 @@ def readpickle(path):
 		return pickle.load(picklefile)
 
 
-def writepickle(dm, path):
+def writepickle(dm, path, protocol=-1):
 
 	"""
 	desc:
@@ -46,7 +46,10 @@ def writepickle(dm, path):
 	arguments:
 		dm:		The DataMatrix to write.
 		path:	The path to the pickle file.
+
+	keywords:
+		protocol:	The pickle protocol.
 	"""
 
 	with open(path, 'wb') as picklefile:
-		pickle.dump(dm, picklefile)
+		pickle.dump(dm, picklefile, protocol)
