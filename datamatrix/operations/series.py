@@ -116,7 +116,8 @@ def baseline(series, baseline, bl_start=-100, bl_end=None):
 		type:	SeriesColumn
 	"""
 
-	baseline = reduce_(window(baseline, start=bl_start, end=bl_end))
+	baseline = reduce_(window(baseline, start=bl_start, end=bl_end),
+		operation=nanmedian)
 	return series / baseline
 
 
