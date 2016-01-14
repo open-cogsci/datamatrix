@@ -21,6 +21,7 @@ from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
 	SeriesColumn
 from nose.tools import ok_
+import numpy as np
 
 def check_select(col_type):
 
@@ -40,6 +41,12 @@ def check_select(col_type):
 
 def check_concat(col_type, invalid):
 
+	def check(col, ref):
+		for x, y in zip(col, ref):
+			if x != y and not (np.isnan(x) and np.isnan(y)):
+				return False
+		return True
+
 	dm1 = DataMatrix(length=2, default_col_type=col_type)
 	dm1.col1 = 1, 2
 	dm1.col_shared = 3, 4
@@ -47,9 +54,9 @@ def check_concat(col_type, invalid):
 	dm2.col2 = 5, 6
 	dm2.col_shared = 7, 8
 	dm3 = dm1 << dm2
-	ok_(list(dm3.col1) == [1,2,invalid,invalid])
-	ok_(list(dm3.col_shared) == [3,4,7,8])
-	ok_(list(dm3.col2) == [invalid,invalid,5,6])
+	check(dm3.col1, [1,2,invalid,invalid])
+	check(dm3.col_shared, [3,4,7,8])
+	check(dm3.col2, [invalid,invalid,5,6])
 
 
 def test_mixedcolumn():
@@ -61,7 +68,7 @@ def test_mixedcolumn():
 def test_floatcolumn():
 
 	check_select(FloatColumn)
-	check_concat(FloatColumn, invalid=0)
+	check_concat(FloatColumn, invalid=np.nan)
 
 
 def test_intcolumn():
