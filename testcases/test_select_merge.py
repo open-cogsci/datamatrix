@@ -21,6 +21,7 @@ from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
 	SeriesColumn
 from nose.tools import ok_
+from testcases.test_tools import check_col, check_series, check_integrity
 import numpy as np
 
 def check_select(col_type):
@@ -28,24 +29,18 @@ def check_select(col_type):
 	dm = DataMatrix(length=2, default_col_type=col_type)
 	dm.col = 1, 2
 	dm_ = dm.col < 2
-	ok_(list(dm_.col) == [1])
+	check_col(dm_.col, [1])
 	dm_ = dm.col == 2
-	ok_(list(dm_.col) == [2])
+	check_col(dm_.col, [2])
 	dm_ = (dm.col == 1) | (dm.col == 2)
-	ok_(list(dm_.col) == [1,2])
+	check_col(dm_.col, [1,2])
 	dm_ = (dm.col == 1) & (dm.col == 2)
-	ok_(list(dm_.col) == [])
+	check_col(dm_.col, [])
 	dm_ = (dm.col == 1) ^ (dm.col == 2)
-	ok_(list(dm_.col) == [1,2])
+	check_col(dm_.col, [1,2])
 
 
 def check_concat(col_type, invalid):
-
-	def check(col, ref):
-		for x, y in zip(col, ref):
-			if x != y and not (np.isnan(x) and np.isnan(y)):
-				return False
-		return True
 
 	dm1 = DataMatrix(length=2, default_col_type=col_type)
 	dm1.col1 = 1, 2
@@ -54,9 +49,9 @@ def check_concat(col_type, invalid):
 	dm2.col2 = 5, 6
 	dm2.col_shared = 7, 8
 	dm3 = dm1 << dm2
-	check(dm3.col1, [1,2,invalid,invalid])
-	check(dm3.col_shared, [3,4,7,8])
-	check(dm3.col2, [invalid,invalid,5,6])
+	check_col(dm3.col1, [1,2,invalid,invalid])
+	check_col(dm3.col_shared, [3,4,7,8])
+	check_col(dm3.col2, [invalid,invalid,5,6])
 
 
 def test_mixedcolumn():
@@ -79,10 +74,6 @@ def test_intcolumn():
 
 def test_seriescolumn():
 
-	def check(col, ref):
-		for i, j in zip(col, ref):
-			ok_(all(i == j))
-
 	dm1 = DataMatrix(length=2)
 	dm1.col1 = SeriesColumn(2)
 	dm1.col1 = 1, 2
@@ -94,6 +85,6 @@ def test_seriescolumn():
 	dm2.col_shared = SeriesColumn(2)
 	dm2.col_shared = 7, 8
 	dm3 = dm1 << dm2
-	check(dm3.col1, [[1,1],[2,2],[0,0],[0,0]])
-	check(dm3.col_shared, [[3,3],[4,4],[7,7],[8,8]])
-	check(dm3.col2, [[0,0],[0,0],[5,5],[6,6]])
+	check_series(dm3.col1, [[1,1],[2,2],[0,0],[0,0]])
+	check_series(dm3.col_shared, [[3,3],[4,4],[7,7],[8,8]])
+	check_series(dm3.col2, [[0,0],[0,0],[5,5],[6,6]])

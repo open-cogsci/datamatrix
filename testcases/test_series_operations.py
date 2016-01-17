@@ -19,14 +19,10 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, SeriesColumn
-from datamatrix.operations import series
+from datamatrix import series
+from testcases.test_tools import check_col, check_series, check_integrity
 from nose.tools import eq_, ok_
 import numpy as np
-
-def check(col, ref):
-
-	for i, j in zip(col, ref):
-		ok_(all(i == j))
 
 
 def test_reduce_():
@@ -36,7 +32,8 @@ def test_reduce_():
 	dm.series[0] = 1, 2, 3
 	dm.series[1] = 2, 3, 4
 	dm.col = series.reduce_(dm.series)
-	ok_(dm.col == [2,3])
+	check_col(dm.col, [2,3])
+	check_integrity(dm)
 
 
 def test_window():
@@ -46,7 +43,8 @@ def test_window():
 	dm.series[0] = 0,1,1,0
 	dm.series[1] = 0,2,2,0
 	dm.window = series.window(dm.series, 1, 3)
-	check(dm.window, [[1,1], [2,2]])
+	check_series(dm.window, [[1,1], [2,2]])
+	check_integrity(dm)
 
 
 def test_baseline():
@@ -59,4 +57,5 @@ def test_baseline():
 	dm.baseline[0] = range(1,4)
 	dm.baseline[1] = range(3)
 	dm.norm = series.baseline(dm.series, dm.baseline)
-	check(dm.norm, [[0,.5,1], [1,2,3]])
+	check_series(dm.norm, [[0,.5,1], [1,2,3]])
+	check_integrity(dm)
