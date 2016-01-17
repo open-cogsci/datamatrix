@@ -72,6 +72,11 @@ class _SeriesColumn(NumericColumn):
 		self._seq[:] = value
 
 	@property
+	def unique(self):
+
+		raise NotImplementedError(u'unique is not implemented for SeriesColumn')
+
+	@property
 	def depth(self):
 
 		"""

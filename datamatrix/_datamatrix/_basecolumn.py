@@ -46,6 +46,18 @@ class BaseColumn(object):
 		self._init_seq()
 
 	@property
+	def unique(self):
+
+		"""
+		name:	unique
+
+		desc:
+			An interator for all unique values that occur in the column.
+		"""
+
+		return list(set(self._seq))
+
+	@property
 	def mean(self):
 
 		"""
@@ -368,10 +380,26 @@ class BaseColumn(object):
 		col = self._empty_col()
 		col._rowid = key
 		col._seq = []
-		for _rowid, val in zip(self._rowid, self._seq):
-			if _rowid in key:
-				col._seq.append(val)
+		for _rowid in key:
+			if _rowid not in self._rowid:
+				continue
+			col._seq.append(self._seq[self._rowid.index(_rowid)])
 		return col
+
+	def _sortedrowid(self):
+
+		"""
+		visible: False
+
+		desc:
+			Gives a list of rowids that are ordered such that they sort the
+			column.
+
+		returns:
+			An iterator.
+		"""
+
+		return [rowid for val, rowid in sorted(zip(self._seq, self._rowid))]
 
 	def _setintkey(self, key, value):
 

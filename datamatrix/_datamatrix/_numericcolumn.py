@@ -46,6 +46,11 @@ class NumericColumn(BaseColumn):
 		super(NumericColumn, self).__init__(datamatrix)
 
 	@property
+	def unique(self):
+
+		return np.unique(self._seq)
+
+	@property
 	def mean(self):
 
 		return nanmean(self._seq)
@@ -112,7 +117,7 @@ class NumericColumn(BaseColumn):
 	def _compare(self, other, op):
 
 		i = np.where(op(self._seq, other))[0]
-		return self._datamatrix._selectrowid(list(i))
+		return self._datamatrix._selectrowid(list(self._rowid[i]))
 
 	def _operate(self, other, number_op, str_op=None):
 
@@ -132,12 +137,28 @@ class NumericColumn(BaseColumn):
 
 	def _getrowidkey(self, key):
 
+		# We need to select all rows that match the rowids specified in key,
+		# while preserving the order provided by key. To do this, we use the
+		# following logic:
+		# - Get a list of indices (`orig_indices`) that give a sorted view on
+		#   self._rowid.
+		# - Use this to search through a sorted view of _rowid for all items in
+		#   key
+		# - Map the matching indices, which refer to the sorted view of _rowid
+		#   back to a list of indices in the original, non-sorted array.
+		# See also: http://stackoverflow.com/questions/9566592/\
+		#  find-multiple-values-within-a-numpy-array
 		col = self._empty_col()
-		col._rowid = key
-		i = np.in1d(self._rowid, key)
-		col._rowid = self._rowid[i]
-		col._seq = self._seq[i]
+		orig_indices = self._rowid.argsort()
+		matching_indices = np.searchsorted(self._rowid[orig_indices], key)
+		selected_indices = orig_indices[matching_indices]
+		col._rowid = self._rowid[selected_indices]
+		col._seq = self._seq[selected_indices]
 		return col
+
+	def _sortedrowid(self):
+
+		return list(self._rowid[self._seq.argsort()])
 
 	def _merge(self, other, _rowid):
 
