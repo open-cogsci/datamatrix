@@ -31,6 +31,8 @@ class BaseColumn(object):
 		but rather use MixedColumn or NumericColumn.
 	"""
 
+	default_value = u''
+
 	def __init__(self, datamatrix):
 
 		"""
@@ -205,7 +207,7 @@ class BaseColumn(object):
 			the data.
 		"""
 
-		self._seq = [None]*len(self._datamatrix)
+		self._seq = [self.default_value]*len(self._datamatrix)
 
 	def _addrowid(self, _rowid):
 
@@ -220,7 +222,7 @@ class BaseColumn(object):
 		"""
 
 		self._rowid += _rowid
-		self._seq += [None]*len(_rowid)
+		self._seq += [self.default_value]*len(_rowid)
 
 	def _checktype(self, value):
 

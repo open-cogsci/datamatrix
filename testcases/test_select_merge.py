@@ -38,7 +38,7 @@ def check_select(col_type):
 	check_col(dm_.col, [])
 	dm_ = (dm.col == 1) ^ (dm.col == 2)
 	check_col(dm_.col, [1,2])
-
+	check_integrity(dm)
 
 def check_concat(col_type, invalid):
 
@@ -88,3 +88,11 @@ def test_seriescolumn():
 	check_series(dm3.col1, [[1,1],[2,2],[0,0],[0,0]])
 	check_series(dm3.col_shared, [[3,3],[4,4],[7,7],[8,8]])
 	check_series(dm3.col2, [[0,0],[0,0],[5,5],[6,6]])
+	dm3.i = [4,0,2,1]
+	dm4 = dm3.i <= 2
+	dm5 = (dm3.i <= 2) | (dm3.i >= 3)
+	check_integrity(dm1)
+	check_integrity(dm2)
+	check_integrity(dm3)
+	check_integrity(dm4)
+	check_integrity(dm5)

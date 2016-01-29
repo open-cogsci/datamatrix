@@ -22,6 +22,8 @@ import numpy as np
 
 
 def check_col(col, ref):
+
+	check_integrity(col._datamatrix)
 	for x, y in zip(col, ref):
 		if x != y and not (np.isnan(x) and np.isnan(y)):
 			print(u'Column error: %s != %s' % (col, ref))
@@ -30,6 +32,7 @@ def check_col(col, ref):
 
 def check_series(col, ref):
 
+	check_integrity(col._datamatrix)
 	for i, j in zip(col, ref):
 		ok_(all(i == j))
 
@@ -42,5 +45,6 @@ def check_integrity(dm):
 			ok_(False)
 		for i, j in zip(dm._rowid, col._rowid):
 			if i != j:
-				print('Integrity failure: %s != %s' % (dm._rowid, col._rowid))
+				print('Integrity failure: %s != %s (col: %s)' \
+					% (dm._rowid, col._rowid, name))
 				ok_(False)

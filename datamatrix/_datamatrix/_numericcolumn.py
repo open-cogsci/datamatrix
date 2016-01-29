@@ -169,8 +169,7 @@ class NumericColumn(BaseColumn):
 		col._rowid = np.concatenate(
 			(self._rowid[i_self], other._rowid[i_other]))
 		col._seq = np.concatenate((self._seq[i_self], other._seq[i_other]))
-		return col
-
+		return col._getrowidkey(_rowid)
 
 class FloatColumn(NumericColumn):
 

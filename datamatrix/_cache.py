@@ -61,24 +61,23 @@ def cached(func):
 		if 'cacheid' in kwargs:
 			if not cache_initialized:
 				init_cache()
-			cachepath = os.path.join(cachefolder, kwargs['cacheid']) + '.pkl'
+			hascachefile, cachepath = cachefile(kwargs['cacheid'])
 			del kwargs['cacheid']
 		else:
 			cachepath = None
-		if skipcache or cachepath == None or not os.path.exists(cachepath):
+		if skipcache or cachepath is None or not hascachefile:
 			print('@cached: calling %s' % func)
 			a = func(*args, **kwargs)
-			if cachepath != None:
+			if cachepath is not None:
 				print('@cached: saving %s' % cachepath)
-				with open(cachepath, u'wb') as fd:
-					pickle.dump(a, fd, protocol)
+				writecache(a, cachepath)
 		else:
 			ctime = time.ctime(os.path.getctime(cachepath))
 			print('@cached: loading %s (created %s)' % (cachepath, ctime))
-			with open(cachepath, u'rb') as fd:
-				a = pickle.load(fd)
+			a = readcache(cachepath)
 		return a
 
+	inner.__name__ = func.__name__
 	return inner
 
 def iscached(func):
@@ -92,4 +91,55 @@ def iscached(func):
 		type:	false
 	"""
 
+	if py3:
+		return 'iscached' in func.__code__.co_varnames
 	return 'iscached' in func.func_code.co_varnames
+
+def cachefile(cacheid):
+
+	"""
+	desc:
+		Gets the cachefile for a cacheid, and checks whether this file exists.
+
+	arguments:
+		cacheid:	The cacheid.
+
+	returns:
+		A (cache_exists, cachepath) tuple, where the first is a boolean that
+		indicates if the second exists.
+	"""
+
+	path = os.path.join(cachefolder, cacheid) + '.pkl'
+	if os.path.exists(path):
+		return True, path
+	return False, path
+
+def readcache(cachepath):
+
+	"""
+	desc:
+		Reads an object from a cachefile.
+
+	arguments:
+		cachepath:	The full path to the cachefile.
+
+	returns:
+		An object that was cached.
+	"""
+
+	with open(cachepath, u'rb') as fd:
+		return pickle.load(fd)
+
+def writecache(a, cachepath):
+
+	"""
+	desc:
+		Writes a cachefile for an object.
+
+	arguments:
+		a:			The object to cache. This object should be pickleable.
+		cachepath:	The full path to the cachefile.
+	"""
+
+	with open(cachepath, u'wb') as fd:
+		pickle.dump(a, fd, protocol)

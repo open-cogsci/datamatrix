@@ -219,8 +219,7 @@ class _SeriesColumn(NumericColumn):
 		# For a 1D array with the length of the datamatrix, we create an array
 		# in which the second dimension (i.e. the depth) is constant.
 		if a.shape == (length, ):
-			a2 = np.empty( (length, self._depth),
-				dtype=self.dtype)
+			a2 = np.empty( (length, self._depth), dtype=self.dtype)
 			np.rot90(a2)[:] = a
 			return a2
 		# For a 2D array that already has the correct dimensions, we return it.
@@ -245,7 +244,7 @@ class _SeriesColumn(NumericColumn):
 	def __getitem__(self, key):
 
 		if isinstance(key, tuple) and len(key) == 2:
-			return self._seq[key]
+			return self._seq[key].copy()
 		return super(_SeriesColumn, self).__getitem__(key)
 
 	def __setitem__(self, key, value):

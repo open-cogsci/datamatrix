@@ -89,14 +89,28 @@ class DataMatrix(object):
 		desc:
 			Renames a column. Modifies the DataMatrix in place.
 
+		raises:
+			ValueError: When an error occurs.
+
 		arguments:
 			old:	The old name.
 			new:	The new name.
 		"""
 
-		col = self._cols[old]
-		del self._cols[old]
-		self._cols[new] = col
+		if old == new:
+			return
+		if old not in self._cols:
+			raise ValueError(u'Column name does not exist')
+		if new in self._cols:
+			raise ValueError(u'Column name already exists')
+		try:
+			exec(u'%s = None' % new)
+		except SyntaxError:
+			raise ValueError(u'Invalid column name')
+		# A rename recipe that preservers order.
+		_cols = collections.OrderedDict([(new, v) if k == old else (k, v) \
+			for k, v in self._cols.items()])
+		object.__setattr__(self, u'_cols', _cols)
 		self._mutate()
 
 	# Private functions. These can also be called by the BaseColumn (and
@@ -464,7 +478,10 @@ class DataMatrix(object):
 
 		if name in ('__getstate__', '_cols'):
 			raise AttributeError()
-		return self._cols[name]
+		if name in self._cols:
+			return self._cols[name]
+		# return object.__getattr__(self, name)
+		raise AttributeError()
 
 	def __getitem__(self, key):
 
@@ -485,9 +502,9 @@ class DataMatrix(object):
 		import prettytable
 		t = prettytable.PrettyTable()
 		t.add_column('#', self._rowid)
-		for name, col in list(self._cols.items())[:5]:
+		for name, col in list(self._cols.items())[:6]:
 			t.add_column(name, col._printable_list())
-		if len(self._cols) > 5:
+		if len(self._cols) > 6:
 			return str(t) + u'\n(+ %d columns not shown)' % (len(self._cols)-5)
 		return str(t)
 

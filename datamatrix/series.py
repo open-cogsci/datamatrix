@@ -199,6 +199,52 @@ def smooth(series, winlen=11, wintype='hanning', correctlen=True):
 	return _apply_fnc(series, _smooth, winlen=winlen, wintype=wintype,
 		correctlen=correctlen)
 
+def threshold(series, fnc, min_length=1):
+
+	"""
+	desc:
+		Finds samples that satisfy some threshold criterion for a given period.
+
+	arguments:
+		series:
+			desc:	A signal to threshold.
+			type:	SeriesColumn
+		fnc:
+			desc:	A function that takes a single value and returns True if
+					this value exceeds a threshold, and False otherwise.
+			type:	FunctionType
+
+	keywords:
+		min_length:
+			desc:	The minimum number of samples for which `fnc` must return
+					True.
+			type:	int
+
+	returns:
+		desc:	A series where 0 indicates below threshold, and 1 indicates
+				above threshold.
+		type:	SeriesColumn
+	"""
+
+	threshold_series = _SeriesColumn(series._datamatrix, series.depth)
+	threshold_series[:] = 0
+	# First walk through all rows
+	for i, trace in enumerate(series):
+		print()
+		# Then walk through all samples within a row
+		nhit = 0
+		for j, val in enumerate(trace):
+			hit = fnc(val)
+			if hit:
+				nhit += 1
+				continue
+			if nhit >= min_length:
+				threshold_series[i,j-nhit:j] = 1
+			nhit = 0
+		if nhit >= min_length:
+			threshold_series[i,j-nhit:j] = 1
+	return threshold_series
+
 # Private functions
 
 def _apply_fnc(series, fnc, **kwdict):
