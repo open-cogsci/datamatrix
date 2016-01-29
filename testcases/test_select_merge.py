@@ -57,7 +57,7 @@ def check_concat(col_type, invalid):
 def test_mixedcolumn():
 
 	check_select(MixedColumn)
-	check_concat(MixedColumn, invalid=None)
+	check_concat(MixedColumn, invalid=u'')
 
 
 def test_floatcolumn():

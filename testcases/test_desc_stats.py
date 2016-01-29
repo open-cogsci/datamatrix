@@ -110,7 +110,7 @@ def test_seriescolumn():
 
 def test_mixedcolumn():
 
-	check_desc_stats(MixedColumn, invalid=None, assert_invalid=assert_None)
+	check_desc_stats(MixedColumn, invalid=u'', assert_invalid=assert_None)
 
 
 def test_floatcolumn():
@@ -120,4 +120,4 @@ def test_floatcolumn():
 
 def test_intcolumn():
 
-	check_desc_stats(IntColumn, invalid=np.nan, assert_invalid=assert_nan)
+	check_desc_stats(IntColumn, invalid=0, assert_invalid=assert_nan)

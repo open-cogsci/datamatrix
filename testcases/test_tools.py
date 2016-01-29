@@ -25,7 +25,9 @@ def check_col(col, ref):
 
 	check_integrity(col._datamatrix)
 	for x, y in zip(col, ref):
-		if x != y and not (np.isnan(x) and np.isnan(y)):
+		if x != y:
+			if not (x is None or y is None) and np.isnan(x) and np.isnan(y):
+				continue
 			print(u'Column error: %s != %s' % (col, ref))
 			ok_(False)
 
