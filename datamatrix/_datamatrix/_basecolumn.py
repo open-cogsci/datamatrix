@@ -241,9 +241,16 @@ class BaseColumn(object):
 		"""
 
 		try:
-			value = float(value)
+			assert(int(value) == value)
+			value = int(value)
 		except:
-			pass
+			try:
+				# Make sure we don't convert 'inf' and 'nan' strings to float
+				assert(not math.isinf(float(value)))
+				assert(not math.isnan(float(value)))
+				value = float(value)
+			except:
+				pass
 		if value is None or isinstance(value, (numbers.Number, str)):
 			return value
 		if isinstance(value, bytes):
