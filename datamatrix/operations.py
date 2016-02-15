@@ -17,8 +17,160 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix import DataMatrix, FloatColumn, IntColumn
+from datamatrix import DataMatrix, FloatColumn, IntColumn, SeriesColumn, \
+	MixedColumn
+from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 import random
+import warnings
+
+def split(col):
+
+	"""
+	desc:
+		Splits a DataMatrix by unique values in a column.
+
+	arguments:
+		col:
+			desc:	The column to split by.
+			type:	BaseColumn
+
+	returns:
+		desc:	A iterator over (value, DataMatrix) tuples.
+		type:	Iterator
+	"""
+
+	for val in col.unique:
+		yield val, col == val
+
+
+def fullfactorial(dm, ignore=u''):
+
+	"""
+	desc: |
+		*Requires numpy*
+
+		Creates a new DataMatrix that uses a specified DataMatrix as the base of
+		a full-factorial design. That is, each value of every row is combined
+		with each value from every other row. For example:
+
+			A B
+			---
+			1 3
+			2 4
+
+		Gives
+
+			A B
+			---
+			1 3
+			1 4
+			2 3
+			2 4
+
+	arguments:
+		dm:
+			desc:	The source DataMatrix.
+			type:	DataMatrix
+
+	keywords:
+		ignore:		A value that should be ignored.
+
+	return:
+		type:	DataMatrix
+	"""
+
+
+	design = [len(col != ignore) for name, col in dm.columns]
+	a = _fullfact(design)
+	fdm = DataMatrix(a.shape[0])
+	for name in dm.column_names:
+		fdm[name] = u''
+	for i in range(a.shape[0]):
+		row = a[i]
+		for rownr, name in enumerate(dm.column_names):
+			fdm[name][i] = dm[name][int(row[rownr])]
+	return fdm
+
+
+def group(dm, by=None):
+
+	"""
+	desc:
+		*Requires numpy*
+
+		Groups the DataMatrix by unique values in a set of grouping columns.
+		Grouped columns are stored as SeriesColumns.
+
+		For example:
+
+		A B
+		---
+		1 0
+		1 1
+		2 2
+		3 3
+
+		>>> group(dm, by=dm.a)
+
+		Gives:
+
+		A B
+		---
+		1 [0, 1]
+		2 [2, 3]
+
+	arguments:
+		dm:
+			desc:	The DataMatrix to group.
+			type:	DataMatrix
+
+	keywords:
+		by:			A list of columns to group by.
+		type:		[list, None]
+
+	returns:
+		desc:	A grouped DataMatrix.
+		type:	DataMatrix
+	"""
+
+	import numpy as np
+
+	bycol = MixedColumn(datamatrix=dm)
+	if by is not None:
+		for col in by:
+			bycol += col
+	keys = bycol.unique
+
+	groupcols = [(name, col) for name, col in dm.columns if col not in by]
+	nogroupcols = [(name, col) for name, col in dm.columns if col in by]
+
+	cm = DataMatrix(length=len(keys))
+	for name, col in groupcols:
+		if isinstance(col, _SeriesColumn):
+			warnings.warn(
+				u'Failed to create series for SeriesColumn s%s' % name)
+			continue
+		cm[name] = SeriesColumn(depth=0)
+	for name, col in nogroupcols:
+		cm[name] = col.__class__
+
+	for i, key in enumerate(keys):
+		dm_ = bycol == key
+		for name, col in groupcols:
+			if isinstance(col, _SeriesColumn):
+				continue
+			if cm[name].depth < len(dm_[name]):
+				cm[name].defaultnan = True
+				cm[name].depth = len(dm_[name])
+				cm[name].defaultnan = False
+			try:
+				cm[name][i,:len(dm_[name])] = dm_[name]
+			except ValueError:
+				warnings.warn(
+					u'Failed to create series for MixedColumn %s' % name)
+		for name, col in nogroupcols:
+			cm[name][i] = dm_[name][0]
+	return cm
 
 
 def sort(obj, by=None):
@@ -135,3 +287,31 @@ def auto_type(dm):
 			new_col[:] = col
 			del dm[name]
 			dm[name] = new_col
+
+# Private function
+
+def _fullfact(levels):
+
+	"""
+	desc:
+		Taken from pydoe. See:
+		<https://github.com/tisimst/pyDOE/blob/master/pyDOE/doe_factorial.py>
+	"""
+
+	import numpy as np
+	n = len(levels)  # number of factors
+	nb_lines = np.prod(levels)  # number of trial conditions
+	H = np.zeros((nb_lines, n))
+
+	level_repeat = 1
+	range_repeat = np.prod(levels)
+	for i in range(n):
+		range_repeat /= levels[i]
+		lvl = []
+		for j in range(levels[i]):
+			lvl += [j]*level_repeat
+		rng = lvl*range_repeat
+		level_repeat *= levels[i]
+		H[:, i] = rng
+
+	return H
