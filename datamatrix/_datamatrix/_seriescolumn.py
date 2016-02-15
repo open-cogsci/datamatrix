@@ -35,6 +35,7 @@ class _SeriesColumn(NumericColumn):
 	"""
 
 	dtype = float
+	defaultnan = False
 
 	def __init__(self, datamatrix, depth):
 
@@ -95,6 +96,8 @@ class _SeriesColumn(NumericColumn):
 			return
 		if depth > self._depth:
 			seq = np.zeros( (len(self), depth), dtype=self.dtype)
+			if self.defaultnan:
+				seq[:] = np.nan
 			seq[:,:self._depth] = self._seq
 			self._seq = seq
 			self._depth = depth
@@ -151,6 +154,8 @@ class _SeriesColumn(NumericColumn):
 
 		self._seq = np.zeros( (len(self._datamatrix), self._depth),
 			dtype=self.dtype)
+		if self.defaultnan:
+			self._seq[:] = np.nan
 
 	def _ellipsize(self, a):
 
