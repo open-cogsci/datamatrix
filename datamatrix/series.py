@@ -49,9 +49,14 @@ def reduce_(series, operation=nanmean):
 		type:	FloatColumn
 	"""
 
-	a = operation(series, axis=1)
 	col = FloatColumn(series._datamatrix)
-	col[:] = a
+	try:
+		a = operation(series, axis=1)
+	except TypeError:
+		for i, val in enumerate(series):
+			col[i] = operation(val)
+	else:
+		col[:] = a
 	return col
 
 
