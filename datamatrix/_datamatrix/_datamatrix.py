@@ -427,14 +427,17 @@ class DataMatrix(object):
 		if name == u'default_col_type':
 			self._set_default_col_type(value)
 			return
+		# Create a new column by type
 		if isinstance(value, type) and issubclass(value, BaseColumn):
 			self._cols[name] = value(self)
 			return
+		# Create a new column by type, kwdict tuple
 		if isinstance(value, tuple) and len(value) == 2 \
 			and isinstance(value[0], type) and issubclass(value[0], BaseColumn):
 				cls, kwdict = value
 				self._cols[name] = cls(self, **kwdict)
 				return
+		# Create new column by existing column
 		if isinstance(value, BaseColumn):
 			if value._datamatrix is not self:
 				raise Exception(
