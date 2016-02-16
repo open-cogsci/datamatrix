@@ -23,6 +23,53 @@ from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 import random
 import warnings
 
+
+def weight(col):
+
+	"""
+	desc: |
+		Weights a DataMatrix by a column. That is, each row from a DataMatrix is
+		repeated as many times as the value in the weighting column.
+
+		For example:
+
+		A B
+		---
+		1 X
+		2 Y
+
+		>>> weight(dm.A)
+
+		A B
+		---
+		1 X
+		2 Y
+		2 Y
+
+	arguments:
+		col:
+			desc:	The column to weight by.
+			type:	BaseColumn
+
+	returns:
+		type:	DataMatrix
+	"""
+
+	dm1 = col._datamatrix
+	dm2 = DataMatrix(length=int(col.sum))
+	for colname, col in dm1.columns:
+		dm2[colname] = type(col)
+	i2 = 0
+	for i1, weight in enumerate(col):
+		if not isinstance(weight, int) or weight < 0:
+			raise TypeError(u'Weights should be non-negative integer values')
+		for c in range(weight):
+			for colname in dm1.column_names:
+				dm2[colname][i2] = dm1[colname][i1]
+			i2 += 1
+	return dm2
+
+
 def split(col):
 
 	"""
@@ -55,17 +102,17 @@ def fullfactorial(dm, ignore=u''):
 
 			A B
 			---
-			1 3
-			2 4
+			x 3
+			y 4
 
-		Gives
+		>>> fullfactorial(dm)
 
 			A B
 			---
-			1 3
-			1 4
-			2 3
-			2 4
+			x 3
+			x 4
+			y 3
+			y 4
 
 	arguments:
 		dm:
@@ -95,29 +142,30 @@ def fullfactorial(dm, ignore=u''):
 def group(dm, by=None):
 
 	"""
-	desc:
+	desc: |
 		*Requires numpy*
 
 		Groups the DataMatrix by unique values in a set of grouping columns.
-		Grouped columns are stored as SeriesColumns.
+		Grouped columns are stored as SeriesColumns. The columns that are
+		grouped should contain numeric values.
 
 		For example:
 
 		A B
 		---
-		1 0
-		1 1
-		2 2
-		3 3
+		x 0
+		x 1
+		y 2
+		y 3
 
-		>>> group(dm, by=dm.a)
+		>>> group(dm, by=[dm.a])
 
 		Gives:
 
 		A B
 		---
-		1 [0, 1]
-		2 [2, 3]
+		x [0, 1]
+		y [2, 3]
 
 	arguments:
 		dm:
@@ -283,10 +331,11 @@ def auto_type(dm):
 				except:
 					break
 		else:
-			new_col = IntColumn(col._datamatrix)
+			new_col = col_type(col._datamatrix)
 			new_col[:] = col
 			del dm[name]
 			dm[name] = new_col
+	dm._mutate()
 
 # Private function
 
