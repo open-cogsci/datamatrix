@@ -36,7 +36,12 @@ def check_series(col, ref):
 
 	check_integrity(col._datamatrix)
 	for i, j in zip(col, ref):
-		ok_(all(i == j))
+		for x, y in zip(i, j):
+			if x != y:
+				if not (x is None or y is None) and np.isnan(x) and np.isnan(y):
+					continue
+				print(u'Column error: %s != %s' % (col, ref))
+				ok_(False)
 
 
 def check_integrity(dm):
