@@ -23,7 +23,101 @@ from datamatrix import DataMatrix, _cache
 import time
 import warnings
 
-def callfunc(dm, modules, func, cache_prefix='auto_cache.', redo=False):
+
+def dispatch(dm, modules=[], full=[], cache_prefix='auto_cache.'):
+
+	"""
+	desc:
+		Executes an analysis loop, in which all functions that specified on the
+		command are executed. A function is executed if its name is prefixed by
+		`@` and if it is present in one of the helpers modules. Cachable
+		functions are cached automatically. If a function returns a DataMatrix,
+		this is used to replace the current DataMatrix for the following functions.
+
+	arguments:
+		dm:		The DataMatrix to analyze.
+
+	keywords:
+		modules:	A module or list of modules that contain the analysis
+					functions.
+		full:		A list of functions or function names that make up the full
+					analysis pathway.
+		cache_prefix:
+					A prefix for the cacheid for cachable functions. The
+					function name will be appended.
+	"""
+
+	if not isinstance(modules, list):
+		modules = [modules]
+	if not modules:
+		raise Exception('No modules specified')
+	print('Dispatching ...')
+	t0 = time.time()
+	if '@full' in sys.argv:
+		print('Running full analysis pathway')
+		if not full:
+			raise Exception('No full analysis pathway specified')
+		for func in full:
+			dm = _callfunc(dm, modules, func, cache_prefix=cache_prefix)
+	else:
+		for func in sys.argv:
+			if not func[0] == '@':
+				continue
+			if ':redo' in func:
+				func = func.replace(':redo', '')
+				redo = True
+			else:
+				redo = False
+			dm = _callfunc(dm, modules, func, cache_prefix=cache_prefix, redo=redo)
+	print('Dispatch finished (%.2f s)' % (time.time() - t0))
+
+def waterfall(*pipeline):
+
+	"""
+	desc:
+		Implements a "cached waterfall", which is a series of cachable
+		operations which is executed from the last point onward that is not
+		cached.
+
+	argument-list:
+		pipeline:	A list of (func, cacheid, kwdict) tuples. Here, func is a
+					cachable function, cacheid specifies the cacheid, and
+					kwdict is dictionary of keyword arguments to passed to func.
+					Each function except the first should take a DataMatrix as
+					the first argument. All functions should return a
+					DataMatrix.
+
+	returns:
+		type:	DataMatrix
+	"""
+
+	print('Starting waterfall ...')
+	t0 = time.time()
+	todo = []
+	dm = None
+	for i, (func, cacheid, kwdict) in enumerate(pipeline[::-1]):
+		hascachefile, cachepath = _cache.cachefile(cacheid)
+		if not hascachefile:
+			todo.append( (func, cacheid, kwdict))
+			continue
+		print(u'-> Latest cache is %s' % func.__name__)
+		dm = _cache.readcache(cachepath)
+		break
+	for func, cacheid, kwdict in todo[::-1]:
+		if dm is None:
+			print(u'-> Running (entry point) %s' % func.__name__)
+			dm = func(cacheid=cacheid, **kwdict)
+		else:
+			print(u'-> Running %s' % func.__name__)
+			dm = func(dm, cacheid=cacheid, **kwdict)
+	print('Waterfall finished (%.2f s)' % (time.time() - t0))
+	return dm
+
+
+# Private functions
+
+
+def _callfunc(dm, modules, func, cache_prefix='auto_cache.', redo=False):
 
 	"""
 	desc:
@@ -72,75 +166,4 @@ def callfunc(dm, modules, func, cache_prefix='auto_cache.', redo=False):
 			break # Break in case the same function occurs in multiple modules
 	if not found:
 		warnings.warn('Helper function %s does not exist' % func)
-	return dm
-
-def dispatch(dm, modules=[], full=[], cache_prefix='auto_cache.'):
-
-	"""
-	desc:
-		Executes an analysis loop, in which all functions that specified on the
-		command are executed. A function is executed if its name is prefixed by
-		`@` and if it is present in one of the helpers modules. Cachable
-		functions are cached automatically. If a function returns a DataMatrix,
-		this is used to replace the current DataMatrix for the following functions.
-
-	arguments:
-		dm:		The DataMatrix to analyze.
-
-	keywords:
-		modules:	A module or list of modules that contain the analysis
-					functions.
-		full:		A list of functions or function names that make up the full
-					analysis pathway.
-		cache_prefix:
-					A prefix for the cacheid for cachable functions. The
-					function name will be appended.
-	"""
-
-	if not isinstance(modules, list):
-		modules = [modules]
-	if not modules:
-		raise Exception('No modules specified')
-	print('Dispatching ...')
-	t0 = time.time()
-	if '@full' in sys.argv:
-		print('Running full analysis pathway')
-		if not full:
-			raise Exception('No full analysis pathway specified')
-		for func in full:
-			dm = callfunc(dm, modules, func, cache_prefix=cache_prefix)
-	else:
-		for func in sys.argv:
-			if not func[0] == '@':
-				continue
-			if ':redo' in func:
-				func = func.replace(':redo', '')
-				redo = True
-			else:
-				redo = False
-			dm = callfunc(dm, modules, func, cache_prefix=cache_prefix, redo=redo)
-	print('Dispatch finished (%.2f s)' % (time.time() - t0))
-
-def waterfall(*pipeline):
-
-	print('Starting waterfall ...')
-	t0 = time.time()
-	todo = []
-	dm = None
-	for i, (func, cacheid, kwdict) in enumerate(pipeline[::-1]):
-		hascachefile, cachepath = _cache.cachefile(cacheid)
-		if not hascachefile:
-			todo.append( (func, cacheid, kwdict))
-			continue
-		print(u'-> Latest cache is %s' % func.__name__)
-		dm = _cache.readcache(cachepath)
-		break
-	for func, cacheid, kwdict in todo[::-1]:
-		if dm is None:
-			print(u'-> Running (entry point) %s' % func.__name__)
-			dm = func(cacheid=cacheid, **kwdict)
-		else:
-			print(u'-> Running %s' % func.__name__)
-			dm = func(dm, cacheid=cacheid, **kwdict)
-	print('Waterfall finished (%.2f s)' % (time.time() - t0))
 	return dm
