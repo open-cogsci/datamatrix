@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with zoteromarkdown.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from dataframe import __version__
+from datamatrix import __version__
 from setuptools import setup, find_packages
 
 setup(
