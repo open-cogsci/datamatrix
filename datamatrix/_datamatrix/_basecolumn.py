@@ -57,7 +57,7 @@ class BaseColumn(object):
 			An interator for all unique values that occur in the column.
 		"""
 
-		return list(set(self._seq))
+		return list(sorted(set(self._seq)))
 
 	@property
 	def mean(self):
