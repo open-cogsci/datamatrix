@@ -37,6 +37,8 @@ def init_cache():
 	"""
 
 	global cache_initialized
+	if cache_initialized:
+		return
 	cache_initialized = True
 	print(u'Initializing cache ...')
 	if '--clear-cache' in sys.argv and os.path.exists(cachefolder):
@@ -59,8 +61,6 @@ def cached(func):
 
 		iscached = True
 		if 'cacheid' in kwargs:
-			if not cache_initialized:
-				init_cache()
 			hascachefile, cachepath = cachefile(kwargs['cacheid'])
 			del kwargs['cacheid']
 		else:
@@ -77,6 +77,7 @@ def cached(func):
 			a = readcache(cachepath)
 		return a
 
+	init_cache()
 	inner.__name__ = func.__name__
 	return inner
 
@@ -91,6 +92,7 @@ def iscached(func):
 		type:	false
 	"""
 
+	init_cache()
 	if py3:
 		return 'iscached' in func.__code__.co_varnames
 	return 'iscached' in func.func_code.co_varnames
@@ -109,6 +111,7 @@ def cachefile(cacheid):
 		indicates if the second exists.
 	"""
 
+	init_cache()
 	path = os.path.join(cachefolder, cacheid) + '.pkl'
 	if os.path.exists(path):
 		return True, path
@@ -127,6 +130,7 @@ def readcache(cachepath):
 		An object that was cached.
 	"""
 
+	init_cache()
 	with open(cachepath, u'rb') as fd:
 		return pickle.load(fd)
 
@@ -141,5 +145,6 @@ def writecache(a, cachepath):
 		cachepath:	The full path to the cachefile.
 	"""
 
+	init_cache()
 	with open(cachepath, u'wb') as fd:
 		pickle.dump(a, fd, protocol)
