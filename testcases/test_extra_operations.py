@@ -68,7 +68,6 @@ def test_group():
 	dm.b = 'x', 'x', 'x', 'y'
 	dm.c = 0, 1, 2, 3
 	dm = ops.group(dm, [dm.a, dm.b])
-	print(dm)
 	check_series(dm.c, [[2, np.nan], [3, np.nan], [0, 1]])
 
 
