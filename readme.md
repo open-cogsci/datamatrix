@@ -17,7 +17,15 @@ The main advantage of `datamatrix` over similar libraries is the clean, Pythonic
 
 ## Dependencies
 
-Most of `datamatrix` requires only the Python standard library. However, to use the `FloatColumn`, `IntColumn`, and `SeriesColumn` objects, you need `numpy` and `scipy`.
+Required:
+
+- Python 2.7 or 3.4
+
+Optional:
+
+- `numpy` and `scipy` for using the `FloatColumn`, `IntColumn`, and `SeriesColumn` objects
+- `prettytable` for creating a text representation of a DataMatrix (e.g. to print it out)
+- `openpyxl` for reading and writing `.xlsx` files
 
 ## Usage
 
