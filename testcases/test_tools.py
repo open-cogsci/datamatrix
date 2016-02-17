@@ -21,9 +21,17 @@ from nose.tools import eq_, ok_
 import numpy as np
 
 
+def check_dm(dm, ref):
+
+	ok_(dm.column_names == ref.column_names)
+	for colname in dm.column_names:
+		check_col(dm[colname], ref[colname])
+
+
 def check_col(col, ref):
 
 	check_integrity(col._datamatrix)
+	ok_(len(col) == len(ref))
 	for x, y in zip(col, ref):
 		if x != y:
 			if not (x is None or y is None) and np.isnan(x) and np.isnan(y):

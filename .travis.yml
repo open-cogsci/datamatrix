@@ -9,4 +9,5 @@ addons:
     packages:
     - python-numpy
     - python-scipy
+    - python-openpyxl
 script: nosetests testcases/*.py
