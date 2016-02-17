@@ -4,10 +4,11 @@ python:
 sudo: false
 virtualenv:
   system_site_packages: true
+before_install:
+  - pip install openpyxl
 addons:
   apt:
     packages:
     - python-numpy
     - python-scipy
-    - python-openpyxl
 script: nosetests testcases/*.py

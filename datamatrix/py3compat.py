@@ -54,6 +54,9 @@ def safe_decode(s, enc='utf-8', errors='strict'):
 def safe_encode(s, enc='utf-8', errors='strict'):
 	if isinstance(s, bytes):
 		return s
+	# Numeric values are encoded right away
+	if isinstance(s, int) or isinstance(s, float):
+		return bytes(s)
 	return s.encode(enc, errors)
 
 if py3:

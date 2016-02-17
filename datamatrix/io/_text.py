@@ -78,6 +78,6 @@ def writetxt(dm, path, delimiter=',', quotechar='"'):
 		raise TypeError('Can only write 2D DataMatrix objects to csv')
 	with open(path, 'w') as csvfile:
 		writer = csv.writer(csvfile, delimiter=delimiter, quotechar=quotechar)
-		writer.writerow(dm.column_names)
+		writer.writerow([safe_str(colname) for colname in dm.column_names])
 		for row in dm:
-			writer.writerow(row)
+			writer.writerow([safe_str(value) for colname, value in row])
