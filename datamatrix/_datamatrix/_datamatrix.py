@@ -380,6 +380,26 @@ class DataMatrix(object):
 
 		return Row(self, key)
 
+	def _check_name(self, name):
+
+		"""
+		visible: False
+
+		desc:
+			Checks whether a name is a valid column name.
+
+		raises:
+			ValueError:	If name is not valid.
+
+		arguments:
+			name:		The name to check.
+		"""
+
+		try:
+			exec('%s = None' % name)
+		except SyntaxError:
+			raise ValueError(u'Invalid column name: %s' % name)
+
 	# Implemented syntax
 
 	def __contains__(self, item):
@@ -421,6 +441,7 @@ class DataMatrix(object):
 
 	def __setattr__(self, name, value):
 
+		self._check_name(name)
 		if name == u'length':
 			self._setlength(value)
 			return
@@ -483,7 +504,6 @@ class DataMatrix(object):
 			raise AttributeError()
 		if name in self._cols:
 			return self._cols[name]
-		# return object.__getattr__(self, name)
 		raise AttributeError()
 
 	def __getitem__(self, key):
