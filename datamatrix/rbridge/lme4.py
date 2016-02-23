@@ -18,6 +18,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import os
+import time
 import subprocess
 from datamatrix import io, series, SeriesColumn, DataMatrix, cached
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
@@ -31,6 +32,7 @@ def lmer(dm, formula):
 library(lmerTest)
 result <- lmer(%s)
 write.csv(summary(result)$coef, ".r-out.csv")
+
 ''' % formula
 	rm = _launchr(dm, cmd)
 	rm.rename(u'', u'effect')
