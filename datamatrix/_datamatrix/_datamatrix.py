@@ -441,7 +441,7 @@ class DataMatrix(object):
 
 	def __setattr__(self, name, value):
 
-		self._check_name(name)
+		# self._check_name(name)
 		if name == u'length':
 			self._setlength(value)
 			return
