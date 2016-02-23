@@ -35,8 +35,13 @@ def safe_decode(s, enc='utf-8', errors='strict'):
 	if isinstance(s, bytes):
 		return s.decode(enc, errors)
 	# Numeric values are encoded right away
-	if isinstance(s, int) or isinstance(s, float):
-		return str(s)
+	try:
+		return str(int(s))
+	except:
+		try:
+			return str(float(s))
+		except:
+			pass
 	# Some types need to be converted to unicode, but require the encoding
 	# and errors parameters. Notable examples are Exceptions, which have
 	# strange characters under some locales, such as French. It even appears
@@ -55,8 +60,13 @@ def safe_encode(s, enc='utf-8', errors='strict'):
 	if isinstance(s, bytes):
 		return s
 	# Numeric values are encoded right away
-	if isinstance(s, int) or isinstance(s, float):
-		return bytes(s)
+	try:
+		return str(int(s)).encode()
+	except:
+		try:
+			return str(float(s)).encode()
+		except:
+			pass
 	return s.encode(enc, errors)
 
 if py3:
