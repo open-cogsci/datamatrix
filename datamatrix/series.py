@@ -26,6 +26,19 @@ from scipy.stats import nanmean, nanmedian, nanstd
 from scipy.interpolate import interp1d
 import warnings
 
+
+def endlock(series):
+
+	endlock_series = _SeriesColumn(series._datamatrix, series.depth)
+	endlock_series[:] = np.nan
+	for i in range(len(series)):
+		for j in range(series.depth-1, -1, -1):
+			if not np.isnan(series[i,j]):
+				break
+		endlock_series[i,-j-1:] = series[i,:j+1]
+	return endlock_series
+
+
 def reduce_(series, operation=nanmean):
 
 	"""
