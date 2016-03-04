@@ -11,4 +11,5 @@ addons:
     packages:
     - python-numpy
     - python-scipy
+    - python-pandas
 script: nosetests testcases/*.py
