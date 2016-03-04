@@ -31,8 +31,9 @@ def lmer(dm, formula):
 	cmd = u'''
 library(lmerTest)
 result <- lmer(%s)
-write.csv(summary(result)$coef, ".r-out.csv")
-
+s = summary(result)
+s;
+write.csv(s$coef, ".r-out.csv")
 ''' % formula
 	rm = _launchr(dm, cmd)
 	rm.rename(u'', u'effect')
@@ -79,13 +80,14 @@ def _launchr(dm, cmd):
 	dm = dm[:]
 	# SeriesColumns cannot be saved to a csv file, so we delete those first.
 	for name, col in dm.columns:
+		del dm[name]
 		if isinstance(col, _SeriesColumn):
-			del dm[name]
 	# Write the data to an input file
 	io.writetxt(dm, u'.r-in.csv')
 	# Launch R, read the data, and communicate the commands
-	proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE,
-		stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE)
+	# proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE,
+	# 	stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	cmd = u'data <- read.csv(".r-in.csv")\nattach(data)\n%s' % cmd
 	proc.communicate(safe_encode(cmd, u'ascii'))
 	# Wait until the output file has been generated and return it

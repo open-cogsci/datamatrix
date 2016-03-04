@@ -162,6 +162,15 @@ class BaseColumn(object):
 			return None
 		return sum(n)
 
+	@property
+	def name(self):
+
+		for colname, col in self._datamatrix.columns:
+			if col is self:
+				return colname
+		raise NameError(
+			u'Column not found in DataMatrix, and therefore nameless')
+
 	# Private functions
 
 	@property
@@ -577,8 +586,12 @@ class BaseColumn(object):
 	def __le__(self, other):
 		return self._compare(other, operator.le)
 	def __eq__(self, other):
+		if isinstance(other, BaseColumn):
+			return self is other
 		return self._compare(other, operator.eq)
 	def __ne__(self, other):
+		if isinstance(other, BaseColumn):
+			return self is not other
 		return self._compare(other, operator.ne)
 	def __add__(self, other):
 		return self._operate(other, operator.add, operator.concat)

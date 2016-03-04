@@ -17,11 +17,21 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from datamatrix.py3compat import *
 from datamatrix import DataMatrix, FloatColumn, IntColumn, SeriesColumn, \
 	MixedColumn
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
+from datamatrix._datamatrix._basecolumn import BaseColumn
 import random
 import warnings
+
+try:
+	from datamatrix import convert
+	import pandas as pd
+except ImportError as e:
+	pass
+else:
+	pivot_table = convert.wrap_pandas(pd.pivot_table)
 
 
 def weight(col):
@@ -90,6 +100,43 @@ def split(col):
 		yield val, col == val
 
 
+def tuple_split(col, *values):
+
+	"""
+	desc:
+		Splits a DataMatrix by values in a column, and returns the split as a
+		tuple of DataMatrix objects.
+
+	arguments:
+		col:
+			desc:	The column to split by.
+			type:	BaseColumn
+
+	argument-list:
+		values: A list values to split.
+
+	returns:
+		A tuple of DataMatrix objects.
+
+	example: |
+		dm1, dm2 = tuple_split(dm.col, 1, 2)
+	"""
+
+	n_total = len(col)
+	n_select = 0
+	l = []
+	for val in values:
+		dm = col == val
+		n = len(dm)
+		if not n:
+			warnings.warn('No matching rows for %s' % val)
+		n_select += n
+		l.append(dm)
+	if n_select != n_total:
+		warnings.warn('Some rows have not been selected')
+	return tuple(l)
+
+
 def fullfactorial(dm, ignore=u''):
 
 	"""
@@ -127,6 +174,9 @@ def fullfactorial(dm, ignore=u''):
 	"""
 
 
+	for colname, col in dm.columns:
+		if not isinstance(col, MixedColumn):
+			raise ValueError(u'fullfactorial only works with MixedColumns')
 	design = [len(col != ignore) for name, col in dm.columns]
 	a = _fullfact(design)
 	fdm = DataMatrix(a.shape[0])
@@ -186,12 +236,12 @@ def group(dm, by=None):
 	bycol = MixedColumn(datamatrix=dm)
 	if by is not None:
 		for col in by:
+			if col._datamatrix is not dm:
+				raise ValueError(u'By-columns are from a different DataMatrix')
 			bycol += col
 	keys = bycol.unique
-
 	groupcols = [(name, col) for name, col in dm.columns if col not in by]
 	nogroupcols = [(name, col) for name, col in dm.columns if col in by]
-
 	cm = DataMatrix(length=len(keys))
 	for name, col in groupcols:
 		if isinstance(col, _SeriesColumn):
@@ -294,13 +344,22 @@ def keep_only(dm, cols=[]):
 
 	keywords:
 		cols:
-			desc:	A list of column names.
+			desc:	A list of column names, or columns.
 			type:	list
 	"""
 
-	for col in dm.column_names:
-		if col not in cols:
-			del dm[col]
+	colnames = []
+	for col in cols:
+		if isinstance(col, basestring):
+			colnames.append(col)
+			continue
+		if isinstance(col, BaseColumn):
+			colnames.append(col.name)
+			continue
+		raise ValueError(u'Expecting column names or BaseColumn objects')
+	for colname in dm.column_names:
+		if colname not in colnames:
+			del dm[colname]
 
 
 def auto_type(dm):

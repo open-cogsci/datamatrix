@@ -51,6 +51,18 @@ def test_split():
 	check_col(dm.b, [2, 3])
 
 
+def test_tuple_split():
+
+	dm = DataMatrix(length=4)
+	dm.a = 'a', 'a', 'b', 'b'
+	dm.b = 0, 1, 2, 3
+	dma, dmb = ops.tuple_split(dm.a, 'a', 'b')
+	check_col(dma.a, ['a', 'a'])
+	check_col(dma.b, [0, 1])
+	check_col(dmb.a, ['b', 'b'])
+	check_col(dmb.b, [2, 3])
+
+
 def test_fullfactorial():
 
 	dm = DataMatrix(length=3)
@@ -66,6 +78,7 @@ def test_group():
 	dm = DataMatrix(length=4)
 	dm.a = 'b', 'b', 'a', 'a'
 	dm.b = 'x', 'x', 'x', 'y'
+	dm.c = IntColumn
 	dm.c = 0, 1, 2, 3
 	dm = ops.group(dm, [dm.a, dm.b])
 	check_series(dm.c, [[2, np.nan], [3, np.nan], [0, 1]])

@@ -35,9 +35,8 @@ class _SeriesColumn(NumericColumn):
 	"""
 
 	dtype = float
-	defaultnan = False
 
-	def __init__(self, datamatrix, depth):
+	def __init__(self, datamatrix, depth, defaultnan=False):
 
 		"""
 		desc:
@@ -56,6 +55,7 @@ class _SeriesColumn(NumericColumn):
 		if np is None:
 			raise Exception(u'NumPy and SciPy are required, but not installed.')
 		self._depth = depth
+		self.defaultnan = defaultnan
 		NumericColumn.__init__(self, datamatrix)
 
 	def setallrows(self, value):
@@ -259,6 +259,6 @@ class _SeriesColumn(NumericColumn):
 			return
 		return super(_SeriesColumn, self).__setitem__(key, value)
 
-def SeriesColumn(depth):
+def SeriesColumn(depth, defaultnan=False):
 
-	return _SeriesColumn, {'depth' : depth}
+	return _SeriesColumn, {'depth' : depth, u'defaultnan' : defaultnan}

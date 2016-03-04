@@ -538,7 +538,7 @@ class DataMatrix(object):
 		dm = DataMatrix(len(self)+len(other))
 		for name, col in self._cols.items():
 			if hasattr(col, 'depth'):
-				dm[name] = col.__class__(dm, col.depth)
+				dm[name] = col.__class__(dm, col.depth, col.defaultnan)
 			else:
 				dm[name] = col.__class__
 			dm[name][:len(self)] = self[name]
@@ -546,7 +546,7 @@ class DataMatrix(object):
 		for name, col in other._cols.items():
 			if name not in dm._cols:
 				if hasattr(col, 'depth'):
-					dm[name] = col.__class__(dm, col.depth)
+					dm[name] = col.__class__(dm, col.depth, col.defaultnan)
 				else:
 					dm[name] = col.__class__
 			elif hasattr(col, 'depth'):
