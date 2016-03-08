@@ -106,7 +106,7 @@ def window(series, start=0, end=None):
 	return window_series
 
 
-def baseline(series, baseline, bl_start=-100, bl_end=None):
+def baseline(series, baseline, bl_start=-100, bl_end=None, reduce_fnc=None):
 
 	"""
 	desc:
@@ -128,14 +128,20 @@ def baseline(series, baseline, bl_start=-100, bl_end=None):
 			desc:	The end of the window from `baseline` to use, or None to go
 					to the end.
 			type:	[int, None]
+		reduce_fnc:
+			desc:	The function to reduce the baseline epoch to a single value.
+					If None, np.nanmedian() is used.
+			type:	[FunctionType, None]
 
 	returns:
 		desc:	A baseline-correct version of the signal.
 		type:	SeriesColumn
 	"""
 
+	if reduce_fnc is None:
+		reduce_fnc = nanmedian
 	baseline = reduce_(window(baseline, start=bl_start, end=bl_end),
-		operation=nanmedian)
+		operation=reduce_fnc)
 	return series / baseline
 
 
