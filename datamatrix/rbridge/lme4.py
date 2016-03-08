@@ -48,6 +48,28 @@ write.csv(s$coef, ".r-out.csv")
 
 
 @cached
+def glmer(dm, formula, family):
+
+	cmd = u'''
+library(lme4)
+result <- glmer(%s, family="%s")
+s = summary(result)
+s;
+write.csv(s$coef, ".r-out.csv")
+''' % (formula, family)
+	rm = _launchr(dm, cmd)
+	rm.rename(u'', u'effect')
+	rm.rename(u'Estimate', u'est')
+	rm.rename(u'Std. Error', u'se')
+	rm.rename(u'z value', u'z')
+	if u'Pr(>|z|)' in rm:
+		rm.rename(u'Pr(>|z|)', u'p')
+	else:
+		rm.p = -1
+	return rm
+
+
+@cached
 def lmer_series(dm, formula, winlen=1):
 
 	col = formula.split()[0]
@@ -80,14 +102,14 @@ def _launchr(dm, cmd):
 	dm = dm[:]
 	# SeriesColumns cannot be saved to a csv file, so we delete those first.
 	for name, col in dm.columns:
-		del dm[name]
 		if isinstance(col, _SeriesColumn):
+			del dm[name]
 	# Write the data to an input file
 	io.writetxt(dm, u'.r-in.csv')
 	# Launch R, read the data, and communicate the commands
-	proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE)
-	# proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE,
-	# 	stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	# proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE)
+	proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE,
+		stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	cmd = u'data <- read.csv(".r-in.csv")\nattach(data)\n%s' % cmd
 	proc.communicate(safe_encode(cmd, u'ascii'))
 	# Wait until the output file has been generated and return it
