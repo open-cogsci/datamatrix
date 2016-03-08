@@ -95,7 +95,7 @@ def trace(series, x=None, color=blue[1], label=None):
 	plt.plot(x, y, color=color, label=label)
 
 
-def threshold(a, y=1, **kwdict):
+def threshold(a, y=1, min_length=1, **kwdict):
 
 	inhit = False
 	for x, hit in enumerate(a):
@@ -103,8 +103,12 @@ def threshold(a, y=1, **kwdict):
 			onset = x
 			inhit = True
 		if inhit and not hit:
-			plt.plot([onset, x], [y,y], **kwdict)
+			if x-onset >= min_length:
+				plt.plot([onset, x], [y,y], **kwdict)
 			inhit = False
+	if inhit:
+		if x-onset >= min_length:
+			plt.plot([onset, x], [y,y], **kwdict)
 
 
 def regress(x, y, annotate=True, symbol='.', linestyle='--',
