@@ -36,6 +36,7 @@ def safe_decode(s, enc='utf-8', errors='strict'):
 		return s.decode(enc, errors)
 	# Numeric values are encoded right away
 	try:
+		assert(int(s) == float(s))
 		return str(int(s))
 	except:
 		try:
@@ -61,6 +62,7 @@ def safe_encode(s, enc='utf-8', errors='strict'):
 		return s
 	# Numeric values are encoded right away
 	try:
+		assert(int(s) == float(s))
 		return str(int(s)).encode()
 	except:
 		try:
