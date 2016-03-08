@@ -20,6 +20,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn
 import warnings
+import os
 
 
 def readxlsx(path, default_col_type=MixedColumn):
@@ -70,6 +71,10 @@ def writexlsx(dm, path):
 
 	from openpyxl import Workbook
 
+	try:
+		os.makedirs(os.path.dirname(path))
+	except:
+		pass
 	wb = Workbook()
 	ws = wb.active
 	for colnr, colname in enumerate(dm.column_names):

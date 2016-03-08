@@ -19,9 +19,11 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn
+import os
 import csv
 import collections
 import warnings
+
 
 def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
 
@@ -76,6 +78,10 @@ def writetxt(dm, path, delimiter=',', quotechar='"'):
 
 	if not dm.is_2d:
 		raise TypeError('Can only write 2D DataMatrix objects to csv')
+	try:
+		os.makedirs(os.path.dirname(path))
+	except:
+		pass
 	with open(path, 'w') as csvfile:
 		writer = csv.writer(csvfile, delimiter=delimiter, quotechar=quotechar)
 		writer.writerow([safe_str(colname) for colname in dm.column_names])

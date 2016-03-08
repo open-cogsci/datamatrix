@@ -19,6 +19,8 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 import pickle
+import os
+
 
 def readpickle(path):
 
@@ -51,5 +53,9 @@ def writepickle(dm, path, protocol=-1):
 		protocol:	The pickle protocol.
 	"""
 
+	try:
+		os.makedirs(os.path.dirname(path))
+	except:
+		pass
 	with open(path, 'wb') as picklefile:
 		pickle.dump(dm, picklefile, protocol)
