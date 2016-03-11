@@ -86,6 +86,8 @@ def from_pandas(df):
 	for colname in df.columns:
 		if isinstance(colname, tuple):
 			_colname = u'_'.join([str(i) for i in colname])
+		else:
+			_colname = colname
 		try:
 			exec('%s = None' % _colname)
 		except SyntaxError:
