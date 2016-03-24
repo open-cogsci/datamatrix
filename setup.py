@@ -28,6 +28,14 @@ setup(
 	author=u'Sebastiaan Mathôt',
 	author_email=u's.mathot@cogsci.nl',
 	license=u'GNU GPL Version 3',
+	packages=find_packages('.', exclude=[u'testcases']),
 	url=u'https://github.com/smathot/python-datamatrix',
-	packages=find_packages(u'.', exclude=[u'testcases']),	
+	classifiers=[
+		'Development Status :: 4 - Beta',
+		'Intended Audience :: Science/Research',
+		'Topic :: Scientific/Engineering',
+		 'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+		'Programming Language :: Python :: 2',
+		'Programming Language :: Python :: 3',
+	],
 )

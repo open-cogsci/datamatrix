@@ -137,6 +137,40 @@ def tuple_split(col, *values):
 	return tuple(l)
 
 
+def bin_split(col, bins):
+
+	"""
+	desc:
+		Splits a DataMatrix into bins; that is, the DataMatrix is first sorted
+		by a column, and then split into equal-size (or roughly equal-size)
+		bins.
+
+	arguments:
+		col:
+			desc:	The column to split by.
+			type:	BaseColumn
+		bins:
+			desc:	The number of bins.
+			type:	int
+
+	returns:
+		desc:	A generator that iterators over the splits.
+
+	example: |
+		# Get the mean response time for 10 bins
+		for dm_ in op.split(dm.response_time, bins=10):
+			print(dm_.response_time.mean)
+	"""
+
+	if len(col) < bins:
+		raise ValueError('More bins than rows')
+	dm = sort(col._datamatrix, by=col)
+	for i in range(bins):
+		start = int(len(dm)/bins*i)
+		end = int(len(dm)/bins*(i+1))
+		yield dm[start:end]
+
+
 def fullfactorial(dm, ignore=u''):
 
 	"""

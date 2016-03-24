@@ -62,7 +62,7 @@ def new(size=r):
 	return fig
 
 
-def trace(series, x=None, color=blue[1], label=None):
+def trace(series, x=None, color=blue[1], err=True, **kwdict):
 
 	"""
 	desc:
@@ -91,8 +91,9 @@ def trace(series, x=None, color=blue[1], label=None):
 	ymax = y + series.std/np.sqrt(len(series))
 	if x is None:
 		x = np.arange(len(y))
-	plt.fill_between(x, ymin, ymax, color=color, alpha=.2)
-	plt.plot(x, y, color=color, label=label)
+	if err:
+		plt.fill_between(x, ymin, ymax, color=color, alpha=.2)
+	plt.plot(x, y, color=color, **kwdict)
 
 
 def threshold(a, y=1, min_length=1, **kwdict):

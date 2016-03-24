@@ -21,7 +21,7 @@ from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, IntColumn, FloatColumn
 from datamatrix import operations as ops
 from testcases.test_tools import check_col, check_series, check_integrity
-from nose.tools import eq_, ok_
+from nose.tools import eq_, ok_, raises
 import numpy as np
 
 
@@ -62,6 +62,26 @@ def test_tuple_split():
 	check_col(dmb.a, ['b', 'b'])
 	check_col(dmb.b, [2, 3])
 
+
+def test_bin_split():
+
+	dm = DataMatrix(length=4)
+	dm.a = range(4)
+	dm = ops.shuffle(dm)
+	print(dm)
+	dm1, dm2 = ops.bin_split(dm.a, 2)
+	check_col(dm1.a, [0,1])
+	check_col(dm2.a, [2,3])
+	dm1, dm2, dm3 = ops.bin_split(dm.a, 3)
+	check_col(dm1.a, [0])
+	check_col(dm2.a, [1])
+	check_col(dm3.a, [2,3])
+	dm1, = ops.bin_split(dm.a, 1)
+	check_col(dm1.a, [0,1,2,3])
+	@raises(ValueError)
+	def _():
+		x, = ops.bin_split(dm.a, 5)
+	_()
 
 def test_fullfactorial():
 

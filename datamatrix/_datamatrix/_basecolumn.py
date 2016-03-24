@@ -59,6 +59,20 @@ class BaseColumn(object):
 
 		return list(sorted(set(self._seq)))
 
+
+	@property
+	def count(self):
+
+		"""
+		name:	count
+
+		desc:
+			The number of unique values that occur in the column.
+		"""
+
+		return len(self.unique)
+
+
 	@property
 	def mean(self):
 

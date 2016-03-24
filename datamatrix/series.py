@@ -299,7 +299,8 @@ def _apply_fnc(series, fnc, **kwdict):
 		new_series[i] = fnc(cell, **kwdict)
 	return new_series
 
-def _blinkreconstruct(a, vt=5, maxdur=500, margin=10):
+def _blinkreconstruct(a, vt=5, maxdur=500, margin=10, smooth_winlen=21,
+	std_thr=3):
 
 	"""
 	visible: False
@@ -312,7 +313,7 @@ def _blinkreconstruct(a, vt=5, maxdur=500, margin=10):
 	# velocity profile.
 	a = np.copy(a)
 	try:
-		strace = _smooth(a, winlen=21)
+		strace = _smooth(a, winlen=smooth_winlen)
 	except Exception as e:
 		warnings.warn(str(e))
 		strace = a
@@ -352,6 +353,7 @@ def _blinkreconstruct(a, vt=5, maxdur=500, margin=10):
 		# We don't accept blinks that are too long, because blinks are not
 		# generally very long (although they can be).
 		if iend-istart > maxdur:
+			ifrom = istart+maxdur//10
 			continue
 		lblink.append( (istart, iend) )
 	# Now reconstruct the trace during the blinks
@@ -376,6 +378,15 @@ def _blinkreconstruct(a, vt=5, maxdur=500, margin=10):
 		xInt = np.arange(istart, iend)
 		yInt = f2(xInt)
 		a[xInt] = yInt
+
+	# For all remaining gaps, replace them with the previous sample if available
+	b = np.where( (a < (a.mean()-std_thr*a.std())) \
+		| (a.mean() > (a+std_thr*a.std())) \
+		| np.isnan(a) )[0]
+	for i in b:
+		if i == 0:
+			continue
+		a[i] = a[i-1]
 	return a
 
 
