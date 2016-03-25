@@ -167,7 +167,7 @@ def bin_split(col, bins):
 	dm = sort(col._datamatrix, by=col)
 	for i in range(bins):
 		start = int(len(dm)/bins*i)
-		end = int(len(dm)/bins*(i+1))
+		end = int(1.*len(dm)/bins*(i+1))
 		yield dm[start:end]
 
 

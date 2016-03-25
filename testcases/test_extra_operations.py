@@ -68,7 +68,6 @@ def test_bin_split():
 	dm = DataMatrix(length=4)
 	dm.a = range(4)
 	dm = ops.shuffle(dm)
-	print(dm)
 	dm1, dm2 = ops.bin_split(dm.a, 2)
 	check_col(dm1.a, [0,1])
 	check_col(dm2.a, [2,3])
@@ -82,6 +81,7 @@ def test_bin_split():
 	def _():
 		x, = ops.bin_split(dm.a, 5)
 	_()
+
 
 def test_fullfactorial():
 
