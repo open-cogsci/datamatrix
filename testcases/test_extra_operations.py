@@ -20,7 +20,8 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, IntColumn, FloatColumn
 from datamatrix import operations as ops
-from testcases.test_tools import check_col, check_series, check_integrity
+from testcases.test_tools import check_col, check_row, check_series, \
+	check_integrity
 from nose.tools import eq_, ok_, raises
 import numpy as np
 
@@ -141,6 +142,31 @@ def test_shuffle():
 			break
 		except:
 			pass
+
+
+def test_shuffle_horiz():
+
+	dm = DataMatrix(length=2)
+	dm.a = 'a', 'b'
+	dm.b = 0, 1
+	dm.c = '-', '-'
+	while True:
+		dm2 = ops.shuffle_horiz(dm)
+		try:
+			check_row(dm2[0], [0, '-', 'a'])
+			break
+		except:
+			pass
+	while True:
+		dm2 = ops.shuffle_horiz(dm.a, dm.b)
+		try:
+			check_row(dm2[0], [0, 'a', '-'])
+			break
+		except:
+			pass
+	for i in range(1000):
+		dm2 = ops.shuffle_horiz(dm.a, dm.b)
+		check_col(dm.c, ['-', '-'])
 
 
 def test_keep_only():

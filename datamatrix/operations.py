@@ -364,6 +364,57 @@ def shuffle(obj):
 	return col
 
 
+def shuffle_horiz(*obj):
+
+	"""
+	desc:
+		Shuffles a DataMatrix, or several columns from a DataMatrix,
+		horizontally. That is, the values are shuffled between columns from the
+		same row.
+
+	argument-list:
+	 	desc:	A list of BaseColumns, or a single DataMatrix.
+
+	returns:
+		desc:	The shuffled DataMatrix.
+		type:	DataMatrix
+
+	example: |
+		dm = DataMatrix(length=2)
+		dm.col1 = 'a', 'b'
+		dm.col2 = 1, 2
+		dm.col3 = '-'
+		# Shuffle all columns
+		dm_shuffle = operations.shuffle_horiz(dm)
+		print(dm_shuffle)
+		# Shuffle only col1 and col2
+		dm_shuffle = operations.shuffle_horiz(dm.col1, dm.col2)
+		print(dm_shuffle)
+	"""
+
+	if len(obj) == 1 and isinstance(obj[0], DataMatrix):
+		obj = [column for colname, column in obj[0].columns]
+	try:
+		assert(len(obj) > 1)
+		for column in obj:
+			assert(isinstance(column, BaseColumn))
+		dm = obj[0]._datamatrix
+		for column in obj:
+			assert(dm == column._datamatrix)
+	except AssertionError:
+		raise ValueError(
+			u'Expecting a DataMatrix or multiple BaseColumns from the same DataMatrix')
+	dm = dm[:]
+	dm_shuffle = dm[:]
+	keep_only(dm_shuffle, obj)
+	for row in dm_shuffle:
+		random.shuffle(row)
+	for colname, column in dm_shuffle.columns:
+		dm._cols[colname] = column
+	dm._mutate()
+	return dm
+
+
 def keep_only(dm, cols=[]):
 
 	"""

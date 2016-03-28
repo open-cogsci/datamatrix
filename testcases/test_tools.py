@@ -40,6 +40,18 @@ def check_col(col, ref):
 			ok_(False)
 
 
+def check_row(row, ref):
+
+	check_integrity(row._datamatrix)
+	ok_(len(row) == len(ref))
+	for (colname, x), y in zip(row, ref):
+		if x != y:
+			if not (x is None or y is None) and np.isnan(x) and np.isnan(y):
+				continue
+			print(u'Row error: %s != %s' % (row, ref))
+			ok_(False)
+
+
 def check_series(col, ref):
 
 	check_integrity(col._datamatrix)
