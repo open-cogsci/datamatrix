@@ -26,7 +26,16 @@ from nose.tools import eq_, ok_, raises
 import numpy as np
 
 
-def weight():
+def test_z():
+
+	dm = DataMatrix(length=5)
+	dm.a = range(-2,3)
+	dm.z = ops.z(dm.a)
+	for x, y in zip(dm.z, [-1.26, -0.63, 0, .63, 1.26]):
+		assert(abs(x-y) < .1)
+
+
+def test_weight():
 
 	dm = DataMatrix(length=3)
 	dm.a = 'a', 'b', 'c'

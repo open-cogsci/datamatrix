@@ -34,6 +34,23 @@ else:
 	pivot_table = convert.wrap_pandas(pd.pivot_table)
 
 
+def z(col):
+
+	"""
+	desc:
+		Transforms a column into z scores.
+
+	arguments:
+		col:
+			desc:	The column to transform.
+			type:	BaseColumn
+
+	returns:
+		type:	BaseColumn
+	"""
+
+	return (col-col.mean)/col.std
+
 def weight(col):
 
 	"""
