@@ -22,7 +22,6 @@ from datamatrix import DataMatrix, MixedColumn
 import os
 import csv
 import collections
-import warnings
 
 
 def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
@@ -55,7 +54,7 @@ def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
 				all_columns.remove(column)
 				d[column].append(val)
 			for column in all_columns:
-				warnings.warn(u'Some rows miss column %s' % column)
+				warn(u'Some rows miss column %s' % column)
 				d[column].append(u'')
 	dm = DataMatrix(default_col_type=default_col_type)._fromdict(d)
 	return dm

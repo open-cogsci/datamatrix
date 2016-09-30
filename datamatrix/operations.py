@@ -23,7 +23,6 @@ from datamatrix import DataMatrix, FloatColumn, IntColumn, SeriesColumn, \
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix._datamatrix._basecolumn import BaseColumn
 import random
-import warnings
 
 try:
 	from datamatrix import convert
@@ -146,11 +145,11 @@ def tuple_split(col, *values):
 		dm = col == val
 		n = len(dm)
 		if not n:
-			warnings.warn('No matching rows for %s' % val)
+			warn(u'No matching rows for %s' % val)
 		n_select += n
 		l.append(dm)
 	if n_select != n_total:
-		warnings.warn('Some rows have not been selected')
+		warn(u'Some rows have not been selected')
 	return tuple(l)
 
 
@@ -296,8 +295,7 @@ def group(dm, by=None):
 	cm = DataMatrix(length=len(keys))
 	for name, col in groupcols:
 		if isinstance(col, _SeriesColumn):
-			warnings.warn(
-				u'Failed to create series for SeriesColumn s%s' % name)
+			warn(u'Failed to create series for SeriesColumn s%s' % name)
 			continue
 		cm[name] = SeriesColumn(depth=0)
 	for name, col in nogroupcols:
@@ -315,8 +313,7 @@ def group(dm, by=None):
 			try:
 				cm[name][i,:len(dm_[name])] = dm_[name]
 			except ValueError:
-				warnings.warn(
-					u'Failed to create series for MixedColumn %s' % name)
+				warn(u'Failed to create series for MixedColumn %s' % name)
 		for name, col in nogroupcols:
 			cm[name][i] = dm_[name][0]
 	return cm

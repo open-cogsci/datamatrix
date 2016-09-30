@@ -75,9 +75,13 @@ if py3:
 	safe_str = safe_decode
 else:
 	safe_str = safe_encode
+	
+def warn(msg):
+	import warnings
+	warnings.warn(safe_str(msg))
 
 __all__ = ['py3', 'safe_decode', 'safe_encode', 'safe_str',
-	'universal_newline_mode']
+	'universal_newline_mode', 'warn']
 if not py3:
 	__all__ += ['str', 'bytes']
 else:

@@ -24,7 +24,6 @@ from datamatrix.colors import tango
 import numpy as np
 from scipy.stats import nanmean, nanmedian, nanstd
 from scipy.interpolate import interp1d
-import warnings
 
 
 def endlock(series):
@@ -315,7 +314,7 @@ def _blinkreconstruct(a, vt=5, maxdur=500, margin=10, smooth_winlen=21,
 	try:
 		strace = _smooth(a, winlen=smooth_winlen)
 	except Exception as e:
-		warnings.warn(str(e))
+		warn(e)
 		strace = a
 	vtrace = strace[1:]-strace[:-1]
 	# Start blink detection

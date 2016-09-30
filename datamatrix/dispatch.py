@@ -21,7 +21,6 @@ import sys
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, _cache
 import time
-import warnings
 
 
 def dispatch(dm, modules=[], full=[], cache_prefix='auto_cache.'):
@@ -165,5 +164,5 @@ def _callfunc(dm, modules, func, cache_prefix='auto_cache.', redo=False):
 			found = True
 			break # Break in case the same function occurs in multiple modules
 	if not found:
-		warnings.warn('Helper function %s does not exist' % func)
+		warn(u'Helper function %s does not exist' % func)
 	return dm

@@ -19,7 +19,6 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn
-import warnings
 import os
 
 
@@ -52,7 +51,7 @@ def readxlsx(path, default_col_type=MixedColumn):
 		for colname, cell in zip(dm.column_names, rows[i]):
 			if cell.value is None:
 				dm[colname][i] = default_col_type.default_value
-				warnings.warn(u'Some rows miss column %s' % colname)
+				warn(u'Some rows miss column %s' % colname)
 			else:
 				dm[colname][i] = cell.value
 	return dm
