@@ -357,6 +357,8 @@ class DataMatrix(object):
 			type:	BaseColumn
 		"""
 
+		if isinstance(key, bytes):
+			key = safe_decode(key)
 		for name, col in self._cols.items():
 			if name == key:
 				return col
@@ -441,7 +443,8 @@ class DataMatrix(object):
 
 	def __setattr__(self, name, value):
 
-		# self._check_name(name)
+		if isinstance(name, bytes):
+			name = safe_decode(name)
 		if name == u'length':
 			self._setlength(value)
 			return

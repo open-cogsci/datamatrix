@@ -325,7 +325,7 @@ class BaseColumn(object):
 		"""
 
 		if isinstance(value, (numbers.Number, basestring)):
-			return [value]*length
+			return [self._checktype(value)]*length
 		try:
 			value = list(value)
 		except:

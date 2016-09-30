@@ -23,7 +23,7 @@ from test_tools import check_dm
 def test_io():
 
 	refdm = DataMatrix(length=3)
-	refdm.A = 1, 2, u''
+	refdm[u'tést'] = 1, 2, u''
 	refdm.B = u'mathôt', u'b', u'x'
 	refdm.C = u'a,\\b"\'c', 8, u''
 

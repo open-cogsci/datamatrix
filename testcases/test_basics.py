@@ -34,7 +34,7 @@ def test_mixedcolumn():
 	check_col(dm.col, [2, 3])
 	dm.col[:-1] = 4
 	check_col(dm.col, [4, 3])
-	dm.col[:] = 'test'
+	dm.col[:] = 'test'	
 	check_col(dm.col, ['test', 'test'])
 	# Test shortening and lengthening
 	dm.length = 0

@@ -24,6 +24,8 @@ import numpy as np
 def check_dm(dm, ref):
 
 	ok_(dm.column_names == ref.column_names)
+	for column_name in dm.column_names:
+		ok_(not isinstance(column_name, bytes))
 	for colname in dm.column_names:
 		check_col(dm[colname], ref[colname])
 
