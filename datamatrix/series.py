@@ -20,13 +20,27 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix import FloatColumn
-from datamatrix.colors import tango
 import numpy as np
-from scipy.stats import nanmean, nanmedian, nanstd
+from scipy.stats import nanmean, nanmedian
 from scipy.interpolate import interp1d
 
 
 def endlock(series):
+	
+	"""
+	desc:
+		Locks a series to the end, so that any nan-values that were at the end
+		are moved to the front.
+		
+	arguments:
+		series:
+			desc:	The signal to end-lock.
+			type:	SeriesColumn
+			
+	returns:
+		desc:	An end-locked signal.
+		type:	SeriesColumn
+	"""
 
 	endlock_series = _SeriesColumn(series._datamatrix, series.depth)
 	endlock_series[:] = np.nan
@@ -36,8 +50,8 @@ def endlock(series):
 				break
 		endlock_series[i,-j-1:] = series[i,:j+1]
 	return endlock_series
-
-
+	
+	
 def reduce_(series, operation=nanmean):
 
 	"""
@@ -144,7 +158,7 @@ def baseline(series, baseline, bl_start=-100, bl_end=None, reduce_fnc=None):
 	return series / baseline
 
 
-def blinkreconstruct(series, vt=5, maxdur=500, margin=10):
+def blinkreconstruct(series, **kwargs):
 
 	"""
 	Source:
@@ -177,8 +191,7 @@ def blinkreconstruct(series, vt=5, maxdur=500, margin=10):
 		type:	SeriesColumn
 	"""
 
-	return _apply_fnc(series, _blinkreconstruct, vt=vt, maxdur=500,
-		margin=margin)
+	return _apply_fnc(series, _blinkreconstruct, **kwargs)
 
 
 def smooth(series, winlen=11, wintype='hanning', correctlen=True):
