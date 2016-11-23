@@ -18,7 +18,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix import DataMatrix, io
-from test_tools import check_dm
+from testcases.test_tools import check_dm
 
 def test_io():
 
@@ -31,6 +31,11 @@ def test_io():
 	check_dm(refdm, testdm)
 	io.writetxt(testdm, 'tmp.csv')
 	testdm = io.readtxt('tmp.csv')
+	check_dm(refdm, testdm)
+	
+	refdm = io.readtxt('testcases/data/line-ending-cr.csv')
+	check_dm(refdm, testdm)
+	refdm = io.readtxt('testcases/data/line-ending-crlf.csv')
 	check_dm(refdm, testdm)
 
 	io.writepickle(testdm, 'tmp.pickle')

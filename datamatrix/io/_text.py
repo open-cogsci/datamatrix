@@ -43,7 +43,7 @@ def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
 	"""
 
 	d = collections.OrderedDict()
-	with open(path) as csvfile:
+	with open(path, u'Ur') as csvfile:
 		reader = csv.reader(csvfile, delimiter=delimiter,
 			quotechar=quotechar)
 		for column in next(reader):
