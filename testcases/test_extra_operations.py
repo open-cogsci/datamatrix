@@ -51,11 +51,11 @@ def test_split():
 	dm.a = 'a', 'a', 'b', 'b'
 	dm.b = 0, 1, 2, 3
 	g = ops.split(dm.a)
-	val, dm = g.next()
+	val, dm = next(g)
 	eq_(val, 'a')
 	check_col(dm.a, ['a', 'a'])
 	check_col(dm.b, [0, 1])
-	val, dm = g.next()
+	val, dm = next(g)
 	eq_(val, 'b')
 	check_col(dm.a, ['b', 'b'])
 	check_col(dm.b, [2, 3])
