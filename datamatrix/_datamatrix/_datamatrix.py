@@ -21,6 +21,7 @@ from datamatrix.py3compat import *
 from datamatrix import Row
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._mixedcolumn import MixedColumn
+from datamatrix._datamatrix._index import Index
 import collections
 _id = 0
 
@@ -45,7 +46,7 @@ class DataMatrix(object):
 
 		global _id
 		object.__setattr__(self, u'_cols', collections.OrderedDict())
-		object.__setattr__(self, u'_rowid', list(range(length)))
+		object.__setattr__(self, u'_rowid', Index(length))
 		object.__setattr__(self, u'_default_col_type', default_col_type)
 		object.__setattr__(self, u'_id', _id)
 		_id += 1

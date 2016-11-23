@@ -409,13 +409,10 @@ class BaseColumn(object):
 			BaseColunn
 		"""
 
+		indices = {rowid : index for index, rowid in enumerate(self._rowid)}
 		col = self._empty_col()
 		col._rowid = key
-		col._seq = []
-		for _rowid in key:
-			if _rowid not in self._rowid:
-				continue
-			col._seq.append(self._seq[self._rowid.index(_rowid)])
+		col._seq = [self._seq[indices[_rowid]] for _rowid in key]
 		return col
 
 	def _sortedrowid(self):
