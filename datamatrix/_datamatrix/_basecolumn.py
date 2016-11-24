@@ -18,6 +18,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
+from datamatrix._datamatrix._index import Index
 import collections
 import numbers
 import operator
@@ -218,7 +219,7 @@ class BaseColumn(object):
 			the row ids.
 		"""
 
-		self._rowid = self._datamatrix._rowid[:]
+		self._rowid = self._datamatrix._rowid.clone()
 
 	def _init_seq(self):
 
@@ -387,7 +388,7 @@ class BaseColumn(object):
 		"""
 
 		col = self._empty_col()
-		col._rowid = []
+		col._rowid = Index()
 		col._seq = []
 		for i in key:
 			col._rowid.append(self._rowid[i])
@@ -409,10 +410,9 @@ class BaseColumn(object):
 			BaseColunn
 		"""
 
-		indices = {rowid : index for index, rowid in enumerate(self._rowid)}
 		col = self._empty_col()
 		col._rowid = key
-		col._seq = [self._seq[indices[_rowid]] for _rowid in key]
+		col._seq = [self._seq[self._rowid.index(_rowid)] for _rowid in key]
 		return col
 
 	def _sortedrowid(self):
@@ -428,7 +428,8 @@ class BaseColumn(object):
 			An iterator.
 		"""
 
-		return [rowid for val, rowid in sorted(zip(self._seq, self._rowid))]
+		return Index(
+			[rowid for val, rowid in sorted(zip(self._seq, self._rowid))])
 
 	def _setintkey(self, key, value):
 
@@ -497,7 +498,7 @@ class BaseColumn(object):
 			type:	DataMatrix
 		"""
 
-		_rowid = []
+		_rowid = Index(0)
 		for rowid, val in zip(self._rowid, self._seq):
 			try:
 				if op(val, other):

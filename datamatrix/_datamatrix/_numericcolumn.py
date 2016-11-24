@@ -19,6 +19,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._basecolumn import BaseColumn
+from datamatrix._datamatrix._index import Index
 import operator
 try:
 	import numpy as np
@@ -92,7 +93,7 @@ class NumericColumn(BaseColumn):
 
 	def _init_rowid(self):
 
-		self._rowid = np.array(self._datamatrix._rowid, dtype=int)
+		self._rowid = self._datamatrix._rowid.asarray
 
 	def _init_seq(self):
 
@@ -117,7 +118,7 @@ class NumericColumn(BaseColumn):
 	def _compare(self, other, op):
 
 		i = np.where(op(self._seq, other))[0]
-		return self._datamatrix._selectrowid(list(self._rowid[i]))
+		return self._datamatrix._selectrowid(Index(self._rowid[i]))
 
 	def _operate(self, other, number_op, str_op=None):
 
@@ -129,7 +130,7 @@ class NumericColumn(BaseColumn):
 	def _addrowid(self, _rowid):
 
 		old_length = len(self)
-		self._rowid = np.concatenate((self._rowid, _rowid))
+		self._rowid = np.concatenate((self._rowid, _rowid.asarray))
 		a = np.empty(len(self._rowid), dtype=self.dtype)
 		a[:old_length] = self._seq
 		a[old_length:] = self.invalid
@@ -158,7 +159,7 @@ class NumericColumn(BaseColumn):
 
 	def _sortedrowid(self):
 
-		return list(self._rowid[self._seq.argsort()])
+		return Index(self._rowid[self._seq.argsort()])
 
 	def _merge(self, other, _rowid):
 

@@ -239,7 +239,7 @@ class _SeriesColumn(NumericColumn):
 	def _addrowid(self, _rowid):
 
 		old_length = len(self)
-		self._rowid = np.concatenate((self._rowid, _rowid))
+		self._rowid = np.concatenate((self._rowid, _rowid.asarray))
 		a = np.zeros( (len(self._rowid), self._depth), dtype=self.dtype)
 		a[:old_length] = self._seq
 		self._seq = a

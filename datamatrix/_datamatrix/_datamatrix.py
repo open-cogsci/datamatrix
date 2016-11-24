@@ -179,13 +179,7 @@ class DataMatrix(object):
 			type:	DataMatrix.
 		"""
 
-		if isinstance(key, slice):
-			_rowid = self._rowid[key]
-		else:
-			try:
-				_rowid = [self._rowid[row] for row in key]
-			except:
-				raise Exception('Invalid row indices')
+		_rowid = self._rowid[key]
 		dm = DataMatrix(len(_rowid))
 		object.__setattr__(dm, u'_rowid', _rowid)
 		object.__setattr__(dm, u'_id', self._id)
@@ -226,9 +220,9 @@ class DataMatrix(object):
 			if len(self) == 0:
 				startid = 0
 			else:
-				startid = max(self._rowid)+1
-			rowid = [rowid+startid for rowid in range(value-len(self))]
-			object.__setattr__(self, u'_rowid', self._rowid+rowid)
+				startid = self._rowid.max+1
+			rowid = Index([i+startid for i in range(value-len(self))])
+			object.__setattr__(self, u'_rowid', self._rowid.clone()+rowid)
 			for name in self._cols:
 				self._cols[name]._addrowid(rowid)
 		self._mutate()
@@ -423,18 +417,18 @@ class DataMatrix(object):
 
 	def __and__(self, other):
 
-		selection = set(self._rowid) & set(other._rowid)
+		selection = Index(set(self._rowid) & set(other._rowid))
 		return self._merge(other, sorted(selection))
 
 	def __or__(self, other):
 
 		selection = set(self._rowid) | set(other._rowid)
-		return self._merge(other, sorted(selection))
+		return self._merge(other, Index(sorted(selection)))
 
 	def __xor__(self, other):
 
 		selection = set(self._rowid) ^ set(other._rowid)
-		return self._merge(other, sorted(selection))
+		return self._merge(other, Index(sorted(selection)))
 
 	def __delattr__(self, name):
 

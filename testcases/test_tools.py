@@ -18,6 +18,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from nose.tools import eq_, ok_
+from datamatrix._datamatrix._index import Index
 import numpy as np
 
 
@@ -28,6 +29,7 @@ def check_dm(dm, ref):
 		ok_(not isinstance(column_name, bytes))
 	for colname in dm.column_names:
 		check_col(dm[colname], ref[colname])
+	ok_(isinstance(dm._rowid, Index))
 
 
 def check_col(col, ref):

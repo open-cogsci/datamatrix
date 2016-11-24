@@ -22,6 +22,7 @@ from datamatrix import DataMatrix, FloatColumn, IntColumn, SeriesColumn, \
 	MixedColumn
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix._datamatrix._basecolumn import BaseColumn
+from datamatrix._datamatrix._index import Index
 import random
 
 try:
@@ -369,7 +370,7 @@ def shuffle(obj):
 		type:	[DataMatrix, BaseColumn]
 	"""
 
-	_rowid = list(obj._rowid)
+	_rowid = Index(obj._rowid)
 	random.shuffle(_rowid)
 	if isinstance(obj, DataMatrix):
 		return obj._selectrowid(_rowid)

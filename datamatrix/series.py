@@ -119,7 +119,8 @@ def window(series, start=0, end=None):
 	return window_series
 
 
-def baseline(series, baseline, bl_start=-100, bl_end=None, reduce_fnc=None):
+def baseline(series, baseline, bl_start=-100, bl_end=None, reduce_fnc=None,
+	method='divisive'):
 
 	"""
 	desc:
@@ -155,7 +156,11 @@ def baseline(series, baseline, bl_start=-100, bl_end=None, reduce_fnc=None):
 		reduce_fnc = nanmedian
 	baseline = reduce_(window(baseline, start=bl_start, end=bl_end),
 		operation=reduce_fnc)
-	return series / baseline
+	if method == 'divisive':
+		return series / baseline
+	if method == 'subtractive':
+		return series - baseline
+	raise Exception('Baseline method should be divisive or subtractive')
 
 
 def blinkreconstruct(series, **kwargs):
