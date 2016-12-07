@@ -137,3 +137,20 @@ def test_seriescolumn():
 	dm.col.depth = 3
 	check_series(dm.col, [[1,0,0], [2,0,0], [3,0,0]])
 	check_integrity(dm)
+
+
+def test_resize():
+	
+	dm = DataMatrix(length=0)
+	for l in range(1, 11):
+		print('growing to %d' % l)
+		dm.length += 1
+		for x, y in zip(dm._rowid, range(l)):
+			print(x, y)
+			ok_(x == y)
+	for l in range(10, 0, -1):
+		print('shrinking to %d' % l)
+		dm.length -= 1
+		for x, y in zip(dm._rowid, range(l)):
+			print(x, y)
+			ok_(x == y)

@@ -1,2 +1,2 @@
 #!/bin/bash
-nosetests testcases/*.py --with-coverage --cover-package=datamatrix
+nosetests testcases/*.py --with-coverage --verbose --cover-package=datamatrix
