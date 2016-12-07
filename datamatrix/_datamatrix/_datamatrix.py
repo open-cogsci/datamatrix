@@ -217,10 +217,7 @@ class DataMatrix(object):
 			for name, col in self._cols.items():
 				self._cols[name] = self._cols[name][:value]
 		else:
-			if len(self) == 0:
-				startid = 0
-			else:
-				startid = self._rowid.max+1
+			startid = 0 if not len(self) else self._rowid.max+1
 			rowid = Index([i+startid for i in range(value-len(self))])
 			object.__setattr__(self, u'_rowid', self._rowid.clone()+rowid)
 			for name in self._cols:

@@ -77,6 +77,7 @@ class Index(object):
 		self._l += other
 		self._length = len(self._l)
 		self._metaindex = None
+		self._max = None
 		return self
 		
 	def __len__(self):
