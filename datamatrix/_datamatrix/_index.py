@@ -126,3 +126,11 @@ class Index(object):
 		if np is None:
 			raise Exception('numpy is not available')
 		return np.array(self._l, dtype=int)
+
+	def sorted(self):
+		
+		i = Index(0)
+		i._l = sorted(self._l[:])
+		i._max = self._max
+		i._length = self._length
+		return i		

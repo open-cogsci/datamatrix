@@ -415,17 +415,17 @@ class DataMatrix(object):
 	def __and__(self, other):
 
 		selection = Index(set(self._rowid) & set(other._rowid))
-		return self._merge(other, sorted(selection))
+		return self._merge(other, selection.sorted())
 
 	def __or__(self, other):
 
-		selection = set(self._rowid) | set(other._rowid)
-		return self._merge(other, Index(sorted(selection)))
+		selection = Index(set(self._rowid) | set(other._rowid))
+		return self._merge(other, selection.sorted())
 
 	def __xor__(self, other):
 
-		selection = set(self._rowid) ^ set(other._rowid)
-		return self._merge(other, Index(sorted(selection)))
+		selection = Index(set(self._rowid) ^ set(other._rowid))
+		return self._merge(other, selection.sorted())
 
 	def __delattr__(self, name):
 
