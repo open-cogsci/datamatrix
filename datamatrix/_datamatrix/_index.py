@@ -31,7 +31,7 @@ class Index(object):
 		An index object that resembles a list but is more efficient.
 	"""
 	
-	def __init__(self, start):		
+	def __init__(self, start=0):		
 		
 		if isinstance(start, int):
 			self._l = list(range(start))			
