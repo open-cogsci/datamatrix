@@ -440,3 +440,10 @@ def _smooth(a, winlen=11, wintype='hanning', correctlen=True):
 		elif len(y) < len(a):
 			raise Exception('The output array is too short!')
 	return y
+	
+
+def _downsample(a, by, fnc=nanmean):
+	
+	# Resize the array so that its length is a multiple of by
+	a = a[:by * (a.shape[0] // by)]
+	return fnc(a.reshape(-1, by), axis=1)

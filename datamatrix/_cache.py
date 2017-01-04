@@ -59,7 +59,6 @@ def cached(func):
 
 	def inner(*args, **kwargs):
 
-		iscached = True
 		if 'cacheid' in kwargs:
 			hascachefile, cachepath = cachefile(kwargs['cacheid'])
 			del kwargs['cacheid']
