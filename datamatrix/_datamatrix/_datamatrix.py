@@ -351,10 +351,10 @@ class DataMatrix(object):
 
 		if isinstance(key, bytes):
 			key = safe_decode(key)
-		for name, col in self._cols.items():
-			if name == key:
-				return col
-		raise Exception('Column not found')
+		col = self._cols.get(key, None)
+		if col is None:
+			raise Exception('Column not found')
+		return col
 
 	def _getrow(self, key):
 
@@ -530,25 +530,40 @@ class DataMatrix(object):
 
 		if isinstance(other, dict):
 			other = DataMatrix()._fromdict(other)
+		# Create a new DataMatrix with the combined length of self and other. Add all
+		# columns from self into the new DataMatrix, and put data from self at the
+		# beginning of those columns.
 		dm = DataMatrix(len(self)+len(other))
 		for name, col in self._cols.items():
 			if hasattr(col, 'depth'):
 				dm[name] = col.__class__(dm, col.depth, col.defaultnan)
 			else:
 				dm[name] = col.__class__
+			dm[name]._typechecking = False
 			dm[name][:len(self)] = self[name]
 			dm[name]._datamatrix = dm
+		# Now add all columns from other into the new DataMatrix (if they don't exist
+		# yet), and put data from other at the end of those columns.
 		for name, col in other._cols.items():
 			if name not in dm._cols:
 				if hasattr(col, 'depth'):
 					dm[name] = col.__class__(dm, col.depth, col.defaultnan)
 				else:
 					dm[name] = col.__class__
-			elif hasattr(col, 'depth'):
-				dm[name].depth = max(col.depth, dm[name].depth)
-				other[name].depth = max(col.depth, dm[name].depth)
+				dm[name]._typechecking = False
+			else:
+				# If the column already exists, check if the types match
+				if type(dm[name]) != type(other[name]):
+					raise TypeError(u'Non-matching type for column %s' % name)
+				# If the column already exists and is a series, modify the depth to the
+				# longest column
+				if hasattr(col, 'depth'):
+					dm[name].depth = max(col.depth, dm[name].depth)
+					other[name].depth = max(col.depth, dm[name].depth)
 			dm[name][len(self):] = other[name]
 			dm[name]._datamatrix = dm
+		for colname, col in dm.columns:
+			col._typechecking = True
 		return dm
 
 	def __iter__(self):

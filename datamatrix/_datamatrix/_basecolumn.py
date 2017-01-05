@@ -23,6 +23,13 @@ import collections
 import numbers
 import operator
 import math
+import warnings
+try:
+	import fastnumbers
+except ImportError:
+	warnings.warn('Install fastnumbers for better performance')
+	fastnumbers = None
+
 
 class BaseColumn(object):
 
@@ -45,6 +52,7 @@ class BaseColumn(object):
 		"""
 
 		self._datamatrix = datamatrix
+		self._typechecking = True
 		self._init_rowid()
 		self._init_seq()
 
@@ -263,19 +271,22 @@ class BaseColumn(object):
 		returns:
 			A suitably typed value.
 		"""
-
-		try:
-			assert(int(value) == value)
-			value = int(value)
-		except:
+		
+		if fastnumbers is not None:
+			value = fastnumbers.fast_real(value, nan=u'nan', inf=u'inf')
+		else:
 			try:
-				# Make sure we don't convert 'inf' and 'nan' strings to float
-				assert(not math.isinf(float(value)))
-				assert(not math.isnan(float(value)))
-				value = float(value)
+				assert(int(value) == value)
+				value = int(value)
 			except:
-				pass
-		if value is None or isinstance(value, (numbers.Number, str)):
+				try:
+					# Make sure we don't convert 'inf' and 'nan' strings to float
+					assert(not math.isinf(float(value)))
+					assert(not math.isnan(float(value)))
+					value = float(value)
+				except:
+					pass
+		if value is None or isinstance(value, (int, float, str)):
 			return value
 		if isinstance(value, bytes):
 			return safe_decode(value)
@@ -460,6 +471,11 @@ class BaseColumn(object):
 					length of the slice.
 		"""
 
+		# If type-checking is disabled and we're receiving a BaseColumn, assign
+		# right away to speed up performance
+		if not self._typechecking and type(value) == type(self):
+			self._seq[key] = value._seq
+			return
 		length = len(self._seq[key])
 		self._seq[key] = self._tosequence(value, length)
 
