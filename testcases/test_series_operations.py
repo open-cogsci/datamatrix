@@ -76,3 +76,45 @@ def test_baseline():
 	dm.norm = series.baseline(dm.series, dm.baseline)
 	check_series(dm.norm, [[0,.5,1], [1,2,3]])
 	check_integrity(dm)
+	
+	
+def test_downsample():
+	
+	dm = DataMatrix(length=2)
+	dm.series = SeriesColumn(depth=10)
+	dm.series[0] = range(10)
+	dm.series[1] = [0,1]*5
+	dm.d3 = series.downsample(dm.series, 3)
+	dm.d5 = series.downsample(dm.series, 5)
+	check_series(dm.d3, [[1,4,7], [1./3, 2./3, 1./3]])
+	check_series(dm.d5, [[2,7], [.4, .6]])
+	check_integrity(dm)
+	
+	
+def test_smooth():
+	
+	dm = DataMatrix(length=2)
+	dm.series = SeriesColumn(depth=6)
+	dm.series[0] = range(6)
+	dm.series[1] = [0,1,2]*2
+	dm.s = series.smooth(dm.series, winlen=3, wintype='flat')
+	check_series(dm.s, [
+		[2./3, 1, 2, 3, 4, 4+1./3],
+		[2./3, 1, 1, 1, 1, 1+1./3]
+		])
+	check_integrity(dm)	
+
+
+def test_threshold():
+	
+	dm = DataMatrix(length=2)
+	dm.series = SeriesColumn(depth=4)
+	dm.series[0] = range(4)
+	dm.series[1] = range(1,5)
+	dm.t1 = series.threshold(dm.series, lambda v: v > 1)
+	dm.t2 = series.threshold(dm.series, lambda v: v > 1 and v < 3)
+	dm.t3 = series.threshold(dm.series, lambda v: v < 3, min_length=3)
+	check_series(dm.t1, [[0,0,1,1], [0,1,1,1]])
+	check_series(dm.t2, [[0,0,1,0], [0,1,0,0]])
+	check_series(dm.t3, [[1,1,1,0], [0,0,0,0]])
+	check_integrity(dm)	

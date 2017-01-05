@@ -199,11 +199,11 @@ def blinkreconstruct(series, **kwargs):
 	return _apply_fnc(series, _blinkreconstruct, **kwargs)
 
 
-def smooth(series, winlen=11, wintype='hanning', correctlen=True):
+def smooth(series, winlen=11, wintype='hanning'):
 
 	"""
 	desc:
-		Source: <http://www.scipy.org/Cookbook/SignalSmooth>
+		Adapted from: <http://www.scipy.org/Cookbook/SignalSmooth>
 
 		Smooths a signal using a window with requested size.
 
@@ -227,18 +227,40 @@ def smooth(series, winlen=11, wintype='hanning', correctlen=True):
 					'bartlett', 'blackman'. A flat window produces a moving
 					average smoothing.
 			type:	str
-		correctlen:
-			desc:	Indicates whether the return string should be the same
-					length as the input string.
-			type:	bool
 
 	returns:
 		desc:	A smoothed signal.
 		type:	SeriesColumn
 	"""
 
-	return _apply_fnc(series, _smooth, winlen=winlen, wintype=wintype,
-		correctlen=correctlen)
+	return _apply_fnc(series, _smooth, winlen=winlen, wintype=wintype)
+		
+		
+def downsample(series, by, fnc=nanmean):
+	
+	"""
+	desc:
+		Downsamples a series by a factor, so that it becomes 'by' times shorter.
+		The depth of the downsampled series is the highest multiple of the depth
+		of the original series divided by 'by'. For example, downsampling a
+		series with a depth of 10 by 3 results in a depth of 3.
+		
+	arguments:
+		by:
+			desc:	The downsampling factor.
+			type:	int
+		fnc:
+			desc:	The function to average the samples that are combined
+					into 1 value. Typically an average or a median.
+			type:	callable
+			
+	returns:
+		desc:	A downsampled series.
+		type:	SeriesColumn
+	"""
+
+	return _apply_fnc(series, _downsample, by=by, fnc=fnc)
+	
 
 def threshold(series, fnc, min_length=1):
 
@@ -271,7 +293,6 @@ def threshold(series, fnc, min_length=1):
 	threshold_series[:] = 0
 	# First walk through all rows
 	for i, trace in enumerate(series):
-		print()
 		# Then walk through all samples within a row
 		nhit = 0
 		for j, val in enumerate(trace):
@@ -283,12 +304,15 @@ def threshold(series, fnc, min_length=1):
 				threshold_series[i,j-nhit:j] = 1
 			nhit = 0
 		if nhit >= min_length:
-			threshold_series[i,j-nhit:j] = 1
+			print(i, j-nhit, j)
+			threshold_series[i,j-nhit+1:j+1] = 1
 	return threshold_series
+
 
 # Private functions
 
-def _apply_fnc(series, fnc, **kwdict):
+
+def _apply_fnc(series, _fnc, **kwdict):
 
 	"""
 	visible: False
@@ -310,11 +334,16 @@ def _apply_fnc(series, fnc, **kwdict):
 		desc:	A new signal.
 		type:	SeriesColumn
 	"""
-
-	new_series = _SeriesColumn(series._datamatrix, depth=series.depth)
+	
+	if not series:
+		return _SeriesColumn(series._datamatrix, depth=series.depth)
 	for i, cell in enumerate(series):
-		new_series[i] = fnc(cell, **kwdict)
+		new_cell = _fnc(cell, **kwdict)
+		if not i:
+			new_series = _SeriesColumn(series._datamatrix, depth=len(new_cell))
+		new_series[i] = new_cell
 	return new_series
+
 
 def _blinkreconstruct(a, vt=5, maxdur=500, margin=10, smooth_winlen=21,
 	std_thr=3):
@@ -407,7 +436,7 @@ def _blinkreconstruct(a, vt=5, maxdur=500, margin=10, smooth_winlen=21,
 	return a
 
 
-def _smooth(a, winlen=11, wintype='hanning', correctlen=True):
+def _smooth(a, winlen=11, wintype='hanning'):
 
 	"""
 	visible: False
@@ -417,33 +446,35 @@ def _smooth(a, winlen=11, wintype='hanning', correctlen=True):
 	"""
 
 	if a.ndim != 1:
-		raise ValueError("smooth only accepts 1 dimension arrays.")
+		raise ValueError('smooth only accepts 1 dimension arrays')
 	if a.size < winlen:
-		raise ValueError("Input vector needs to be bigger than window size.")
+		raise ValueError('input array must be larger than window size')
 	if winlen < 3:
 		return a
 	if not wintype in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
 		raise ValueError(
-			"Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")
-	s = np.r_[a[winlen-1:0:-1], a, a[-1:-winlen:-1]]
+			"wintype should be 'flat', 'hanning', 'hamming', 'bartlett', or 'blackman'")
+	if not winlen % 2 or winlen < 0 or int(winlen) != winlen:
+		raise ValueError('winlen must be a positive uneven integer')	
+	d = (winlen-1)//2
+	s = np.r_[a[d:0:-1], a, a[-2:-d-2:-1]]
 	if wintype == 'flat': #moving average
 		w = np.ones(winlen, 'd')
 	else:
 		func = getattr(np, wintype)
 		w = func(winlen)
 	y = np.convolve(w/w.sum(), s, mode='valid')
-	if correctlen:
-		y = y[(winlen/2-1):-(winlen/2)]
-		# The output array can be one shorter than the input array
-		if len(y) > len(a):
-			y = y[:len(a)]
-		elif len(y) < len(a):
-			raise Exception('The output array is too short!')
 	return y
 	
 
 def _downsample(a, by, fnc=nanmean):
 	
+	"""
+	visible: False
+
+	desc:
+		Downsamples a single array.
+	"""	
 	# Resize the array so that its length is a multiple of by
 	a = a[:by * (a.shape[0] // by)]
 	return fnc(a.reshape(-1, by), axis=1)
