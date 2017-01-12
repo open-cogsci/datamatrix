@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+Cogsci // cognitive science and more
+{% endblock %}
+
+{% block head %}
+{{ super() }}
+{% if article.description %}
+<meta name="description" content="Cognitive science and more" />
+{% endif %}
+
+{% for tag in article.tags %}
+<meta name="tags" content="psychology, cognitive science, neuroscience, popular science, blog, opensesame" />
+{% endfor %}
+
+{% endblock %}
+
+{% block title %}
+	{% if category and category.name == "Illusions" %}
+		Optical illusions
+	{% elif category and category.name != "Illusions" %}
+		<span class='cogsci-une'>Category &raquo;</span>
+		{{ category.name }}
+	{% else %}
+		<span class='cogsci-une'>Frontpage &raquo;</span>
+		{{ articles_page.object_list[0].title }}
+	{% endif %}
+{% endblock title %}
+{% block pageurl %}
+{{ SITEURL }}/{{ articles_page.object_list[0].url }}
+{% endblock pageurl %}
+{% block content %}
+<section id="content">
+<div id="cogsci-article-list">
+{% for article in articles_page.object_list %}
+	<div class='cogsci-article-summary'>
+		<article class="hentry">
+			{% if category or loop.index > 1 %}
+			<header><h2 class="cogsci-article-title cogsci-article-title-{{ loop.index }}">
+				<a href="{{ SITEURL }}/{{ article.url }}" rel="bookmark" title="Permalink to {{ article.title|striptags }}">
+					{{ article.title }}
+				</a>
+			</h2></header>
+			{% endif %}
+		{% include 'metadata.html' %}
+		<div class="entry-content"> {{ article.summary }} </div><!-- /.entry-content -->
+		</article>
+
+		<a class="cogsci-article-readmore btn btn-default" href="{{ SITEURL }}/{{ article.url }}">
+			Read more <span class='cogsci-arrow-right'>&raquo;<span>
+		</a>
+	</div>
+{% endfor %}
+</div><!-- /#posts-list -->
+{% if articles_page.has_other_pages() %}
+	{% include 'pagination.html' %}
+{% endif %}
+</section><!-- /#content -->
+{% endblock content %}

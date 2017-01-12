@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block head %}
+{{ super() }}
+{% if page.description %}
+<meta name="description" content="{{page.description}}" />
+{% endif %}
+
+{% for tag in page.tags %}
+<meta name="tags" content="{{tag}}" />
+{% endfor %}
+
+{% endblock %}
+
+{% block page_title %}
+{{ page.title }} // DataMatrix documentation
+{% endblock %}
+
+{% block title %}
+{{ page.title }}
+{% endblock title %}
+
+{% block content %}
+<section id="content" class="body">
+<div class="entry-content">
+
+{% if page.uptodate == "false" %}
+<div class="alert alert-warning" role="alert">
+This page has been written for an older version of DataMatrix.
+</div>
+{% endif %}
+
+{% if page.reviewed == "false" %}
+<div class="alert alert-info" role="alert">
+This page needs to be reviewed.
+</div>
+{% endif %}
+
+<div class="osdoc-edit-link">
+	<a role="button" class="btn btn-default" href="{{ page.source_path|replace(ROOT_PATH, GITHUB_ROOT_URL) }}">
+		Edit on GitHub
+	</a>
+</div>
+
+{% if page.show_title != "false" %}
+<h1>{{page.title}}</h1>
+{% endif %}
+
+
+{{ page.content }}
+</div><!-- /.entry-content -->
+
+</section>
+{% endblock %}

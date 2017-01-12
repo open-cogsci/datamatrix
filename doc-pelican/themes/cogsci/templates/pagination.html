@@ -1,0 +1,19 @@
+{% if DEFAULT_PAGINATION %}
+<ul class="pager">
+    {% if articles_page.has_previous() %}
+        <li>
+			<a href="{{ SITEURL }}/{{ articles_previous_page.url }}">
+			<span class='cogsci-arrow-left'>&laquo;</span>
+			Newer
+			</a>
+		</li>
+    {% endif %}
+    {% if articles_page.has_next() %}
+        <li>
+			<a href="{{ SITEURL }}/{{ articles_next_page.url }}">Older
+			<span class='cogsci-arrow-right'>&raquo;</span>
+			</a>
+		</li>
+    {% endif %}
+</ul>
+{% endif %}

@@ -1,0 +1,87 @@
+.mega-dropdown {
+  position: static !important;
+}
+
+.level-3 a {
+	font-size: .9em;
+	margin-left: 8px;
+}
+
+.level-2 a {
+	margin-left: 4px;
+}
+
+.dropdown-header .level-3 {
+	font-size: .9em;
+	color: black;
+}
+
+.mega-dropdown-menu {
+    padding: 5px 0px 15px 0px!important;
+    width: 100%;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.mega-dropdown-menu .dropdown-menu {
+	padding: 5px 0px 15px 0px;
+}
+
+.mega-dropdown-menu > li > ul {
+  padding: 0;
+  margin: 0;
+}
+
+.mega-dropdown-menu > li > ul > li {
+  list-style: none;
+}
+.mega-dropdown-menu > li > ul > li > a {
+  display: block;
+  color: #222;
+  padding: 1px 0px 1px 0px;
+}
+.mega-dropdown-menu > li ul > li > a:hover,
+.mega-dropdown-menu > li ul > li > a:focus {
+  text-decoration: none;
+}
+.mega-dropdown-menu .dropdown-header-level-2 {
+  font-size: 1.0em;
+  color: #0277bd;
+  border-bottom: solid 1px #0277bd;
+  text-align: center;
+  font-family: "Roboto Slab";
+  line-height: 30px;
+  margin-bottom: 4px;
+}
+
+.mega-dropdown-menu .dropdown-header-level-3 {
+  font-size: 1.0em;
+  color: #0277bd;
+  padding: 4px 0px 4px 0px;
+  font-family: "Roboto Slab";
+}
+
+.carousel-control {
+  width: 30px;
+  height: 30px;
+  top: -35px;
+
+}
+.left.carousel-control {
+  right: 30px;
+  left: inherit;
+}
+.carousel-control .glyphicon-chevron-left,
+.carousel-control .glyphicon-chevron-right {
+  font-size: 12px;
+  background-color: #fff;
+  line-height: 30px;
+  text-shadow: none;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.cogsci-navbar .glyphicon {
+	font-size: 0.7em;
+	color: #78909c;
+}

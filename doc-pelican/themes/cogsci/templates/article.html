@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+{% if article.description %}
+<meta name="description" content="{{article.description}}" />
+{% endif %}
+
+{% for tag in article.tags %}
+<meta name="tags" content="{{tag}}" />
+{% endfor %}
+
+{% endblock %}
+
+{% block page_title %}
+{{ article.title }} // Cogsci
+{% endblock %}
+
+{% block title %}
+{{ article.title }}
+{% endblock title %}
+
+{% block content %}
+
+<!-- Go to www.addthis.com/dashboard to customize your tools -->
+<div class='cogsci-share' data-spy='affix' data-offset-top="300">
+<div class='cogsci-floating-title'>{{ article.title }}</div>
+<div class="addthis_native_toolbox"></div>
+</div>
+
+<section id="content" class="body">
+{% include 'metadata.html' %}
+<div class="entry-content">
+{{ article.content }}
+</div><!-- /.entry-content -->
+
+{% include 'disqus.html' %}
+
+</section>
+{% endblock %}
