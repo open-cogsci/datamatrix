@@ -15,6 +15,11 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+desc:
+	A set of operations to apply to `SeriesColumn` objects.
+---
 """
 
 from datamatrix.py3compat import *
@@ -28,9 +33,51 @@ from scipy.interpolate import interp1d
 def endlock(series):
 	
 	"""
-	desc:
+	desc: |
 		Locks a series to the end, so that any nan-values that were at the end
-		are moved to the front.
+		are moved to the start.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 import numpy as np
+		 from matplotlib import pyplot as plt
+		 from datamatrix import DataMatrix, SeriesColumn, series
+		 
+		 LENGTH = 5 # Number of rows
+		 DEPTH = 10 # Depth (or length) of SeriesColumns
+		 
+		 sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
+		 
+		 dm = DataMatrix(length=LENGTH)
+		 # First create five identical rows with a sinewave
+		 dm.y = SeriesColumn(depth=DEPTH)
+		 dm.y.setallrows(sinewave)
+		 # Add a random offset to the Y values
+		 dm.y += np.random.random(LENGTH)
+		 # Set some observations at the end to nan
+		 for i, row in enumerate(dm):
+		 	row.y[-i:] = np.nan
+		 # Lock the degraded traces to the end, so that all nans
+		 # now come at the start of the trace
+		 dm.y2 = series.endlock(dm.y)
+		 
+		 plt.clf()
+		 plt.subplot(121)
+		 plt.title('Original (nans at end)')
+		 plt.plot(dm.y.plottable)
+		 plt.subplot(122)
+		 plt.title('Endlocked (nans at start)')
+		 plt.plot(dm.y2.plottable)
+		 plt.savefig('content/pages/img/series/endlock.png')
+		--%
+		
+		%--
+		figure:
+		 source: endlock.png
+		 id: FigEndLock
+		--%
 		
 	arguments:
 		series:
@@ -55,9 +102,27 @@ def endlock(series):
 def reduce_(series, operation=nanmean):
 
 	"""
-	desc:
+	desc: |
 		Transforms series to single values by applying an operation (typically
 		a mean) to each series.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 import numpy as np
+		 from datamatrix import DataMatrix, SeriesColumn, series
+		 
+		 LENGTH = 5 # Number of rows
+		 DEPTH = 10 # Depth (or length) of SeriesColumns
+		 
+		 dm = DataMatrix(length=LENGTH)
+		 dm.y = SeriesColumn(depth=DEPTH)
+		 dm.y = np.random.random( (LENGTH, DEPTH) )
+		 dm.mean_y = series.reduce_(dm.y)
+		 
+		 print(dm)
+		--%
 
 	arguments:
 		series:
@@ -89,9 +154,47 @@ def reduce_(series, operation=nanmean):
 def window(series, start=0, end=None):
 
 	"""
-	desc:
+	desc: |
 		Extracts a window from a signal.
-
+		
+		__Example:__
+		
+		%--
+		python: |
+		 import numpy as np
+		 from matplotlib import pyplot as plt
+		 from datamatrix import DataMatrix, SeriesColumn, series
+		 
+		 LENGTH = 5 # Number of rows
+		 DEPTH = 10 # Depth (or length) of SeriesColumnsplt.show()
+		 
+		 sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
+		 
+		 dm = DataMatrix(length=LENGTH)
+		 # First create five identical rows with a sinewave
+		 dm.y = SeriesColumn(depth=DEPTH)
+		 dm.y.setallrows(sinewave)
+		 # Add a random offset to the Y values
+		 dm.y += np.random.random(LENGTH)
+		 # Look only the middle half of the signal
+		 dm.y2 = series.window(dm.y, start=DEPTH//4, end=-DEPTH//4)
+		 
+		 plt.clf()
+		 plt.subplot(121)
+		 plt.title('Original')
+		 plt.plot(dm.y.plottable)
+		 plt.subplot(122)
+		 plt.title('Window (middle half)')
+		 plt.plot(dm.y2.plottable)
+		 plt.savefig('content/pages/img/series/window.png')
+		--%
+		
+		%--
+		figure:
+		 source: window.png
+		 id: FigWindow
+		--%
+		
 	arguments:
 		series:
 			desc:	The signal to get a window from.
@@ -123,8 +226,50 @@ def baseline(series, baseline, bl_start=-100, bl_end=None, reduce_fnc=None,
 	method='divisive'):
 
 	"""
-	desc:
+	desc: |
 		Applies a baseline to a signal
+		
+		__Example:__
+		
+		%--
+		python: |
+		 import numpy as np
+		 from matplotlib import pyplot as plt
+		 from datamatrix import DataMatrix, SeriesColumn, series
+		 
+		 LENGTH = 5 # Number of rows
+		 DEPTH = 10 # Depth (or length) of SeriesColumns
+		 
+		 sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
+		 
+		 dm = DataMatrix(length=LENGTH)
+		 # First create five identical rows with a sinewave
+		 dm.y = SeriesColumn(depth=DEPTH)
+		 dm.y.setallrows(sinewave)
+		 # Add a random offset to the Y values
+		 dm.y += np.random.random(LENGTH)
+		 # And also a bit of random jitter
+		 dm.y += .2*np.random.random( (LENGTH, DEPTH) )
+		 # Baseline-correct the traces, This will remove the vertical
+		 # offset
+		 dm.y2 = series.baseline(dm.y, dm.y, bl_start=0, bl_end=10,
+		 	method='subtractive')
+		 
+		 plt.clf()
+		 plt.subplot(121)
+		 plt.title('Original')
+		 plt.plot(dm.y.plottable)
+		 plt.subplot(122)
+		 plt.title('Baseline corrected')
+		 plt.plot(dm.y2.plottable)
+		 plt.savefig('content/pages/img/series/baseline.png')
+		--%
+		
+		%--
+		figure:
+		 source: baseline.png
+		 id: FigBaseline
+		--%		
 
 	arguments:
 		series:
@@ -146,6 +291,11 @@ def baseline(series, baseline, bl_start=-100, bl_end=None, reduce_fnc=None,
 			desc:	The function to reduce the baseline epoch to a single value.
 					If None, np.nanmedian() is used.
 			type:	[FunctionType, None]
+		method:
+			desc:	Specifies whether divisive or subtrace correction should be
+					used. Divisive is the default for historical purposes, but
+					subtractive is generally preferred.
+			type:	str
 
 	returns:
 		desc:	A baseline-correct version of the signal.
@@ -163,15 +313,18 @@ def baseline(series, baseline, bl_start=-100, bl_end=None, reduce_fnc=None,
 	raise Exception('Baseline method should be divisive or subtractive')
 
 
-def blinkreconstruct(series, **kwargs):
+def blinkreconstruct(series, vt=5, maxdur=500, margin=10, smooth_winlen=21,
+	std_thr=3):
 
 	"""
-	Source:
-		Mathot, S. (2013). A simple way to reconstruct pupil size during eye
-		blinks. http://doi.org/10.6084/m9.figshare.688002
-
-	desc:
-		Reconstructs pupil size during blinks.
+	desc: |
+		Reconstructs pupil size during blinks. This algorithm has been designed
+		and tested largely with the EyeLink 1000 eye tracker.
+		
+		__Source:__
+		
+		- Mathot, S. (2013). A simple way to reconstruct pupil size during eye
+		blinks. <http://doi.org/10.6084/m9.figshare.688002>		
 
 	arguments:
 		series:
@@ -202,15 +355,55 @@ def blinkreconstruct(series, **kwargs):
 def smooth(series, winlen=11, wintype='hanning'):
 
 	"""
-	desc:
-		Adapted from: <http://www.scipy.org/Cookbook/SignalSmooth>
-
+	desc: |		
 		Smooths a signal using a window with requested size.
 
 		This method is based on the convolution of a scaled window with the
 		signal. The signal is prepared by introducing reflected copies of the
 		signal (with the window size) in both ends so that transient parts are
 		minimized in the begining and end part of the output signal.
+		
+		__Adapted from:__
+		
+		- <http://www.scipy.org/Cookbook/SignalSmooth>
+		
+		__Example:__
+		
+		%--
+		python: |
+		 import numpy as np
+		 from matplotlib import pyplot as plt
+		 from datamatrix import DataMatrix, SeriesColumn, series
+		 
+		 LENGTH = 5 # Number of rows
+		 DEPTH = 100 # Depth (or length) of SeriesColumns
+		 
+		 sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
+		 
+		 dm = DataMatrix(length=LENGTH)
+		 # First create five identical rows with a sinewave
+		 dm.y = SeriesColumn(depth=DEPTH)
+		 dm.y.setallrows(sinewave)
+		 # And add a bit of random jitter
+		 dm.y += np.random.random( (LENGTH, DEPTH) )
+		 # Smooth the traces to reduce the jitter
+		 dm.y2 = series.smooth(dm.y)
+		 
+		 plt.clf()
+		 plt.subplot(121)
+		 plt.title('Original')
+		 plt.plot(dm.y.plottable)
+		 plt.subplot(122)
+		 plt.title('Smoothed')
+		 plt.plot(dm.y2.plottable)
+		 plt.savefig('content/pages/img/series/smooth.png')
+		--%
+		
+		%--
+		figure:
+		 source: smooth.png
+		 id: FigSmooth
+		--%
 
 	arguments:
 		series:
@@ -239,16 +432,52 @@ def smooth(series, winlen=11, wintype='hanning'):
 def downsample(series, by, fnc=nanmean):
 	
 	"""
-	desc:
+	desc: |
 		Downsamples a series by a factor, so that it becomes 'by' times shorter.
 		The depth of the downsampled series is the highest multiple of the depth
 		of the original series divided by 'by'. For example, downsampling a
 		series with a depth of 10 by 3 results in a depth of 3.
 		
+		__Example:__
+		
+		%--
+		python: |
+		 import numpy as np
+		 from matplotlib import pyplot as plt
+		 from datamatrix import DataMatrix, SeriesColumn, series
+		 
+		 LENGTH = 1 # Number of rows
+		 DEPTH = 100 # Depth (or length) of SeriesColumns
+		 
+		 sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
+		 
+		 dm = DataMatrix(length=LENGTH)
+		 dm.y = SeriesColumn(depth=DEPTH)
+		 dm.y.setallrows(sinewave)
+		 dm.y2 = series.downsample(dm.y, by=10)
+		 
+		 plt.clf()
+		 plt.subplot(121)
+		 plt.title('Original')
+		 plt.plot(dm.y.plottable, 'o-')
+		 plt.subplot(122)
+		 plt.title('Downsampled')
+		 plt.plot(dm.y2.plottable, 'o-')
+		 plt.savefig('content/pages/img/series/downsample.png')
+		--%
+		
+		%--
+		figure:
+		 source: downsample.png
+		 id: FigDownsample
+		--%		
+		
 	arguments:
 		by:
 			desc:	The downsampling factor.
 			type:	int
+			
+	keywords:
 		fnc:
 			desc:	The function to average the samples that are combined
 					into 1 value. Typically an average or a median.
@@ -265,8 +494,45 @@ def downsample(series, by, fnc=nanmean):
 def threshold(series, fnc, min_length=1):
 
 	"""
-	desc:
+	desc: |
 		Finds samples that satisfy some threshold criterion for a given period.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 import numpy as np
+		 from matplotlib import pyplot as plt
+		 from datamatrix import DataMatrix, SeriesColumn, series
+		 
+		 LENGTH = 1 # Number of rows
+		 DEPTH = 100 # Depth (or length) of SeriesColumns
+		 
+		 sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
+		 
+		 dm = DataMatrix(length=LENGTH)
+		 # First create five identical rows with a sinewave
+		 dm.y = SeriesColumn(depth=DEPTH)
+		 dm.y.setallrows(sinewave)
+		 # And also a bit of random jitter
+		 dm.y += np.random.random( (LENGTH, DEPTH) )
+		 # Threshold the signal by > 0 for at least 10 samples
+		 dm.t = series.threshold(dm.y, fnc=lambda y: y > 0, min_length=10)
+		 
+		 plt.clf()
+		 # Mark the thresholded signal
+		 plt.fill_between(np.arange(DEPTH), dm.t[0], color='black', alpha=.25)
+		 plt.plot(dm.y.plottable)
+		 plt.savefig('content/pages/img/series/threshold.png')
+		 
+		 print(dm)
+		--%
+		
+		%--
+		figure:
+		 source: threshold.png
+		 id: FigThreshold
+		--%				
 
 	arguments:
 		series:
@@ -304,7 +570,6 @@ def threshold(series, fnc, min_length=1):
 				threshold_series[i,j-nhit:j] = 1
 			nhit = 0
 		if nhit >= min_length:
-			print(i, j-nhit, j)
 			threshold_series[i,j-nhit+1:j+1] = 1
 	return threshold_series
 
@@ -324,7 +589,7 @@ def _apply_fnc(series, _fnc, **kwdict):
 		series:
 			desc:	A signal to apply the function to.
 			type:	SeriesColumn
-		fnc:
+		_fnc:
 			desc:	The function to apply.
 
 	keyword-dict:

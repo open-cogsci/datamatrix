@@ -27,8 +27,14 @@ import collections
 def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
 
 	"""
-	desc:
+	desc: |
 		Reads a DataMatrix from a csv file.
+		
+		__Example:__
+		
+		~~~ .python
+		dm = io.readtxt('data.csv')
+		~~~
 
 	arguments:
 		path:	The path to the pickle file.
@@ -63,8 +69,14 @@ def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
 def writetxt(dm, path, delimiter=',', quotechar='"'):
 
 	"""
-	desc:
+	desc: |
 		Writes a DataMatrix to a csv file.
+		
+		__Example:__
+		
+		~~~ .python
+		io.writetxt(dm, 'data.csv')
+		~~~
 
 	arguments:
 		dm:		The DataMatrix to write.

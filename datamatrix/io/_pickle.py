@@ -25,8 +25,14 @@ import os
 def readpickle(path):
 
 	"""
-	desc:
+	desc: |
 		Reads a DataMatrix from a pickle file.
+		
+		__Example:__
+		
+		~~~.python 
+		dm = io.readpickle('data.pkl')
+		~~~
 
 	arguments:
 		path:	The path to the pickle file.
@@ -42,8 +48,15 @@ def readpickle(path):
 def writepickle(dm, path, protocol=-1):
 
 	"""
-	desc:
+	desc: |
 		Writes a DataMatrix to a pickle file.
+		
+		__Example:__
+		
+		~~~ .python				
+		io.writepickle(dm, 'data.pkl')
+		~~~
+		
 
 	arguments:
 		dm:		The DataMatrix to write.

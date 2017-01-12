@@ -15,6 +15,12 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+desc:
+	Convert between `DataMatrix` objects and types of data structures (notably
+	`pandas.DataFrame`).
+---
 """
 
 from datamatrix.py3compat import *
@@ -37,7 +43,7 @@ def wrap_pandas(fnc):
 	"""
 
 	def inner(dm, *arglist, **kwdict):
-
+		
 		df_in = to_pandas(dm)
 		df_out = fnc(df_in, *arglist, **kwdict)
 		return from_pandas(df_out)
@@ -49,8 +55,20 @@ def wrap_pandas(fnc):
 def to_pandas(dm):
 
 	"""
-	desc:
+	desc: |
 		Converts a DataMatrix to a pandas DataFrame.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 from datamatrix import DataMatrix, convert
+		 
+		 dm = DataMatrix(length=3)
+		 dm.col = 1, 2, 3
+		 df = convert.to_pandas(dm)
+		 print(df)
+		--%
 
 	arguments:
 		dm:
@@ -69,11 +87,23 @@ def to_pandas(dm):
 def from_pandas(df):
 
 	"""
-	desc:
+	desc: |
 		Converts a pandas DataFrame to a DataMatrix.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 import pandas as pd
+		 from datamatrix import convert
+		 
+		 df = pd.DataFrame( {'col' : [1,2,3] } )
+		 dm = convert.from_pandas(df)
+		 print(dm)
+		--%
 
 	arguments:
-		dm:
+		df:
 			type:	DataFrame
 
 	returns:

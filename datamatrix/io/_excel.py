@@ -25,8 +25,14 @@ import os
 def readxlsx(path, default_col_type=MixedColumn):
 
 	"""
-	desc:
+	desc: |
 		Reads a DataMatrix from an Excel 2010 xlsx file.
+		
+		__Example:__
+		
+		~~~.python 
+		dm = io.readxlsx('data.xlsx')
+		~~~		
 
 	arguments:
 		path:	The path to the xlsx file.
@@ -60,8 +66,14 @@ def readxlsx(path, default_col_type=MixedColumn):
 def writexlsx(dm, path):
 
 	"""
-	desc:
+	desc: |
 		Writes a DataMatrix to an Excel 2010 xlsx file.
+		
+		__Example:__
+		
+		~~~ .python				
+		io.writexlsx(dm, 'data.xlsx')
+		~~~		
 
 	arguments:
 		dm:		The DataMatrix to write.

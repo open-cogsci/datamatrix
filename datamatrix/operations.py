@@ -15,6 +15,11 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
+
+---
+desc:
+	Functions that operate on DataMatrix objects and columns.
+---
 """
 
 from datamatrix.py3compat import *
@@ -37,8 +42,20 @@ else:
 def z(col):
 
 	"""
-	desc:
+	desc: |
 		Transforms a column into z scores.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations
+		 
+		 dm = DataMatrix(length=5)
+		 dm.col = range(5)
+		 dm.z = operations.z(dm.col)
+		 print(dm)
+		--%
 
 	arguments:
 		col:
@@ -51,6 +68,7 @@ def z(col):
 
 	return (col-col.mean)/col.std
 
+
 def weight(col):
 
 	"""
@@ -58,21 +76,22 @@ def weight(col):
 		Weights a DataMatrix by a column. That is, each row from a DataMatrix is
 		repeated as many times as the value in the weighting column.
 
-		For example:
-
-		A B
-		---
-		1 X
-		2 Y
-
-		>>> weight(dm.A)
-
-		A B
-		---
-		1 X
-		2 Y
-		2 Y
-
+		__Example:__
+		
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations
+		 
+		 dm = DataMatrix(length=3)
+		 dm.A = 1, 2, 0
+		 dm.B = 'x', 'y', 'z'
+		 print('Original:')
+		 print(dm)
+		 dm = operations.weight(dm.A)
+		 print('Weighted by A:')
+		 print(dm)
+		--%
+		
 	arguments:
 		col:
 			desc:	The column to weight by.
@@ -84,12 +103,14 @@ def weight(col):
 
 	dm1 = col._datamatrix
 	dm2 = DataMatrix(length=int(col.sum))
-	for colname, col in dm1.columns:
-		dm2[colname] = type(col)
+	for colname, _col in dm1.columns:
+		dm2[colname] = type(_col)
 	i2 = 0
 	for i1, weight in enumerate(col):
 		if not isinstance(weight, int) or weight < 0:
-			raise TypeError(u'Weights should be non-negative integer values')
+			raise TypeError(
+				u'Weights should be non-negative integer values, not %s (%s)' \
+				% (weight, type(weight)))
 		for c in range(weight):
 			for colname in dm1.column_names:
 				dm2[colname][i2] = dm1[colname][i1]
@@ -100,8 +121,22 @@ def weight(col):
 def split(col):
 
 	"""
-	desc:
+	desc: |
 		Splits a DataMatrix by unique values in a column.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations
+		  
+		 dm = DataMatrix(length=4)
+		 dm.A = 0, 0, 1, 1
+		 dm.B = 'a', 'b', 'c', 'd'
+		 for A, dm in operations.split(dm.A):
+		 	print('col.A = %s' % A)
+		 	print(dm)		
+		--%
 
 	arguments:
 		col:
@@ -120,9 +155,25 @@ def split(col):
 def tuple_split(col, *values):
 
 	"""
-	desc:
+	desc: |
 		Splits a DataMatrix by values in a column, and returns the split as a
 		tuple of DataMatrix objects.
+		
+		__Example:__
+		
+		%--
+		python: |
+			 from datamatrix import DataMatrix, operations
+			 
+			 dm = DataMatrix(length=4)
+			 dm.A = 0, 0, 1, 1
+			 dm.B = 'a', 'b', 'c', 'd'
+			 dm0, dm1 = operations.tuple_split(dm.A, 0, 1)
+			 print('dm.A = 0')
+			 print(dm0)
+			 print('dm.A = 1')
+			 print(dm1)
+		--%
 
 	arguments:
 		col:
@@ -134,9 +185,6 @@ def tuple_split(col, *values):
 
 	returns:
 		A tuple of DataMatrix objects.
-
-	example: |
-		dm1, dm2 = tuple_split(dm.col, 1, 2)
 	"""
 
 	n_total = len(col)
@@ -157,10 +205,24 @@ def tuple_split(col, *values):
 def bin_split(col, bins):
 
 	"""
-	desc:
+	desc: |
 		Splits a DataMatrix into bins; that is, the DataMatrix is first sorted
 		by a column, and then split into equal-size (or roughly equal-size)
 		bins.
+		
+		__Example:__
+		
+		%--
+		python: |
+			 from datamatrix import DataMatrix, operations
+			 
+			 dm = DataMatrix(length=5)
+			 dm.A = 1, 0, 3, 2, 4
+			 dm.B = 'a', 'b', 'c', 'd', 'e'
+			 for bin, dm in enumerate(operations.bin_split(dm.A, bins=3)):
+			 	print('bin %d' % bin)
+			 	print(dm)
+		--%
 
 	arguments:
 		col:
@@ -171,22 +233,17 @@ def bin_split(col, bins):
 			type:	int
 
 	returns:
-		desc:	A generator that iterators over the splits.
-
-	example: |
-		# Get the mean response time for 10 bins
-		for dm_ in op.split(dm.response_time, bins=10):
-			print(dm_.response_time.mean)
+		desc:	A generator that iterates over the bins.
 	"""
 
 	if len(col) < bins:
 		raise ValueError('More bins than rows')
 	dm = sort(col._datamatrix, by=col)
+	start = 0
 	for i in range(bins):
-		start = int(len(dm)/bins*i)
-		end = int(1.*len(dm)/bins*(i+1))
+		end = int(len(dm) * (i+1)/bins)
 		yield dm[start:end]
-
+		start = end
 
 def fullfactorial(dm, ignore=u''):
 
@@ -197,20 +254,19 @@ def fullfactorial(dm, ignore=u''):
 		Creates a new DataMatrix that uses a specified DataMatrix as the base of
 		a full-factorial design. That is, each value of every row is combined
 		with each value from every other row. For example:
-
-			A B
-			---
-			x 3
-			y 4
-
-		>>> fullfactorial(dm)
-
-			A B
-			---
-			x 3
-			x 4
-			y 3
-			y 4
+			
+		__Example:__
+				
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations
+		 
+		 dm = DataMatrix(length=2)
+		 dm.A = 'x', 'y'
+		 dm.B = 3, 4
+		 dm = operations.fullfactorial(dm)
+		 print(dm)
+		--%
 
 	arguments:
 		dm:
@@ -240,7 +296,7 @@ def fullfactorial(dm, ignore=u''):
 	return fdm
 
 
-def group(dm, by=None):
+def group(dm, by):
 
 	"""
 	desc: |
@@ -249,43 +305,40 @@ def group(dm, by=None):
 		Groups the DataMatrix by unique values in a set of grouping columns.
 		Grouped columns are stored as SeriesColumns. The columns that are
 		grouped should contain numeric values.
-
-		For example:
-
-		A B
-		---
-		x 0
-		x 1
-		y 2
-		y 3
-
-		>>> group(dm, by=[dm.a])
-
-		Gives:
-
-		A B
-		---
-		x [0, 1]
-		y [2, 3]
+		
+		__Example:__
+				
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations
+		 
+		 dm = DataMatrix(length=4)
+		 dm.A = 'x', 'x', 'y', 'y'
+		 dm.B = 0, 1, 2, 3
+		 print('Original:')
+		 print(dm)
+		 dm = operations.group(dm, by=dm.A)
+		 print('Grouped by A:')
+		 print(dm)
+		--%		
 
 	arguments:
 		dm:
 			desc:	The DataMatrix to group.
 			type:	DataMatrix
-
-	keywords:
-		by:			A list of columns to group by.
-		type:		[list, None]
+		by:
+			desc:	A column or list of columns to group by.
+			type:	[BaseColumn, list]
 
 	returns:
 		desc:	A grouped DataMatrix.
 		type:	DataMatrix
 	"""
 
-	import numpy as np
-
 	bycol = MixedColumn(datamatrix=dm)
 	if by is not None:
+		if isinstance(by, BaseColumn):
+			by = [by]
 		for col in by:
 			if col._datamatrix is not dm:
 				raise ValueError(u'By-columns are from a different DataMatrix')
@@ -323,14 +376,29 @@ def group(dm, by=None):
 def sort(obj, by=None):
 
 	"""
-	desc:
+	desc: |
 		Sorts a column or DataMatrix. In the case of a DataMatrix, a column must
 		be specified to determine the sort order. In the case of a column, this
 		needs to be specified if the column should be sorted by another column.
+		
+		__Example:__
+				
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations
+		 
+		 dm = DataMatrix(length=3)
+		 dm.A = 2, 0, 1
+		 dm.B = 'a', 'b', 'c'
+		 dm = operations.sort(dm, by=dm.A)
+		 print(dm)
+		--%
 
 	arguments:
 		obj:
 			type:	[DataMatrix, BaseColumn]
+			
+	keywords:
 		by:
 			desc:	The sort key, that is, the column that is used for sorting
 					the DataMatrix, or the other column.
@@ -356,10 +424,22 @@ def sort(obj, by=None):
 def shuffle(obj):
 
 	"""
-	desc:
-		Shuffles a DataMatrix or a column. If a DataMatrix is shuffle, the order
+	desc: |
+		Shuffles a DataMatrix or a column. If a DataMatrix is shuffled, the order
 		of the rows is shuffled, but values that were in the same row will stay
 		in the same row.
+		
+		__Example:__
+				
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations
+		 
+		 dm = DataMatrix(length=5)
+		 dm.A = 'a', 'b', 'c', 'd', 'e'
+		 dm.B = operations.shuffle(dm.A)
+		 print(dm)
+		--%
 
 	arguments:
 		obj:
@@ -382,10 +462,23 @@ def shuffle(obj):
 def shuffle_horiz(*obj):
 
 	"""
-	desc:
+	desc: |
 		Shuffles a DataMatrix, or several columns from a DataMatrix,
 		horizontally. That is, the values are shuffled between columns from the
 		same row.
+		
+		__Example:__
+				
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations
+		 
+		 dm = DataMatrix(length=5)
+		 dm.A = 'a', 'b', 'c', 'd', 'e'
+		 dm.B = range(5)
+		 dm = operations.shuffle_horiz(dm.A, dm.B)
+		 print(dm)
+		--%			
 
 	argument-list:
 	 	desc:	A list of BaseColumns, or a single DataMatrix.
@@ -393,18 +486,6 @@ def shuffle_horiz(*obj):
 	returns:
 		desc:	The shuffled DataMatrix.
 		type:	DataMatrix
-
-	example: |
-		dm = DataMatrix(length=2)
-		dm.col1 = 'a', 'b'
-		dm.col2 = 1, 2
-		dm.col3 = '-'
-		# Shuffle all columns
-		dm_shuffle = operations.shuffle_horiz(dm)
-		print(dm_shuffle)
-		# Shuffle only col1 and col2
-		dm_shuffle = operations.shuffle_horiz(dm.col1, dm.col2)
-		print(dm_shuffle)
 	"""
 
 	if len(obj) == 1 and isinstance(obj[0], DataMatrix):
@@ -434,9 +515,22 @@ def keep_only(dm, cols=[]):
 
 	"""
 	desc: |
+		*This modifies the DataMatrix in place.*
+		
 		Removes all columns from the DataMatrix, except those listed in `cols`.
 
-		*Note:* This modifies the DataMatrix in place.
+		__Example:__
+				
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations
+		 
+		 dm = DataMatrix(length=5)
+		 dm.A = 'a', 'b', 'c', 'd', 'e'
+		 dm.B = range(5)
+		 operations.keep_only(dm, [dm.A])
+		 print(dm)
+		--%
 
 	arguments:
 		dm:
@@ -466,10 +560,24 @@ def auto_type(dm):
 
 	"""
 	desc: |
+		*This modifies the DataMatrix in place.*
+	
 		Converts all columns of type MixedColumn to IntColumn if all values are
 		integer numbers, or FloatColumn if all values are non-integer numbes.
 
-		*Note:* This modifies the DataMatrix in place.
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations
+		 
+		 dm = DataMatrix(length=5)
+		 dm.A = 'a'
+		 dm.B = 1
+		 dm.C = 1.1
+		 operations.auto_type(dm)
+		 print('dm.A: %s' % type(dm.A))
+		 print('dm.B: %s' % type(dm.B))
+		 print('dm.C: %s' % type(dm.C))
+		--%
 
 	arguments:
 		dm:
@@ -501,7 +609,9 @@ def auto_type(dm):
 def _fullfact(levels):
 
 	"""
-	desc:
+	visible: False
+	
+	desc: |
 		Taken from pydoe. See:
 		<https://github.com/tisimst/pyDOE/blob/master/pyDOE/doe_factorial.py>
 	"""
