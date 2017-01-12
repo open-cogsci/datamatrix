@@ -4,9 +4,7 @@ title: datamatrix.series
 
 ## What are series?
 
-A `SeriesColumn` is a column with a depth. For example, imagine a table that combines the names of two cities with their populations during the past four years. Here, the names the cities are single values that fit into a normal tale. But the population corresponds to a series of values for each city. This is where the `SeriesColumn` comes in.
-
-Data of this kind is very common. For example, in an EEG experiment, electrodes record signal over time.
+A `SeriesColumn` is a column with a depth. For example, imagine a table that combines the names of two cities with their populations during the past four years. Here, the names the cities are single values that fit into a normal table. But the population corresponds to a series of values for each city. This is where the `SeriesColumn` comes in.
 
 __Example:__
 
@@ -45,6 +43,9 @@ python: |
 figure:
  source: series.png
  id: FigSeries.png
+ caption: The populations of Marseille and Lyon over time.
 --%
+
+Data of this kind is very common. For example, imagine a psychology experiment in which participants see positive or negative pictures, while their brain activity is recorded using electroencephalography (EEG). Here, picture type (positive or negative) is a single value that could be stored in a normal table. But EEG activity is a continuous signal, and could be stored as `SeriesColumn`.
 
 %-- include: include/api/series.md --%

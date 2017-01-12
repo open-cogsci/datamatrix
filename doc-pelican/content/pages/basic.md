@@ -7,25 +7,17 @@ from datamatrix import DataMatrix
 # Create a new DataMatrix
 dm = DataMatrix(length=5)
 # The first two rows
-dm[:2]
+print(dm[:2])
 # Create a new column and initialize it with the Fibonacci series
 dm.fibonacci = 0, 1, 1, 2, 3 
 # A simple selection (remove 0 and 2)
 dm = (dm.fibonacci != 0) & (dm.fibonacci != 2)
 # The first two cells from the fibonacci column
-dm.fibonacci[:2]
-# Some column properties
-dm.fibonacci.mean
-dm.fibonacci.median
-dm.fibonacci.min
-dm.fibonacci.max
-dm.fibonacci.sum
-dm.fibonacci.std # standard deviation
-dm.fibonacci.unique # a list of unique values
-dm.fibonacci.count # the number of unique values
-dm.fibonacci.name # is 'fibonacci'
+print(dm.fibonacci[:2])
+# Column mean
+print('Mean: %s' % dm.fibonacci.mean)
 # Multiply all fibonacci cells by 2
-dm.fibonacci * 2
+dm.fibonacci_times_two = dm.fibonacci * 2
 # Loop through all rows
 for row in dm:
 	print(row.fibonacci) # get the fibonacci cell from the row
@@ -39,8 +31,8 @@ Slightly longer cheat sheet:
 
 [TOC]
 
-## Basic operations
 
+## Basic operations
 
 ### Creating a DataMatrix
 
@@ -148,6 +140,25 @@ python: |
  print(dm)
 --%
 
+### Column properties
+
+Basic numeric properties, such as the mean, can be accessed directly. Only numeric values are taken into account.
+
+%--
+python: |
+ dm.col = 1, 2, 'not a number'
+ # Numeric descriptives
+ print('mean: %s' % dm.col.mean)
+ print('median: %s' % dm.col.median)
+ print('standard deviation: %s' % dm.col.std)
+ print('sum: %s' % dm.col.sum)
+ print('min: %s' % dm.col.min)
+ print('max: %s' % dm.col.max)
+ # Other properties
+ print('unique values: %s' % dm.col.unique)
+ print('number of unique values: %s' % dm.col.count)
+ print('column name: %s' % dm.col.name)
+--%
 
 ### Iterating over rows, columns, and cells
 

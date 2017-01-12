@@ -15,7 +15,7 @@ SITENAME = u'DataMatrix documentation'
 STATIC_PATHS = ['pages']
 
 ROOT_PATH = os.getcwd()
-GITHUB_ROOT_URL = 'https://github.com/smathot/python-datamatrix/blob/%s/doc-pelican' % BRANCH
+GITHUB_ROOT_URL = 'https://github.com/smathot/python-datamatrix/tree/master/doc-pelican'
 OUTPUT_PATH = 'output/' + BRANCH
 PATH = 'content'
 THEME=  'themes/cogsci'

@@ -1,6 +1,6 @@
 title: DataMatrix
 
-`DataMatrix` is a Python library for working with column-based and continuous data.
+`DataMatrix` is an intuitive Python library for working with column-based and continuous data.
 
 <div class="btn-group" role="group" aria-label="...">
   <a role="button" class="btn btn-success" href="%url:install%">

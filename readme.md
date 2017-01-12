@@ -3,7 +3,7 @@
 *An intuitive, Pythonic way to work with tabular data.*
 
 Sebastiaan Mathôt  <br />
-Copyright 2015-2016  <br />
+Copyright 2015-2017  <br />
 http://www.cogsci.nl/smathot
 
 [![Build Status](https://travis-ci.org/smathot/python-datamatrix.svg?branch=master)](https://travis-ci.org/smathot/python-datamatrix)
@@ -26,12 +26,11 @@ Optional:
 - `numpy` and `scipy` for using the `FloatColumn`, `IntColumn`, and `SeriesColumn` objects
 - `prettytable` for creating a text representation of a DataMatrix (e.g. to print it out)
 - `openpyxl` for reading and writing `.xlsx` files
+- `fastnumbers` for improved performance
 
-## Usage
+## Documentation
 
-See the included IPython notebook for examples of how to use `datamatrix`:
-
-- [using-datamatrix.ipynb](using-datamatrix.ipynb)
+See <http://datamatrix.cogsci.nl/>
 
 ## License
 
