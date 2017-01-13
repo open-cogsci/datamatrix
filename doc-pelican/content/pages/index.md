@@ -30,11 +30,15 @@ title: DataMatrix
 %--
 python: |
  from datamatrix import DataMatrix
- dm = DataMatrix(length=5)
- dm.prime = 2, 3, 5, 7, 11
- print('First five prime numbers')
+ # Four philosophers with their names, fields, and genders
+ dm = DataMatrix(length=4)
+ dm.name = 'Ibn al-Haytam', 'Hypatia', 'Popper', 'de Beauvoir'
+ dm.field = 'Optics', 'Mathematics', 'Science', 'Existentialism'	
+ dm.gender = 'M', 'F', 'M', 'F'
+ print('Philosophers:')
  print(dm)
- dm = (dm.prime >= 3) & (dm.prime <= 7)
- print('Keep only numbers between 3 and 7')
+ # Select only women existentialists
+ dm = (dm.gender == 'F') & (dm.field == 'Existentialism')
+ print('Women Existentialists:')
  print(dm)
 --%
