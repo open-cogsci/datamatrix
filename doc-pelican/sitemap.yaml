@@ -1,0 +1,11 @@
+Install: install
+Basic use: basic
+Modules:
+    datamatrix.operations: operations
+    datamatrix.series: series
+    datamatrix.io: io
+    datamatrix.convert: convert
+Forum: http://forum.cogsci.nl/
+Blog: http://www.cogsci.nl/
+v0.3:
+    v0.3: http://datamatrix.cogsci.nl/0.3/
