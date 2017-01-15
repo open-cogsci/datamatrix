@@ -61,7 +61,7 @@ class Index(object):
 				
 		if isinstance(item, slice):
 			return Index(self._l[item])
-		if isinstance(item, list):
+		if isinstance(item, (tuple, list)):
 			i = Index(0)
 			for row in item:
 				i.append(self._l[row])
