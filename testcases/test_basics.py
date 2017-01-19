@@ -59,6 +59,13 @@ def test_floatcolumn():
 	dm.col[:] = 'test'
 	for value in dm.col:
 		ok_(np.isnan(value))
+	# Test nans and infs
+	dm.col = 'nan', 'inf'
+	check_col(dm.col, [np.nan, np.inf])
+	dm.col = np.nan, np.inf
+	check_col(dm.col, [np.nan, np.inf])
+	dm.col = 'x', None
+	check_col(dm.col, [np.nan, np.nan])
 	# Test shortening and lengthening
 	dm.length = 0
 	dm.length = 4
@@ -77,9 +84,9 @@ def test_intcolumn():
 	dm.col = IntColumn
 	dm.col = 1
 	check_col(dm.col, [1, 1])
-	dm.col = 2, 3
+	dm.col = 2, '3'
 	check_col(dm.col, [2, 3])
-	dm.col[:-1] = 4
+	dm.col[:-1] = '4'
 	check_col(dm.col, [4, 3])
 	@raises(TypeError)
 	def _():
@@ -88,6 +95,10 @@ def test_intcolumn():
 	@raises(TypeError)
 	def _():
 		dm.col[:] = 'test'
+	_()
+	@raises(TypeError)
+	def _():
+		dm.col[0] = None
 	_()
 	# Test shortening and lengthening
 	dm.length = 0

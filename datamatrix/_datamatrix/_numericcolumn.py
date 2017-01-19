@@ -21,6 +21,7 @@ from datamatrix.py3compat import *
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._index import Index
 import operator
+import warnings
 try:
 	import numpy as np
 	from scipy.stats import nanmean, nanmedian, nanstd
@@ -28,6 +29,12 @@ try:
 except ImportError:
 	np = None
 	nan = None
+try:
+	import fastnumbers
+except ImportError:
+	warnings.warn('Install fastnumbers for better performance')
+	fastnumbers = None
+
 
 class NumericColumn(BaseColumn):
 
@@ -102,10 +109,16 @@ class NumericColumn(BaseColumn):
 
 	def _checktype(self, value):
 
+		if value is None:
+			return self.invalid
+		if fastnumbers is not None:
+			if not fastnumbers.isreal(value, allow_inf=True, allow_nan=True):
+				return self.invalid
+			return fastnumbers.fast_real(value, nan=np.nan, inf=np.inf)		
 		try:
 			return float(value)
 		except:
-			return np.nan
+			return self.invalid
 
 	def _tosequence(self, value, length):
 
@@ -117,14 +130,15 @@ class NumericColumn(BaseColumn):
 
 	def _compare(self, other, op):
 
-		i = np.where(op(self._seq, other))[0]
+		i = np.where(op(self._seq, self._checktype(other)))[0]
 		return self._datamatrix._selectrowid(Index(self._rowid[i]))
 
 	def _operate(self, other, number_op, str_op=None):
 
 		col = self._empty_col()
 		col._rowid = self._rowid
-		col._seq = number_op(self._seq, other)
+		col._seq = number_op(self._seq,
+			self._tosequence(other, len(self._datamatrix)))
 		return col
 
 	def _addrowid(self, _rowid):
@@ -172,6 +186,7 @@ class NumericColumn(BaseColumn):
 		col._seq = np.concatenate((self._seq[i_self], other._seq[i_other]))
 		return col._getrowidkey(_rowid)
 
+
 class FloatColumn(NumericColumn):
 
 	"""
@@ -202,24 +217,47 @@ class IntColumn(NumericColumn):
 				pass
 			else:
 				return super(NumericColumn, self)._tosequence(value, length)
-		try:
-			value = int(value)
-		except:
-			raise TypeError(u'IntColumn expects integers!')
+		value = self._checktype(value)
 		return super(NumericColumn, self)._tosequence(value, length)
 
 	def _checktype(self, value):
-
+				
+		if value is not None and fastnumbers is not None:
+			value = fastnumbers.fast_forceint(value)
+			if isinstance(value, int):
+				return value
+			raise TypeError(u'IntColumn expects integers, not %s' \
+				% safe_decode(value))
 		try:
 			return int(value)
 		except:
-			raise TypeError(u'IntColumn expects integers!')
+			raise TypeError(u'IntColumn expects integers, not %s' \
+				% safe_decode(value))
 
 	def _operate(self, other, number_op, str_op=None):
 
 		col = super(IntColumn, self)._operate(other, number_op, str_op=None)
 		col._seq = col._seq.astype(self.dtype)
 		return col
+		
+	def __eq__(self, other):
+		
+		try:
+			return super(IntColumn, self).__eq__(other)
+		except TypeError:
+			# If the other value is not an int, then nothing is equal to it
+			return self._compare(0,
+				lambda x, y: np.zeros(len(self._datamatrix)))
+
+	def __ne__(self, other):
+		
+		try:
+			return super(IntColumn, self).__ne__(other)
+		except TypeError:
+			# If the other value is not an int, then everything is not equal
+			# to it
+			return self._compare(0,
+				lambda x, y: np.ones(len(self._datamatrix)))
 
 	def __div__(self, other):
 
