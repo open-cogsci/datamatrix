@@ -70,6 +70,13 @@ def safe_encode(s, enc='utf-8', errors='strict'):
 		except:
 			pass
 	return s.encode(enc, errors)
+	
+def safe_sorted(l):
+	
+	try:
+		return sorted(l)
+	except TypeError:
+		return sorted([safe_decode(i) for i in l])
 
 if py3:
 	safe_str = safe_decode
@@ -80,7 +87,7 @@ def warn(msg):
 	import warnings
 	warnings.warn(safe_str(msg))
 
-__all__ = ['py3', 'safe_decode', 'safe_encode', 'safe_str',
+__all__ = ['py3', 'safe_decode', 'safe_encode', 'safe_str', 'safe_sorted',
 	'universal_newline_mode', 'warn']
 if not py3:
 	__all__ += ['str', 'bytes']

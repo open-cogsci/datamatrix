@@ -69,7 +69,7 @@ class BaseColumn(object):
 			An interator for all unique values that occur in the column.
 		"""
 
-		return list(sorted(set(self._seq)))
+		return list(safe_sorted(set(self._seq)))
 
 
 	@property
