@@ -118,6 +118,57 @@ def weight(col):
 	return dm2
 
 
+def replace(col, mappings={}):
+	
+	"""
+	desc: |
+		*This modifies the DataMatrix in place.*
+	
+		Replaces values in a column by other values.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations
+		 
+		 dm = DataMatrix(length=3)
+		 dm.old = 0, 1, 2
+		 dm.new = dm.old[:]
+		 operations.replace(dm.new, {0 : 'a', 2 : 'c'})
+		 print(dm)
+		--%
+		
+	arguments:
+		col:
+			desc:	The column to weight by.
+			type:	BaseColumn
+			
+	keywords:
+		mappings:
+			desc:	A dict where old values are keys and new values are values.
+			type:	dict
+	"""
+	
+	# For MixedColumns
+	if isinstance(col._seq, list):
+		for old, new in mappings.items():
+			for i, val in enumerate(col):
+				if old == val:
+					col[i] = new
+		return
+
+	# For NumericColumns and SeriesColumns
+	import numpy as np
+	for old, new in mappings.items():
+		if np.isnan(old):
+			b = np.isnan(col._seq)
+		else:
+			b = col._seq == old
+		i = np.where(b)
+		col._seq[i] = new
+
+
 def split(col):
 
 	"""

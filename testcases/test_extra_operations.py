@@ -18,12 +18,34 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
-from datamatrix import DataMatrix, MixedColumn, IntColumn, FloatColumn
+from datamatrix import DataMatrix, MixedColumn, IntColumn, FloatColumn, \
+	SeriesColumn
 from datamatrix import operations as ops
-from testcases.test_tools import check_col, check_row, check_series, \
-	check_integrity
+from testcases.test_tools import check_col, check_row, check_series
 from nose.tools import eq_, ok_, raises
 import numpy as np
+
+
+def test_replace():
+	
+	dm = DataMatrix(length=3)
+	dm.a = 0, 1, 2
+	dm.c = FloatColumn
+	dm.c = np.nan, 1, 2
+	dm.s = SeriesColumn(depth=3)
+	dm.s[0] = 0, 1, 2
+	dm.s[1] = np.nan, 1, 2
+	dm.s[2] = np.nan, 1, 2
+	ops.replace(dm.a, {0 : 100, 2 : 200})
+	ops.replace(dm.c, {np.nan : 100, 2 : np.nan})
+	ops.replace(dm.s, {np.nan : 100, 2 : np.nan})
+	check_col(dm.a, [100, 1, 200])
+	check_col(dm.c, [100, 1, np.nan])
+	check_series(dm.s, [
+		[0, 1, np.nan],
+		[100, 1, np.nan],
+		[100, 1, np.nan],
+		])
 
 
 def test_z():
