@@ -324,7 +324,7 @@ class BaseColumn(object):
 				col._seq.append(other._seq[other._rowid.index(row)])
 		return col
 
-	def _tosequence(self, value, length):
+	def _tosequence(self, value, length=None):
 
 		"""
 		visible: False
@@ -335,12 +335,17 @@ class BaseColumn(object):
 
 		arguments:
 			value:	The value to turn into a sequence.
-			length:	The length of the sequence.
+			
+		keywords:
+			length:	The length of the sequence, or None to use length of\
+					DataMatrix.
 
 		returns:
 			A sequence, that is, some iterable object.
 		"""
 
+		if length is None:
+			length = len(self._datamatrix)
 		if value is None or isinstance(value, (numbers.Number, basestring)):
 			return [self._checktype(value)]*length
 		try:
@@ -502,6 +507,14 @@ class BaseColumn(object):
 			if _key < 0 or _key >= len(self):
 				raise Exception('Outside of range')
 			self._seq[_key] = _val
+			
+	def _issequence(self, val):
+		
+		if isinstance(val, basestring) or not hasattr(val, u'__len__'):
+			return False
+		if len(val) != len(self._datamatrix):
+			raise TypeError(u'Sequence has invalid length')
+		return True
 
 	def _compare(self, other, op):
 
@@ -519,6 +532,12 @@ class BaseColumn(object):
 			type:	DataMatrix
 		"""
 
+		if self._issequence(other):
+			return self._compare_sequence(other, op)
+		return self._compare_value(other, op)
+		
+	def _compare_value(self, other, op):
+
 		_rowid = Index(0)
 		for rowid, val in zip(self._rowid, self._seq):
 			try:
@@ -527,6 +546,18 @@ class BaseColumn(object):
 			except:
 				pass
 		return self._datamatrix._selectrowid(_rowid)
+		
+	def _compare_sequence(self, other, op):
+		
+		_rowid = Index(0)
+		for rowid, val, ref in \
+				zip(self._rowid, self._seq, self._tosequence(other)):
+			try:
+				if op(val, ref):
+					_rowid.append(rowid)
+			except:
+				pass
+		return self._datamatrix._selectrowid(_rowid)				
 
 	def _operate(self, other, number_op, str_op=None):
 
@@ -619,12 +650,8 @@ class BaseColumn(object):
 	def __le__(self, other):
 		return self._compare(other, operator.le)
 	def __eq__(self, other):
-		if isinstance(other, BaseColumn):
-			return self is other
 		return self._compare(other, operator.eq)
 	def __ne__(self, other):
-		if isinstance(other, BaseColumn):
-			return self is not other
 		return self._compare(other, operator.ne)
 	def __add__(self, other):
 		return self._operate(other, operator.add, operator.concat)
@@ -642,3 +669,4 @@ class BaseColumn(object):
 		return self._operate(other, operator.mod)
 	def __pow__(self, other):
 		return self._operate(other, operator.pow)
+	

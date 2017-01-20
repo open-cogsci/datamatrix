@@ -207,7 +207,11 @@ class _SeriesColumn(NumericColumn):
 		except:
 			raise Exception('Invalid type: %s' % str(value))
 		return a
-
+	
+	def _compare(self, other, op):
+		
+		raise NotImplementedError(u'Cannot compare SeriesColumns')
+		
 	def _tosequence(self, value, length):
 
 		# For float and integers, we simply create a new (length, depth) array

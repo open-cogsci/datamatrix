@@ -387,16 +387,19 @@ def group(dm, by):
 	"""
 
 	bycol = MixedColumn(datamatrix=dm)
+	bynames = []
 	if by is not None:
 		if isinstance(by, BaseColumn):
+			bynames = [by.name]
 			by = [by]
 		for col in by:
 			if col._datamatrix is not dm:
 				raise ValueError(u'By-columns are from a different DataMatrix')
 			bycol += col
-	keys = bycol.unique
-	groupcols = [(name, col) for name, col in dm.columns if col not in by]
-	nogroupcols = [(name, col) for name, col in dm.columns if col in by]
+			bynames += [col.name]
+	keys = bycol.unique	
+	groupcols = [(name, col) for name, col in dm.columns if name not in bynames]
+	nogroupcols = [(name, col) for name, col in dm.columns if name in bynames]
 	cm = DataMatrix(length=len(keys))
 	for name, col in groupcols:
 		if isinstance(col, _SeriesColumn):

@@ -120,18 +120,23 @@ class NumericColumn(BaseColumn):
 		except:
 			return self.invalid
 
-	def _tosequence(self, value, length):
+	def _tosequence(self, value, length=None):
 
+		if length is None:
+			length = len(self._datamatrix)		
 		if value is None or isinstance(value, basestring):
 			a = np.empty(length, dtype=self.dtype)
 			a[:] = self._checktype(value)
 			return a
 		return super(NumericColumn, self)._tosequence(value, length)
 
-	def _compare(self, other, op):
+	def _compare_value(self, other, op):
 
 		_other = self._checktype(other)
 		if np.isnan(_other):
+			# NaN is usually not equal to itself. Here we implement equality
+			# for NaN, as though NaN is equal to itself. This behavior may
+			# change in the future
 			if op is operator.eq:
 				b = np.isnan(self._seq)
 			elif op is operator.ne:
@@ -148,6 +153,12 @@ class NumericColumn(BaseColumn):
 		else:
 			b = op(self._seq, _other)
 		i = np.where(b)[0]
+		return self._datamatrix._selectrowid(Index(self._rowid[i]))
+		
+	def _compare_sequence(self, other, op):
+		
+		_other = self._tosequence(other)
+		i = np.where(op(self._seq, _other))
 		return self._datamatrix._selectrowid(Index(self._rowid[i]))
 
 	def _operate(self, other, number_op, str_op=None):
@@ -225,8 +236,10 @@ class IntColumn(NumericColumn):
 	dtype = int
 	invalid = 0
 
-	def _tosequence(self, value, length):
+	def _tosequence(self, value, length=None):
 
+		if length is None:
+			length = len(self._datamatrix)
 		if not isinstance(value, basestring):
 			try:
 				value = list(value)
@@ -259,21 +272,25 @@ class IntColumn(NumericColumn):
 		
 	def __eq__(self, other):
 		
+		if self._issequence(other):
+			return super(IntColumn, self).__eq__(other)
 		try:
 			return super(IntColumn, self).__eq__(other)
 		except TypeError:
 			# If the other value is not an int, then nothing is equal to it
-			return self._compare(0,
+			return self._compare_value(0,
 				lambda x, y: np.zeros(len(self._datamatrix)))
 
 	def __ne__(self, other):
 		
+		if self._issequence(other):
+			return super(IntColumn, self).__eq__(other)		
 		try:
 			return super(IntColumn, self).__ne__(other)
 		except TypeError:
 			# If the other value is not an int, then everything is not equal
 			# to it
-			return self._compare(0,
+			return self._compare_value(0,
 				lambda x, y: np.ones(len(self._datamatrix)))
 
 	def __div__(self, other):
