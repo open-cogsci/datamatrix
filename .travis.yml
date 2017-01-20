@@ -5,7 +5,7 @@ sudo: false
 virtualenv:
   system_site_packages: true
 before_install:
-  - pip install openpyxl
+  - pip install openpyxl fastnumbers
 addons:
   apt:
     packages:
