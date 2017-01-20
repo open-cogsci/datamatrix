@@ -59,6 +59,18 @@ def check_int_operations():
 		dm.col *= 'x'
 	_()
 	check_integrity(dm)
+	
+	
+def check_float_operations():
+
+	dm = DataMatrix(length=2, default_col_type=FloatColumn)
+	dm.col = 1, 2
+	check_col(dm.col, [1, 2])
+	dm.col *= 2.5
+	check_col(dm.col, [2.5, 5])
+	dm.col *= np.inf, np.nan
+	check_col(dm.col, [np.inf, np.nan])
+	check_integrity(dm)
 
 
 def check_str_operations():
@@ -111,9 +123,10 @@ def test_mixedcolumn():
 def test_floatcolumn():
 
 	check_operations(FloatColumn)
+	check_float_operations()
 
 
 def test_intcolumn():
 
-	check_operations(IntColumn)
 	check_int_operations()
+	check_operations(IntColumn)

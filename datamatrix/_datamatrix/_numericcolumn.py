@@ -122,15 +122,32 @@ class NumericColumn(BaseColumn):
 
 	def _tosequence(self, value, length):
 
-		if isinstance(value, basestring):
+		if value is None or isinstance(value, basestring):
 			a = np.empty(length, dtype=self.dtype)
-			a[:] = np.nan
+			a[:] = self._checktype(value)
 			return a
 		return super(NumericColumn, self)._tosequence(value, length)
 
 	def _compare(self, other, op):
 
-		i = np.where(op(self._seq, self._checktype(other)))[0]
+		_other = self._checktype(other)
+		if np.isnan(_other):
+			if op is operator.eq:
+				b = np.isnan(self._seq)
+			elif op is operator.ne:
+				b = ~np.isnan(self._seq)
+			else:
+				raise TypeError(u'Cannot compare FloatColumn to %s' % other)
+		elif np.isinf(_other):
+			if op is operator.eq:
+				b = np.isinf(self._seq)
+			elif op is operator.ne:
+				b = ~np.isinf(self._seq)
+			else:
+				raise TypeError(u'Cannot compare FloatColumn to %s' % other)
+		else:
+			b = op(self._seq, _other)
+		i = np.where(b)[0]
 		return self._datamatrix._selectrowid(Index(self._rowid[i]))
 
 	def _operate(self, other, number_op, str_op=None):

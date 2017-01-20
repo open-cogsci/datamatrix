@@ -20,9 +20,10 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
 	SeriesColumn
-from nose.tools import ok_
+from nose.tools import raises
 from testcases.test_tools import check_col, check_series, check_integrity
 import numpy as np
+
 
 def check_select(col_type):
 
@@ -39,6 +40,7 @@ def check_select(col_type):
 	dm_ = (dm.col == 1) ^ (dm.col == 2)
 	check_col(dm_.col, [1,2])
 	check_integrity(dm)
+
 
 def check_concat(col_type, invalid):
 
@@ -64,12 +66,46 @@ def test_floatcolumn():
 
 	check_select(FloatColumn)
 	check_concat(FloatColumn, invalid=np.nan)
+	# Check selections with non-int types
+	dm = DataMatrix(length=4, default_col_type=FloatColumn)
+	dm.col = 1, 2, np.nan, np.inf
+	dm2 = dm.col == '1'
+	check_col(dm2.col, [1])
+	dm2 = dm.col == ''
+	check_col(dm2.col, [np.nan])
+	dm2 = dm.col != ''
+	check_col(dm2.col, [1, 2, np.inf])	
+	dm2 = dm.col == np.nan
+	check_col(dm2.col, [np.nan])
+	dm2 = dm.col != np.nan
+	check_col(dm2.col, [1, 2, np.inf])
+	dm2 = dm.col == np.inf
+	check_col(dm2.col, [np.inf])
+	dm2 = dm.col != np.inf
+	check_col(dm2.col, [1, 2, np.nan])
+	@raises(TypeError)
+	def _():
+		dm.col > ''
+	_()
 
 
 def test_intcolumn():
 
 	check_select(IntColumn)
-	check_concat(IntColumn, invalid=0)
+	check_concat(IntColumn, invalid=0)	
+	# Check selections with non-int types
+	dm = DataMatrix(length=2, default_col_type=IntColumn)
+	dm.col = 1, 2
+	dm2 = dm.col == '1.1' # Floored to 1
+	check_col(dm2.col, [1])
+	dm2 = dm.col == ''
+	check_col(dm2.col, [])
+	dm2 = dm.col != ''
+	check_col(dm2.col, [1, 2])
+	@raises(TypeError)
+	def _():
+		dm.col > ''
+	_()
 
 
 def test_seriescolumn():

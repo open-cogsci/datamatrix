@@ -275,6 +275,8 @@ class BaseColumn(object):
 			A suitably typed value.
 		"""
 		
+		if value is None:
+			return value
 		if fastnumbers is not None:
 			value = fastnumbers.fast_real(value, nan=u'nan', inf=u'inf')
 		else:
@@ -289,7 +291,7 @@ class BaseColumn(object):
 					value = float(value)
 				except:
 					pass
-		if value is None or isinstance(value, (int, float, str)):
+		if isinstance(value, (int, float, str)):
 			return value
 		if isinstance(value, bytes):
 			return safe_decode(value)
@@ -339,7 +341,7 @@ class BaseColumn(object):
 			A sequence, that is, some iterable object.
 		"""
 
-		if isinstance(value, (numbers.Number, basestring)):
+		if value is None or isinstance(value, (numbers.Number, basestring)):
 			return [self._checktype(value)]*length
 		try:
 			value = list(value)
