@@ -525,6 +525,10 @@ class DataMatrix(object):
 		if len(self._cols) > 6:
 			return str(t) + u'\n(+ %d columns not shown)' % (len(self._cols)-5)
 		return str(t)
+		
+	def __repr__(self):
+	
+		return u'DataMatrix[%d, 0x%x]\n%s' % (self._id, id(self), str(self))
 
 	def __lshift__(self, other):
 
