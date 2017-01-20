@@ -224,6 +224,16 @@ python: |
  print(dm_subset)
 --%
 
+You can also select by comparing to a series of values, in which case a row-by-row comparison is done:
+
+%--
+python: |
+ dm = DataMatrix(length=4)
+ dm.col = 'a', 'b', 'c', 'd'
+ dm_subset = dm.col == ['a', 'b', 'x', 'y']
+ print(dm_subset)
+--%
+
 
 ### Basic column operations (multiplication, addition, etc.)
 
@@ -240,34 +250,133 @@ python: |
  print(dm)
 --%
 
-## Working numeric data (requires numpy)
 
-If you do not specify a column type (as in the examples above), the `MixedColumn` will be used. When you work with large amounts of numeric data, you can use the `IntColumn` or `FloatColumn` to improve performance. These columns are built on top of `numpy` arrays.
+## Column types
+
+When you create a `DataMatrix`, you can indicate a default column type. If you do not specify a default column type, a `MixedColumn` is used by default.
+
+%--
+python: |
+ from datamatrix import DataMatrix, IntColumn
+ dm = DataMatrix(length=2, default_col_type=IntColumn)
+ dm.i = 1, 2 # This is an IntColumn
+--%
+
+You can also explicitly indicate the column type when creating a new column:
+
+%--
+python: |
+ from datamatrix import FloatColumn
+ dm.f = FloatColumn
+--%
+
+### MixedColumn (default)
+
+A `MixedColumn` contains text (`unicode` in Python 2, `str` in Python 3), `int`, `float`, or `None`. Values are automatically converted to the most appropriate type, and a `utf-8` encoding is assumed where applicable.
+
+%--
+python: |
+ from datamatrix import DataMatrix
+ dm = DataMatrix(length=4)
+ dm.datatype = 'int', 'float', 'float (converted)', 'None'
+ dm.value = 1, 1.2, '1.2', None
+ print(dm)
+--%
+
+### IntColumn (requires numpy)
+
+The `IntColumn` contains only `int` values. It does not support `nan` values. 
+
+%--
+python: |
+ from datamatrix import DataMatrix, IntColumn
+ dm = DataMatrix(length=2)
+ dm.i = IntColumn
+ dm.i = 1, 2
+ print(dm)
+--%
+
+If you insert non-`int` values, they are automatically converted to `int` if possible. Decimals are discarded (i.e. values are floored, not rounded):
+
+%--
+python: |
+ dm.i = '3', 4.7
+ print(dm)
+--%
+
+If you insert values that cannot converted to `int`, a `TypeError` is raised:
+
+%--
+python: |
+ try:
+ 	dm.i = 'x'
+ except TypeError as e:
+ 	print(repr(e))
+--%
+
+
+### FloatColumn (requires numpy)
+
+The `FloatColumn` contains `float`, `nan`, and `inf` values.
 
 %--
 python: |
  import numpy as np
- from matplotlib import pyplot as plt
- from datamatrix import IntColumn, FloatColumn 
- 
- dm = DataMatrix(length=1000)
- dm.x = IntColumn # Initialized with all 0 values
- dm.x = np.arange(0, 1000)
- dm.y = FloatColumn
-
- dm.y = np.sin(np.linspace(0, 2*np.pi, 1000))
- plt.plot(dm.x, dm.y)
- plt.savefig('content/pages/img/basic/sinewave.png')
+ from datamatrix import DataMatrix, FloatColumn
+ dm = DataMatrix(length=3)
+ dm.f = FloatColumn
+ dm.f = 1, np.nan, np.inf
+ print(dm)
 --%
+
+If you insert other values, they are automatically converted if possible.
 
 %--
-figure:
- source: sinewave.png
- id: FigSineWave
+python: |
+ dm.f = '3.3', 'inf', 'nan'
+ print(dm)
+--%
+
+If you insert values that cannot be converted to `float`, they become `nan`.
+
+%--
+python: |
+ dm.f = 'x'
+ print(dm)
 --%
 
 
-## Working with continuous data (requires numpy)
+<div class="alert alert-warning">
+Note: Careful when working with <code>nan</code> data!
+</div>
+
+You have to take special care when working with `nan` data. In general, `nan` is not equal to anything else, not even to itself: `nan != nan`. You can see this behavior when selecting data from a `FloatColumn` with `nan` values in it.
+
+%--
+python: |
+ from datamatrix import DataMatrix, FloatColumn
+ dm = DataMatrix(length=3)
+ dm.f = FloatColumn
+ dm.f = 0, np.nan, 1
+ dm = dm.f == [0, np.nan, 1]
+ print(dm)
+--%
+
+However, for convenience, you can select all `nan` values by comparing a `FloatColumn` to a single `nan` value:
+
+%--
+python: |
+ from datamatrix import DataMatrix, FloatColumn
+ dm = DataMatrix(length=3)
+ dm.f = FloatColumn
+ dm.f = 0, np.nan, 1 
+ print('NaN values')
+ print(dm.f == np.nan)
+ print('Non-NaN values')
+ print(dm.f != np.nan)
+--%
+
+### SeriesColumn: Working with continuous data (requires numpy)
 
 The `SeriesColumn` is 2 dimensional; that is, each cell is by itself an array of values. Therefore, the `SeriesColumn` can be used to work with sets of continuous data, such as EEG or eye-position traces.
 

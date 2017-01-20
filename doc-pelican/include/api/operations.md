@@ -187,6 +187,42 @@ __Keywords:__
 
 [keep_only]: #keep_only
 
+<div class="FunctionDoc YAMLDoc" id="replace" markdown="1">
+
+## function __replace__\(col, mappings=\{\}\)
+
+*This modifies the DataMatrix in place.*
+
+Replaces values in a column by other values.
+
+__Example:__
+
+%--
+python: |
+ from datamatrix import DataMatrix, operations
+ 
+ dm = DataMatrix(length=3)
+ dm.old = 0, 1, 2
+ dm.new = dm.old[:]
+ operations.replace(dm.new, {0 : 'a', 2 : 'c'})
+ print(dm)
+--%
+
+__Arguments:__
+
+- `col` -- The column to weight by.
+	- Type: BaseColumn
+
+__Keywords:__
+
+- `mappings` -- A dict where old values are keys and new values are values.
+	- Type: dict
+	- Default: {}
+
+</div>
+
+[replace]: #replace
+
 <div class="FunctionDoc YAMLDoc" id="shuffle" markdown="1">
 
 ## function __shuffle__\(obj\)
