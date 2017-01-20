@@ -258,8 +258,10 @@ class IntColumn(NumericColumn):
 				return value
 			raise TypeError(u'IntColumn expects integers, not %s' \
 				% safe_decode(value))
+		if isinstance(value, int):
+			return value
 		try:
-			return int(value)
+			return int(float(value))
 		except:
 			raise TypeError(u'IntColumn expects integers, not %s' \
 				% safe_decode(value))
