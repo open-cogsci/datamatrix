@@ -349,7 +349,8 @@ def blinkreconstruct(series, vt=5, maxdur=500, margin=10, smooth_winlen=21,
 		type:	SeriesColumn
 	"""
 
-	return _apply_fnc(series, _blinkreconstruct, **kwargs)
+	return _apply_fnc(series, _blinkreconstruct, vt=vt, maxdur=maxdur,
+		margin=margin, smooth_winlen=21, std_thr=3)
 
 
 def smooth(series, winlen=11, wintype='hanning'):
