@@ -49,7 +49,7 @@ def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
 	"""
 
 	d = collections.OrderedDict()
-	with open(path, u'Ur') as csvfile:
+	with safe_open(path, u'Ur') as csvfile:
 		reader = csv.reader(csvfile, delimiter=delimiter,
 			quotechar=quotechar)
 		for column in next(reader):
@@ -93,7 +93,7 @@ def writetxt(dm, path, delimiter=',', quotechar='"'):
 		os.makedirs(os.path.dirname(path))
 	except:
 		pass
-	with open(path, 'w') as csvfile:
+	with safe_open(path, 'w') as csvfile:
 		writer = csv.writer(csvfile, delimiter=delimiter, quotechar=quotechar)
 		writer.writerow([safe_str(colname) for colname in dm.column_names])
 		for row in dm:

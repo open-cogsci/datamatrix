@@ -77,18 +77,21 @@ def safe_sorted(l):
 		return sorted(l)
 	except TypeError:
 		return sorted([safe_decode(i) for i in l])
-
+		
 if py3:
+	import functools
 	safe_str = safe_decode
+	safe_open = functools.partial(open, encoding='utf-8')
 else:
 	safe_str = safe_encode
+	safe_open = open
 	
 def warn(msg):
 	import warnings
 	warnings.warn(safe_str(msg))
 
 __all__ = ['py3', 'safe_decode', 'safe_encode', 'safe_str', 'safe_sorted',
-	'universal_newline_mode', 'warn']
+	'universal_newline_mode', 'warn', 'safe_open']
 if not py3:
 	__all__ += ['str', 'bytes']
 else:
