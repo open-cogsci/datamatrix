@@ -26,7 +26,7 @@ from datamatrix.py3compat import *
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix import FloatColumn
 import numpy as np
-from scipy.stats import nanmean, nanmedian
+from numpy import nanmean, nanmedian
 from scipy.interpolate import interp1d
 
 

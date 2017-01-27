@@ -24,7 +24,7 @@ import operator
 import warnings
 try:
 	import numpy as np
-	from scipy.stats import nanmean, nanmedian, nanstd
+	from numpy import nanmean, nanmedian, nanstd
 	nan = np.nan
 except ImportError:
 	np = None
@@ -71,7 +71,10 @@ class NumericColumn(BaseColumn):
 	@property
 	def std(self):
 
-		return nanstd(self._seq)
+		# By default, ddof=0. The more normal calculation is to use ddof=1, so
+		# we change that here. See also:
+		# - http://stackoverflow.com/questions/27600207
+		return nanstd(self._seq, ddof=1)
 
 	@property
 	def max(self):

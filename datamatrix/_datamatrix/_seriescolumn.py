@@ -23,7 +23,7 @@ from datamatrix._datamatrix._numericcolumn import NumericColumn
 
 try:
 	import numpy as np
-	from scipy.stats import nanmean, nanmedian, nanstd
+	from numpy import nanmean, nanmedian, nanstd
 except ImportError:
 	np = None
 
@@ -131,7 +131,7 @@ class _SeriesColumn(NumericColumn):
 	@property
 	def std(self):
 
-		return nanstd(self._seq, axis=0)
+		return nanstd(self._seq, axis=0, ddof=1)
 
 	@property
 	def max(self):
