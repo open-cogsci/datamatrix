@@ -59,7 +59,7 @@ class DataMatrix(object):
 	@property
 	def column_names(self):
 
-		return list(self._cols.keys())
+		return list(sorted(self._cols.keys()))
 
 	@property
 	def rows(self):
@@ -499,7 +499,7 @@ class DataMatrix(object):
 			raise AttributeError()
 		if name in self._cols:
 			return self._cols[name]
-		raise AttributeError()
+		raise AttributeError(u'No column named "%s"' % name)
 
 	def __getitem__(self, key):
 
