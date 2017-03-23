@@ -614,6 +614,10 @@ class BaseColumn(object):
 	def __str__(self):
 
 		return u'col%s' % str(self._seq)
+		
+	def __repr__(self):
+		
+		return u'%s[0x%x]\n%s' % (self.__class__.__name__, id(self), str(self))
 
 	def __len__(self):
 
