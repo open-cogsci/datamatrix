@@ -25,6 +25,8 @@ for row in dm:
 for colname, col in dm.columns:
 	for cell in col: # Loop through all cells in the column
 		print(cell) # do something with the cell
+# Or just see which columns exist
+print(dm.column_names)
 ~~~
 
 Slightly longer cheat sheet:
@@ -195,6 +197,13 @@ python: |
  row = dm[0] # Get the first row
  for colname, cell in row:
  	print('%s = %s' % (colname, cell))
+--%
+
+The `column_names` property gives a sorted list of all column names (without the corresponding column objects):
+
+%--
+python: |
+ print(dm.column_names)
 --%
 
 
