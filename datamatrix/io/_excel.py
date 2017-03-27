@@ -49,12 +49,14 @@ def readxlsx(path, default_col_type=MixedColumn):
 	wb = load_workbook(path)
 	rows = list(wb.active.rows)
 	dm = DataMatrix(default_col_type=default_col_type, length=len(rows)-1)
+	column_names = []
 	for cell in rows.pop(0):
 		if cell.value is None:
 			raise ValueError(u'Not all columns have a name on the first row')
 		dm[cell.value] = default_col_type
+		column_names.append(cell.value)
 	for i, row in enumerate(rows):
-		for colname, cell in zip(dm.column_names, rows[i]):
+		for colname, cell in zip(column_names, rows[i]):
 			if cell.value is None:
 				dm[colname][i] = default_col_type.default_value
 				warn(u'Some rows miss column %s' % colname)
