@@ -91,8 +91,16 @@ def writexlsx(dm, path):
 	wb = Workbook()
 	ws = wb.active
 	for colnr, colname in enumerate(dm.column_names):
-		ws[chr(ord('A')+colnr)+'1'] = colname
+		colletter = u''
+		while colnr >= 0:
+			colletter += chr(ord('A')+colnr%26)
+			colnr -= 26
+		ws[colletter+'1'] = colname
 	for rownr, row in enumerate(dm):
 		for colnr, (colname, value) in enumerate(row):
-			ws[chr(ord('A')+colnr)+str(rownr+2)] = value
+			colletter = u''
+			while colnr >= 0:
+				colletter += chr(ord('A')+colnr%26)
+				colnr -= 26		
+			ws[colletter+str(rownr+2)] = value
 	wb.save(path)
