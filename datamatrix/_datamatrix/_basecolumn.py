@@ -27,11 +27,30 @@ import numbers
 import operator
 import math
 import warnings
+inf = float('inf')
+nan = float('nan')
 try:
 	import fastnumbers
+	
+	def _sortkey(val):
+		try:
+			return fastnumbers.fast_float(val[0], default=inf, nan=inf)
+		except TypeError:
+			return inf
+
 except ImportError:
 	warnings.warn('Install fastnumbers for better performance')
 	fastnumbers = None
+
+	def _sortkey(val):
+		
+		try:
+			val = float(val[0])
+		except (ValueError, TypeError):
+			return inf
+		if math.isnan(val):
+			return inf
+		return val
 
 
 class BaseColumn(object):
@@ -57,7 +76,7 @@ class BaseColumn(object):
 		self._datamatrix = datamatrix
 		self._typechecking = True
 		self._init_rowid()
-		self._init_seq()
+		self._init_seq()		
 
 	@property
 	def unique(self):
@@ -449,8 +468,12 @@ class BaseColumn(object):
 			An iterator.
 		"""
 
-		return Index(
-			[rowid for val, rowid in sorted(zip(self._seq, self._rowid))])
+		try:
+			s = sorted(zip(self._seq, self._rowid))
+		except:
+			warn('Cannot sorted incomparable types. Forcing all values to float.')
+			s = sorted(zip(self._seq, self._rowid), key=_sortkey)
+		return Index([rowid for val, rowid in s])
 
 	def _setintkey(self, key, value):
 
@@ -608,7 +631,7 @@ class BaseColumn(object):
 		"""
 
 		return self.__class__(self._datamatrix)
-
+		
 	# Implemented syntax
 
 	def __str__(self):

@@ -435,6 +435,14 @@ def sort(obj, by=None):
 		be specified to determine the sort order. In the case of a column, this
 		needs to be specified if the column should be sorted by another column.
 		
+		The sort order depends on the version of Python. Python 2 is more
+		flexible, and allows comparisons between types such as `str` and `int`.
+		Python 3 does not allow such comparisons.
+		
+		In general, whenever incomparable values are encountered, all values are
+		forced to `float`. Values that cannot be converted to float are
+		considered `inf`.
+		
 		__Example:__
 				
 		%--
