@@ -243,6 +243,16 @@ python: |
  print(dm_subset)
 --%
 
+When a column contains values of different types, you can also select values by type: (Note: On Python 2, all `str` values are automatically decoded to `unicode`, so you'd need to compare the column to `unicode` to extract `str` values.)
+
+%--
+python: |
+ dm = DataMatrix(length=4)
+ dm.col = 'a', 1, 'c', 2
+ dm_subset = dm.col == int
+ print(dm_subset)
+--%
+
 
 ### Basic column operations (multiplication, addition, etc.)
 

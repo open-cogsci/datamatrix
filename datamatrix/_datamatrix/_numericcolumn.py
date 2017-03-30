@@ -277,6 +277,10 @@ class IntColumn(NumericColumn):
 		
 	def __eq__(self, other):
 		
+		if isinstance(other, type):
+			if other is self.dtype:
+				return self._datamatrix
+			return self._datamatrix._selectrowid(Index(0))
 		if self._issequence(other):
 			return super(IntColumn, self).__eq__(other)
 		try:
@@ -288,6 +292,10 @@ class IntColumn(NumericColumn):
 
 	def __ne__(self, other):
 		
+		if isinstance(other, type):
+			if other is not self.dtype:
+				return self._datamatrix
+			return self._datamatrix._selectrowid(Index(0))		
 		if self._issequence(other):
 			return super(IntColumn, self).__eq__(other)		
 		try:

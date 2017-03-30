@@ -20,7 +20,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
 	SeriesColumn
-from nose.tools import raises
+from nose.tools import raises, eq_
 from testcases.test_tools import check_col, check_series, check_integrity
 import numpy as np
 
@@ -60,6 +60,15 @@ def test_mixedcolumn():
 
 	check_select(MixedColumn)
 	check_concat(MixedColumn, invalid=u'')
+	# Check type selectors
+	dm = DataMatrix(length=6)
+	dm.col = 1, 2, 3, 1.1, 2.1, 'a'
+	eq_(len(dm.col == float), 2)
+	eq_(len(dm.col != float), 4)
+	eq_(len(dm.col == str), 1)
+	eq_(len(dm.col != str), 5)
+	eq_(len(dm.col == int), 3)
+	eq_(len(dm.col != int), 3)		
 
 
 def test_floatcolumn():
@@ -87,6 +96,15 @@ def test_floatcolumn():
 	def _():
 		dm.col > ''
 	_()
+	# Check type selectors
+	dm = DataMatrix(length=2, default_col_type=FloatColumn)
+	dm.col = 1, 2
+	eq_(len(dm.col == float), 2)
+	eq_(len(dm.col != float), 0)
+	eq_(len(dm.col == str), 0)
+	eq_(len(dm.col != str), 2)
+	eq_(len(dm.col == int), 0)
+	eq_(len(dm.col != int), 2)	
 
 
 def test_intcolumn():
@@ -106,7 +124,15 @@ def test_intcolumn():
 	def _():
 		dm.col > ''
 	_()
-
+	# Check type selectors
+	dm = DataMatrix(length=2, default_col_type=IntColumn)
+	dm.col = 1, 2
+	eq_(len(dm.col == int), 2)
+	eq_(len(dm.col != int), 0)
+	eq_(len(dm.col == float), 0)
+	eq_(len(dm.col != float), 2)
+	eq_(len(dm.col == str), 0)
+	eq_(len(dm.col != str), 2)
 
 def test_seriescolumn():
 

@@ -555,9 +555,26 @@ class BaseColumn(object):
 			type:	DataMatrix
 		"""
 
+		if isinstance(other, type):
+			return self._compare_type(other, op)
 		if self._issequence(other):
 			return self._compare_sequence(other, op)
 		return self._compare_value(other, op)
+		
+	def _compare_type(self, type_, op):
+		
+		_rowid = Index(0)
+		if op is operator.eq:
+			for rowid, val in zip(self._rowid, self._seq):
+				if isinstance(val, type_):
+					_rowid.append(rowid)
+		elif op is operator.ne:
+			for rowid, val in zip(self._rowid, self._seq):
+				if not isinstance(val, type_):
+					_rowid.append(rowid)
+		else:
+			raise TypeError('types can only be compared with == or !=')
+		return self._datamatrix._selectrowid(_rowid)		
 		
 	def _compare_value(self, other, op):
 
