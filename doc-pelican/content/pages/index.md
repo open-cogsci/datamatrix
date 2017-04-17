@@ -25,6 +25,18 @@ title: DataMatrix
 - `DataMatrix` does what it does really well, but it cannot do everything that libraries such as `pandas` can. Therefore, you can [convert](%link:convert%) to and from `pandas.DataFrame`.
 
 
+%--
+video:
+ source: youtube
+ id: VidTutorial
+ videoid: KLkJQUYFSlA
+ width: 640
+ height: 360
+ caption: |
+  Using <code>datamatrix</code> to play with movie data.
+--%
+
+
 ## Example
 
 %--

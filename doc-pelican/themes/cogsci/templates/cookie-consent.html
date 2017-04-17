@@ -1,11 +1,15 @@
-<!-- Begin Cookie Consent plugin by Silktide - http://silktide.com/cookieconsent -->
-<script type="text/javascript">
-    window.cookieconsent_options = {
-		"message":"By using this website, you accept our use of cookies.",
-		"dismiss":"I understand!",
-		"learnMore":"Read our privacy statement.",
-		"link":"http://www.cogsci.nl/privacy.txt","theme":"light-bottom"};
+<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.css" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.0.3/cookieconsent.min.js"></script>
+<script>
+window.addEventListener("load", function(){
+window.cookieconsent.initialise({
+  "palette": {
+    "popup": {
+      "background": "#263238"
+    },
+    "button": {
+      "background": "#a5d6a7"
+    }
+  }
+})});
 </script>
-
-<script type="text/javascript" src="//s3.amazonaws.com/cc.silktide.com/cookieconsent.latest.min.js"></script>
-<!-- End Cookie Consent plugin -->
