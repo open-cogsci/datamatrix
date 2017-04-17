@@ -686,7 +686,7 @@ def _fullfact(levels):
 	level_repeat = 1
 	range_repeat = np.prod(levels)
 	for i in range(n):
-		range_repeat /= levels[i]
+		range_repeat //= levels[i]
 		lvl = []
 		for j in range(levels[i]):
 			lvl += [j]*level_repeat
