@@ -32,7 +32,7 @@ class DataMatrix(object):
 		A DataMatrix is a tabular data structure.
 	"""
 
-	def __init__(self, length=0, default_col_type=MixedColumn):
+	def __init__(self, length=0, default_col_type=MixedColumn, **columns):
 
 		"""
 		desc:
@@ -42,6 +42,12 @@ class DataMatrix(object):
 			length:
 				desc:	The starting length of the DataMatrix.
 				type:	int
+				
+		keyword-dict:
+			columns:
+				Columns can be initialized by passing them as keywords, where
+				the keyword is the column name, and the value is the initial
+				value for the column.
 		"""
 
 		global _id
@@ -50,6 +56,8 @@ class DataMatrix(object):
 		object.__setattr__(self, u'_default_col_type', default_col_type)
 		object.__setattr__(self, u'_id', _id)
 		_id += 1
+		for column_name, val in columns.items():
+			self[column_name] = val
 
 	@property
 	def columns(self):
@@ -521,7 +529,9 @@ class DataMatrix(object):
 		t = prettytable.PrettyTable()
 		t.add_column('#', self._rowid)
 		for name, col in list(self._cols.items())[:6]:
-			t.add_column(name, col._printable_list())
+			t.add_column(name,
+				['%E' % i if isinstance(i, (int, float)) and i > 1000 else i for i in col._printable_list()]
+				)
 		if len(self._cols) > 6:
 			return str(t) + u'\n(+ %d columns not shown)' % (len(self._cols)-5)
 		return str(t)
