@@ -39,6 +39,10 @@ class Row(object):
 
 		object.__setattr__(self, u'_datamatrix', datamatrix)
 		object.__setattr__(self, u'_index', index)
+		
+	@property
+	def column_names(self):
+		return self._datamatrix.column_names
 
 	def __len__(self):
 
