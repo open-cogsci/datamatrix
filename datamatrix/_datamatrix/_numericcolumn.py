@@ -201,6 +201,15 @@ class NumericColumn(BaseColumn):
 		col._rowid = self._rowid[selected_indices]
 		col._seq = self._seq[selected_indices]
 		return col
+		
+	def _getslicekey(self, key):
+
+		# We need to override the original get slice key so that we get a deep
+		# copy of the numpy array.
+		col = self._empty_col()
+		col._rowid = self._rowid[key]
+		col._seq = np.copy(self._seq[key])
+		return col		
 
 	def _sortedrowid(self):
 
