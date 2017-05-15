@@ -17,9 +17,11 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+
+import os
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn
-import os
+from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 
 
 def readxlsx(path, default_col_type=MixedColumn):
@@ -90,17 +92,33 @@ def writexlsx(dm, path):
 		pass
 	wb = Workbook()
 	ws = wb.active
-	for colnr, colname in enumerate(dm.column_names):
-		colletter = u''
-		while colnr >= 0:
-			colletter += chr(ord('A')+colnr%26)
-			colnr -= 26
-		ws[colletter+'1'] = colname
+	flat_columns = [colname for colname, column in dm.columns \
+		if not isinstance(column, _SeriesColumn)]
+	for colnr, colname in enumerate(flat_columns):
+		ws[_colletter(colnr)+'1'] = colname
 	for rownr, row in enumerate(dm):
-		for colnr, (colname, value) in enumerate(row):
-			colletter = u''
-			while colnr >= 0:
-				colletter += chr(ord('A')+colnr%26)
-				colnr -= 26		
-			ws[colletter+str(rownr+2)] = value
+		for colnr, colname in enumerate(flat_columns):
+			value = row[colname]
+			ws[_colletter(colnr)+str(rownr+2)] = safe_str(value)
 	wb.save(path)
+
+
+def _colletter(colnr):
+	
+	"""
+	visible: False
+	
+	desc:
+		Converts a column number to an Excel-style column letter ('A', 'AA',
+		etc.)		
+	"""
+	
+	i = 0
+	s = ''
+	while colnr >= 26**i or not i:
+		_colnr = colnr//(26**i) % 26
+		if i:
+			_colnr -= 1
+		s = chr(ord('A')+_colnr) + s
+		i += 1
+	return s
