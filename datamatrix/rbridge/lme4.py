@@ -25,6 +25,9 @@ from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix.py3compat import *
 
 
+verbose = False
+
+
 @cached
 def lmer(dm, formula):
 
@@ -107,9 +110,11 @@ def _launchr(dm, cmd):
 	# Write the data to an input file
 	io.writetxt(dm, u'.r-in.csv')
 	# Launch R, read the data, and communicate the commands
-	proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE)
-	# proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE,
-	# 	stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	if verbose:
+		proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE)
+	else:
+		proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE,
+			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	cmd = u'data <- read.csv(".r-in.csv")\nattach(data)\n%s' % cmd
 	proc.communicate(safe_encode(cmd, u'ascii'))
 	# Wait until the output file has been generated and return it
