@@ -112,7 +112,7 @@ def cachefile(cacheid):
 
 	init_cache()
 	path = os.path.join(cachefolder, cacheid) + '.pkl'
-	if os.path.exists(path):
+	if os.path.exists(path) and '~%s' % cacheid not in sys.argv:
 		return True, path
 	return False, path
 
