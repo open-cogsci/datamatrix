@@ -66,6 +66,12 @@ class Row(object):
 
 		if isinstance(key, int):
 			key = self._datamatrix.column_names[key]
+		elif isinstance(key, basestring):
+			# Create a new column with default values if the column does not
+			# exist yet
+			if key not in self._datamatrix.column_names:
+				self._datamatrix[key] = \
+					self._datamatrix._default_col_type.default_value
 		self._datamatrix[key][self._index] = value
 
 	def __str__(self):
