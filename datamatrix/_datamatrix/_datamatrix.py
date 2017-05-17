@@ -361,7 +361,7 @@ class DataMatrix(object):
 			key = safe_decode(key)
 		col = self._cols.get(key, None)
 		if col is None:
-			raise Exception('Column not found')
+			raise Exception('Column not found: %s' % key)
 		return col
 
 	def _getrow(self, key):
