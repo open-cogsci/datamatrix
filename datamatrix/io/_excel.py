@@ -22,7 +22,10 @@ import os
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
-
+try:
+	import numpy as np
+except ImportError:
+	np = None
 
 def readxlsx(path, default_col_type=MixedColumn):
 
@@ -93,6 +96,7 @@ def writexlsx(dm, path):
 	except:
 		pass
 	wb = Workbook()
+	wb.guess_types = True
 	# First we will write all flat columns to the first sheet
 	ws = wb.active
 	ws.title = u'Main sheet'
@@ -102,8 +106,8 @@ def writexlsx(dm, path):
 		ws[utils.get_column_letter(colnr+1)+'1'] = colname
 	for rownr, row in enumerate(dm):
 		for colnr, colname in enumerate(flat_columns):
-			value = row[colname]
-			ws[utils.get_column_letter(colnr+1)+str(rownr+2)] = safe_str(value)
+			value = _excel_safe(row[colname])
+			ws[utils.get_column_letter(colnr+1)+str(rownr+2)] = value
 	# Next we will write all series to individual sheets
 	series_columns = [colname for colname, column in dm.columns \
 		if isinstance(column, _SeriesColumn)]
@@ -111,6 +115,29 @@ def writexlsx(dm, path):
 		ws = wb.create_sheet(title=colname)
 		for rownr, row in enumerate(dm[colname]):
 			for colnr, value in enumerate(row):
-				ws[utils.get_column_letter(colnr+1)+str(rownr+1)] = \
-					safe_str(value)
+				if np.isnan(value):
+					continue
+				ws[utils.get_column_letter(colnr+1)+str(rownr+1)] = float(value)
 	wb.save(path)
+	
+	
+def _excel_safe(value):
+
+	"""
+	visible: False
+	
+	desc:
+		Openpyxl chokes on numpy values, so these are converted to int/ float
+	"""
+	
+	if np is None:
+		return value
+	if isinstance(value, np.int64):
+		if np.isnan(value):
+			return u''
+		return int(value)
+	if isinstance(value, np.float64):
+		if np.isnan(value):
+			return u''
+		return float(value)
+	return value
