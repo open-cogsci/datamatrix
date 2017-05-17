@@ -71,7 +71,9 @@ def writexlsx(dm, path):
 
 	"""
 	desc: |
-		Writes a DataMatrix to an Excel 2010 xlsx file.
+		Writes a DataMatrix to an Excel 2010 xlsx file. The first sheet will
+		contain a regular table with all non-series columns. SeriesColumns are
+		saved as individual sheets.
 		
 		__Example:__
 		
@@ -84,41 +86,31 @@ def writexlsx(dm, path):
 		path:	The path to the xlsx file.
 	"""
 
-	from openpyxl import Workbook
+	from openpyxl import Workbook, utils
 
 	try:
 		os.makedirs(os.path.dirname(path))
 	except:
 		pass
 	wb = Workbook()
+	# First we will write all flat columns to the first sheet
 	ws = wb.active
+	ws.title = u'Main sheet'
 	flat_columns = [colname for colname, column in dm.columns \
 		if not isinstance(column, _SeriesColumn)]
 	for colnr, colname in enumerate(flat_columns):
-		ws[_colletter(colnr)+'1'] = colname
+		ws[utils.get_column_letter(colnr+1)+'1'] = colname
 	for rownr, row in enumerate(dm):
 		for colnr, colname in enumerate(flat_columns):
 			value = row[colname]
-			ws[_colletter(colnr)+str(rownr+2)] = safe_str(value)
+			ws[utils.get_column_letter(colnr+1)+str(rownr+2)] = safe_str(value)
+	# Next we will write all series to individual sheets
+	series_columns = [colname for colname, column in dm.columns \
+		if isinstance(column, _SeriesColumn)]
+	for colname in series_columns:
+		ws = wb.create_sheet(title=colname)
+		for rownr, row in enumerate(dm[colname]):
+			for colnr, value in enumerate(row):
+				ws[utils.get_column_letter(colnr+1)+str(rownr+1)] = \
+					safe_str(value)
 	wb.save(path)
-
-
-def _colletter(colnr):
-	
-	"""
-	visible: False
-	
-	desc:
-		Converts a column number to an Excel-style column letter ('A', 'AA',
-		etc.)		
-	"""
-	
-	i = 0
-	s = ''
-	while colnr >= 26**i or not i:
-		_colnr = colnr//(26**i) % 26
-		if i:
-			_colnr -= 1
-		s = chr(ord('A')+_colnr) + s
-		i += 1
-	return s
