@@ -401,6 +401,40 @@ class DataMatrix(object):
 			exec('%s = None' % name)
 		except SyntaxError:
 			raise ValueError(u'Invalid column name: %s' % name)
+			
+	def _set_col(self, name, value):
+		
+		"""
+		visible: False
+		
+		desc:
+			Sets columns in various formats. Is used by __setitem__ and
+			__setattr__.
+		"""			
+		
+		if isinstance(name, bytes):
+			name = safe_decode(name)
+		# Create a new column by type
+		if isinstance(value, type) and issubclass(value, BaseColumn):
+			self._cols[name] = value(self)
+			return
+		# Create a new column by type, kwdict tuple
+		if isinstance(value, tuple) and len(value) == 2 \
+			and isinstance(value[0], type) and issubclass(value[0], BaseColumn):
+				cls, kwdict = value
+				self._cols[name] = cls(self, **kwdict)
+				return
+		# Create new column by existing column
+		if isinstance(value, BaseColumn):
+			if value._datamatrix is not self:
+				raise Exception(
+					u'This column does not belong to this DataMatrix')
+			self._cols[name] = value
+			return
+		if name not in self:
+			self._cols[name] = self._default_col_type(self)
+		self._cols[name][:] = value
+		self._mutate()
 
 	# Implemented syntax
 
@@ -451,27 +485,7 @@ class DataMatrix(object):
 		if name == u'default_col_type':
 			self._set_default_col_type(value)
 			return
-		# Create a new column by type
-		if isinstance(value, type) and issubclass(value, BaseColumn):
-			self._cols[name] = value(self)
-			return
-		# Create a new column by type, kwdict tuple
-		if isinstance(value, tuple) and len(value) == 2 \
-			and isinstance(value[0], type) and issubclass(value[0], BaseColumn):
-				cls, kwdict = value
-				self._cols[name] = cls(self, **kwdict)
-				return
-		# Create new column by existing column
-		if isinstance(value, BaseColumn):
-			if value._datamatrix is not self:
-				raise Exception(
-					u'This column does not belong to this DataMatrix')
-			self._cols[name] = value
-			return
-		if name not in self:
-			self._cols[name] = self._default_col_type(self)
-		self._cols[name][:] = value
-		self._mutate()
+		self._set_col(name, value)
 
 	def __delitem__(self, value):
 
@@ -499,7 +513,7 @@ class DataMatrix(object):
 
 	def __setitem__(self, name, value):
 
-		self.__setattr__(name, value)
+		self._set_col(name, value)
 
 	def __getattr__(self, name):
 
