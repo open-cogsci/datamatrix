@@ -33,7 +33,8 @@ import random
 try:
 	from datamatrix import convert
 	import pandas as pd
-except ImportError as e:
+except (ImportError, AttributeError, RuntimeError) as e:
+	# AttributeError and RuntimeError can occur due to a PyQt4/5 conflict
 	pass
 else:
 	pivot_table = convert.wrap_pandas(pd.pivot_table)

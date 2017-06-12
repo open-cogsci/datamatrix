@@ -27,7 +27,8 @@ from datamatrix.py3compat import *
 from datamatrix import DataMatrix
 try:
 	import pandas as pd
-except ImportError:
+except (ImportError, AttributeError, RuntimeError):
+	# AttributeError and RuntimeError can occur due to a PyQt4/5 conflict
 	pd = None
 
 
