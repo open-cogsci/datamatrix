@@ -76,7 +76,7 @@ def safe_sorted(l):
 	try:
 		return sorted(l)
 	except TypeError:
-		return sorted([safe_decode(i) for i in l])
+		return sorted(l, key=lambda i: safe_decode(i))
 		
 if py3:
 	import functools
