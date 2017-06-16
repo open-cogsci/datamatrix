@@ -110,14 +110,16 @@ def writexlsx(dm, path):
 			ws[utils.get_column_letter(colnr+1)+str(rownr+2)] = value
 	# Next we will write all series to individual sheets
 	series_columns = [colname for colname, column in dm.columns \
-		if isinstance(column, _SeriesColumn)]
+		if isinstance(column, _SeriesColumn)]	
 	for colname in series_columns:
 		ws = wb.create_sheet(title=colname)
 		for rownr, row in enumerate(dm[colname]):
+			for colnr in range(row.shape[0]):
+				ws[utils.get_column_letter(colnr+1)+'1'] = u'T%.4d' % colnr
 			for colnr, value in enumerate(row):
 				if np.isnan(value):
 					continue
-				ws[utils.get_column_letter(colnr+1)+str(rownr+1)] = float(value)
+				ws[utils.get_column_letter(colnr+1)+str(rownr+2)] = float(value)
 	wb.save(path)
 	
 	
