@@ -62,7 +62,7 @@ class DataMatrix(object):
 	@property
 	def columns(self):
 
-		return list(self._cols.items())
+		return list(sorted(self._cols.items(), key=lambda col: col[0]))
 
 	@property
 	def column_names(self):
