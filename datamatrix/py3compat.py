@@ -86,9 +86,9 @@ else:
 	safe_str = safe_encode
 	safe_open = open
 	
-def warn(msg):
+def warn(msg, *args):
 	import warnings
-	warnings.warn(safe_str(msg))
+	warnings.warn(safe_str(msg), *args)
 
 __all__ = ['py3', 'safe_decode', 'safe_encode', 'safe_str', 'safe_sorted',
 	'universal_newline_mode', 'warn', 'safe_open']

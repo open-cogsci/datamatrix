@@ -72,6 +72,7 @@ def test_split():
 	dm = DataMatrix(length=4)
 	dm.a = 'a', 'a', 'b', 'b'
 	dm.b = 0, 1, 2, 3
+	# Without values
 	g = ops.split(dm.a)
 	val, dm = next(g)
 	eq_(val, 'a')
@@ -80,20 +81,17 @@ def test_split():
 	val, dm = next(g)
 	eq_(val, 'b')
 	check_col(dm.a, ['b', 'b'])
-	check_col(dm.b, [2, 3])
-
-
-def test_tuple_split():
-
+	check_col(dm.b, [2, 3])	
+	# With values
 	dm = DataMatrix(length=4)
 	dm.a = 'a', 'a', 'b', 'b'
-	dm.b = 0, 1, 2, 3
-	dma, dmb = ops.tuple_split(dm.a, 'a', 'b')
+	dm.b = 0, 1, 2, 3	
+	dma, dmb = ops.split(dm.a, 'a', 'b')
 	check_col(dma.a, ['a', 'a'])
 	check_col(dma.b, [0, 1])
 	check_col(dmb.a, ['b', 'b'])
 	check_col(dmb.b, [2, 3])
-
+	
 
 def test_bin_split():
 

@@ -170,7 +170,7 @@ def replace(col, mappings={}):
 		col._seq[i] = new
 
 
-def split(col):
+def split(col, *values):
 
 	"""
 	desc: |
@@ -180,78 +180,62 @@ def split(col):
 		
 		%--
 		python: |
-		 from datamatrix import DataMatrix, operations
+		 from datamatrix import DataMatrix, operations as ops
 		  
 		 dm = DataMatrix(length=4)
 		 dm.A = 0, 0, 1, 1
 		 dm.B = 'a', 'b', 'c', 'd'
-		 for A, dm in operations.split(dm.A):
-		 	print('col.A = %s' % A)
-		 	print(dm)		
+		 # If no values are specified, a (value, DataMatrix) iterator is
+		 # returned.
+		 for A, dm in ops.split(dm.A):
+		 	print('dm.A = %s' % A)
+		 	print(dm)
+		# If values are specific an iterator over DataMatrix objects is
+		# returned.
+		dm_a, dm_c = ops.split(dm.B, 'a', 'c')
+		print('dm.B == "a"')
+		print(dm_a)
+		print('dm.B == "c"')
+		print(dm_c)
 		--%
 
 	arguments:
 		col:
 			desc:	The column to split by.
 			type:	BaseColumn
+			
+	argument-list:
+		values:		Splits the DataMatrix based on these values. If this is
+					provided, an iterator over DataMatrix objects is returned,
+					rather than an iterator over (value, DataMatrix) tuples.
 
 	returns:
-		desc:	A iterator over (value, DataMatrix) tuples.
+		desc:	A iterator over (value, DataMatrix) tuples if no values are
+				provided; an iterator over DataMatrix objects if values are
+				provided.
 		type:	Iterator
 	"""
 
-	for val in col.unique:
-		yield val, col == val
+	_values = values if values else col.unique
+	for val in _values:
+		dm = col == val
+		if not dm:
+			warn(u'No matching rows for %s' % val)
+		if values:
+			yield dm
+		else:
+			yield val, dm
 
 
 def tuple_split(col, *values):
 
 	"""
-	desc: |
-		Splits a DataMatrix by values in a column, and returns the split as a
-		tuple of DataMatrix objects.
-		
-		__Example:__
-		
-		%--
-		python: |
-			 from datamatrix import DataMatrix, operations
-			 
-			 dm = DataMatrix(length=4)
-			 dm.A = 0, 0, 1, 1
-			 dm.B = 'a', 'b', 'c', 'd'
-			 dm0, dm1 = operations.tuple_split(dm.A, 0, 1)
-			 print('dm.A = 0')
-			 print(dm0)
-			 print('dm.A = 1')
-			 print(dm1)
-		--%
-
-	arguments:
-		col:
-			desc:	The column to split by.
-			type:	BaseColumn
-
-	argument-list:
-		values: A list values to split.
-
-	returns:
-		A tuple of DataMatrix objects.
+	visible: False
 	"""
 
-	n_total = len(col)
-	n_select = 0
-	l = []
-	for val in values:
-		dm = col == val
-		n = len(dm)
-		if not n:
-			warn(u'No matching rows for %s' % val)
-		n_select += n
-		l.append(dm)
-	if n_select != n_total:
-		warn(u'Some rows have not been selected')
-	return tuple(l)
+	warn('tuple_split() is deprecated. Please use split() instead.',
+		DeprecationWarning)
+	return split(col, *values)
 
 
 def bin_split(col, bins):
