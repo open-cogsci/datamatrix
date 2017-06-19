@@ -234,6 +234,9 @@ class _SeriesColumn(NumericColumn):
 		# For a 2D array that already has the correct dimensions, we return it.
 		if a.shape == (length, self._depth):
 			return a
+		# Set all rows at once
+		if a.shape == (self._depth,):
+			return a
 		raise Exception('Cannot convert to sequence: %s' % str(value))
 
 	def _empty_col(self):

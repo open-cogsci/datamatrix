@@ -187,6 +187,18 @@ def test_seriescolumn():
 	dm.col.depth = 3
 	check_series(dm.col, [[1,0,0], [2,0,0], [3,0,0]])
 	check_integrity(dm)
+	# Test 
+	dm = DataMatrix(length=2)
+	dm.col = SeriesColumn(depth=3)
+	dm.col = 1, 2
+	check_series(dm.col, [[1,1,1], [2,2,2]])
+	dm.col = 3,4,5
+	check_series(dm.col, [[3,4,5]]*2)
+	dm.col.depth = 2
+	dm.col[:] = 1,2
+	check_series(dm.col, [[1,1], [2,2]])
+	dm.col[:,:] = 3,4
+	check_series(dm.col, [[3,4], [3,4]])
 
 
 def test_resize():
