@@ -660,7 +660,9 @@ def _best_fitting_col_type(col):
 		
 	from fastnumbers import isreal, isintlike
 		
-	if isinstance(col, (FloatColumn, IntColumn, _SeriesColumn)):
+	if isinstance(col, _SeriesColumn):
+		return SeriesColumn(depth=col.depth)
+	if isinstance(col, (FloatColumn, IntColumn)):
 		return type(col)
 	if not all(isreal(val, allow_inf=True, allow_nan=True) for val in col):
 		return MixedColumn
