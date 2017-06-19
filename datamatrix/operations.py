@@ -607,7 +607,7 @@ def auto_type(dm):
 
 	"""
 	desc: |
-		*This modifies the DataMatrix in place.*
+		*Requires fastnumbers*
 	
 		Converts all columns of type MixedColumn to IntColumn if all values are
 		integer numbers, or FloatColumn if all values are non-integer numbes.
@@ -629,29 +629,38 @@ def auto_type(dm):
 	arguments:
 		dm:
 			type:	DataMatrix
+			
+	returns:
+		type:	DataMatrix
 	"""
-
-	for name, col in dm.columns:
-		if isinstance(col, (FloatColumn, IntColumn)):
-			continue
-		col_type = IntColumn
-		for val in col:
-			try:
-				assert(int(val) == float(val))
-			except:
-				try:
-					float(val)
-					col_type = FloatColumn
-				except:
-					break
-		else:
-			new_col = col_type(col._datamatrix)
-			new_col[:] = col
-			del dm[name]
-			dm[name] = new_col
-	dm._mutate()
+	
+	new_dm = DataMatrix(length=len(dm))
+	for name, col in dm.columns:		
+		new_dm[name] = _best_fitting_col_type(col)
+		new_dm[name][:] = col
+	return new_dm
 
 # Private function
+
+def _best_fitting_col_type(col):
+	
+	"""
+	visible: False
+	
+	desc:
+		Determines the best fitting type for a column.
+	"""
+		
+	from fastnumbers import isreal, isintlike
+		
+	if isinstance(col, (FloatColumn, IntColumn, _SeriesColumn)):
+		return type(col)
+	if not all(isreal(val, allow_inf=True, allow_nan=True) for val in col):
+		return MixedColumn
+	if not all(isintlike(val) for val in col):
+		return FloatColumn
+	return IntColumn
+	
 
 def _fullfact(levels):
 

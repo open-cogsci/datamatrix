@@ -214,7 +214,7 @@ def test_auto_type():
 	dm.a = 'a', 1
 	dm.b = 0.1, 1
 	dm.c = 0, 1
-	ops.auto_type(dm)
+	dm = ops.auto_type(dm)
 	ok_(isinstance(dm.a, MixedColumn))
 	ok_(isinstance(dm.b, FloatColumn))
 	ok_(isinstance(dm.c, IntColumn))
