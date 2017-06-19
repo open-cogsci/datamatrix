@@ -59,9 +59,28 @@ def _test_numericcolumn(cls):
 	check_integrity(dm)
 
 
+def _test_copying(cls):
+
+	dm = DataMatrix(length=5)
+	dm.d = cls
+	dm2 = dm[:]
+	ok_(dm2 is not dm)
+	ok_(dm2.d is not dm.d)
+	ok_(dm2.d._seq is not dm.d._seq)
+	dm.c = dm.d
+	ok_(dm.c is dm.d)
+	ok_(dm.c._seq is dm.d._seq)
+	dm.e = dm.d[:]
+	ok_(dm.e is not dm.d)
+	ok_(dm.e._seq is not dm.d._seq)	
+	check_integrity(dm)
+	check_integrity(dm2)
+
+
 def test_mixedcolumn():
 
 	_test_numericcolumn(MixedColumn)
+	_test_copying(MixedColumn)
 	dm = DataMatrix(length=4)
 	dm.col = '1.1', '1', 'x', None
 	check_col(dm.col, [1.1, 1, 'x', None])
@@ -70,6 +89,7 @@ def test_mixedcolumn():
 def test_intcolumn():
 
 	_test_numericcolumn(IntColumn)
+	_test_copying(IntColumn)
 	# Test automatic conversion to int
 	dm = DataMatrix(length=2)
 	dm.col = IntColumn
@@ -96,6 +116,7 @@ def test_intcolumn():
 def test_floatcolumn():
 
 	_test_numericcolumn(FloatColumn)
+	_test_copying(FloatColumn)
 	# Test automatic conversion to float
 	dm = DataMatrix(length=2)
 	dm.col = FloatColumn
@@ -129,6 +150,7 @@ def test_floatcolumn():
 
 def test_seriescolumn():
 
+	_test_copying(SeriesColumn(depth=1))
 	dm = DataMatrix(length=2)
 	dm.col = SeriesColumn(depth=3)
 	# Set all rows to a single value
