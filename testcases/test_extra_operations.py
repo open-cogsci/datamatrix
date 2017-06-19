@@ -36,9 +36,9 @@ def test_replace():
 	dm.s[0] = 0, 1, 2
 	dm.s[1] = np.nan, 1, 2
 	dm.s[2] = np.nan, 1, 2
-	ops.replace(dm.a, {0 : 100, 2 : 200})
-	ops.replace(dm.c, {np.nan : 100, 2 : np.nan})
-	ops.replace(dm.s, {np.nan : 100, 2 : np.nan})
+	dm.a = ops.replace(dm.a, {0 : 100, 2 : 200})
+	dm.c = ops.replace(dm.c, {np.nan : 100, 2 : np.nan})
+	dm.s = ops.replace(dm.s, {np.nan : 100, 2 : np.nan})
 	check_col(dm.a, [100, 1, 200])
 	check_col(dm.c, [100, 1, np.nan])
 	check_series(dm.s, [

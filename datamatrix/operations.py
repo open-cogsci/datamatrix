@@ -123,20 +123,17 @@ def replace(col, mappings={}):
 	
 	"""
 	desc: |
-		*This modifies the DataMatrix in place.*
-	
 		Replaces values in a column by other values.
 		
 		__Example:__
 		
 		%--
 		python: |
-		 from datamatrix import DataMatrix, operations
+		 from datamatrix import DataMatrix, operations as ops
 		 
 		 dm = DataMatrix(length=3)
 		 dm.old = 0, 1, 2
-		 dm.new = dm.old[:]
-		 operations.replace(dm.new, {0 : 'a', 2 : 'c'})
+		 dm.new = ops.replace(dm.old, {0 : 'a', 2 : 'c'})
 		 print(dm)
 		--%
 		
@@ -151,23 +148,21 @@ def replace(col, mappings={}):
 			type:	dict
 	"""
 	
+	col = col[:]	
 	# For MixedColumns
 	if isinstance(col._seq, list):
 		for old, new in mappings.items():
 			for i, val in enumerate(col):
 				if old == val:
 					col[i] = new
-		return
-
+		return col
 	# For NumericColumns and SeriesColumns
 	import numpy as np
 	for old, new in mappings.items():
-		if np.isnan(old):
-			b = np.isnan(col._seq)
-		else:
-			b = col._seq == old
+		b = np.isnan(col._seq) if np.isnan(old) else col._seq == old
 		i = np.where(b)
 		col._seq[i] = new
+	return col
 
 
 def split(col, *values):
