@@ -203,9 +203,12 @@ def test_keep_only():
 	dm = DataMatrix(length=2)
 	dm.a = 'a', 'b'
 	dm.b = 0, 1
-	ops.keep_only(dm, ['b'])
-	ok_('a' not in dm.column_names)
-	ok_('b' in dm.column_names)
+	dm.c = 'y', 'z'
+	for cols in (['b', 'c'], [dm.b, dm.c]):
+		dm = ops.keep_only(dm, *cols)
+		ok_('a' not in dm.column_names)
+		ok_('b' in dm.column_names)
+		ok_('c' in dm.column_names)
 
 
 def test_auto_type():

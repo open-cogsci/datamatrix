@@ -543,8 +543,7 @@ def shuffle_horiz(*obj):
 		raise ValueError(
 			u'Expecting a DataMatrix or multiple BaseColumns from the same DataMatrix')
 	dm = dm[:]
-	dm_shuffle = dm[:]
-	keep_only(dm_shuffle, obj)
+	dm_shuffle = keep_only(dm, *obj)	
 	for row in dm_shuffle:
 		random.shuffle(row)
 	for colname, column in dm_shuffle.columns:
@@ -553,24 +552,23 @@ def shuffle_horiz(*obj):
 	return dm
 
 
-def keep_only(dm, cols=[]):
+def keep_only(dm, *cols):
 
 	"""
 	desc: |
-		*This modifies the DataMatrix in place.*
-		
 		Removes all columns from the DataMatrix, except those listed in `cols`.
 
 		__Example:__
 				
 		%--
 		python: |
-		 from datamatrix import DataMatrix, operations
+		 from datamatrix import DataMatrix, operations as ops
 		 
 		 dm = DataMatrix(length=5)
 		 dm.A = 'a', 'b', 'c', 'd', 'e'
 		 dm.B = range(5)
-		 operations.keep_only(dm, [dm.A])
+		 dm.C = range(5, 10)
+		 dm = ops.keep_only(dm, dm.A, dm.C)
 		 print(dm)
 		--%
 
@@ -584,18 +582,15 @@ def keep_only(dm, cols=[]):
 			type:	list
 	"""
 
-	colnames = []
-	for col in cols:
-		if isinstance(col, basestring):
-			colnames.append(col)
-			continue
-		if isinstance(col, BaseColumn):
-			colnames.append(col.name)
-			continue
-		raise ValueError(u'Expecting column names or BaseColumn objects')
+	# For backwards compatibility, accept also a list as a single argument
+	if len(cols) == 1 and isinstance(cols[0], list):
+		cols = cols[0]
+	dm = dm[:]
+	colnames = [_colname(col) for col in cols]
 	for colname in dm.column_names:
 		if colname not in colnames:
 			del dm[colname]
+	return dm
 
 
 def auto_type(dm):
@@ -636,6 +631,23 @@ def auto_type(dm):
 	return new_dm
 
 # Private function
+
+def _colname(col):
+	
+	"""
+	visible: False
+	
+	desc:
+		Gets the name of column. Column can be specified as a name or as a
+		BaseColumn.
+	"""
+	
+	if isinstance(col, basestring):
+		return col
+	if isinstance(col, BaseColumn):
+		return col.name
+	raise ValueError(u'Expecting column names or BaseColumn objects')	
+
 
 def _best_fitting_col_type(col):
 	
