@@ -36,7 +36,7 @@ class _SeriesColumn(NumericColumn):
 
 	dtype = float
 
-	def __init__(self, datamatrix, depth, defaultnan=False):
+	def __init__(self, datamatrix, depth, defaultnan=True):
 
 		"""
 		desc:

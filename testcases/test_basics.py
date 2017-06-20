@@ -19,7 +19,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
-	SeriesColumn
+	SeriesColumn, NAN
 from testcases.test_tools import check_col, check_series, check_integrity
 from nose.tools import ok_, raises
 import numpy as np
@@ -185,7 +185,7 @@ def test_seriescolumn():
 	dm.col.depth = 1
 	check_series(dm.col, [[1],[2],[3]])
 	dm.col.depth = 3
-	check_series(dm.col, [[1,0,0], [2,0,0], [3,0,0]])
+	check_series(dm.col, [[1,NAN,NAN], [2,NAN,NAN], [3,NAN,NAN]])
 	check_integrity(dm)
 	# Test 
 	dm = DataMatrix(length=2)
