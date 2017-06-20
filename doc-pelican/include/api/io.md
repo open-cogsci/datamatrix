@@ -146,7 +146,9 @@ __Keywords:__
 
 ## function __writexlsx__\(dm, path\)
 
-Writes a DataMatrix to an Excel 2010 xlsx file.
+Writes a DataMatrix to an Excel 2010 xlsx file. The first sheet will
+contain a regular table with all non-series columns. SeriesColumns are
+saved as individual sheets.
 
 __Example:__
 

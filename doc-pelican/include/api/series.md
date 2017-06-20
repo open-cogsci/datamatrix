@@ -125,9 +125,45 @@ A reconstructed singal.
 
 [blinkreconstruct]: #blinkreconstruct
 
+<div class="FunctionDoc YAMLDoc" id="concatenate" markdown="1">
+
+## function __concatenate__\(\*series\)
+
+Concatenates multiple series such that a new series is created with a
+depth that is equal to the sum of the depths of all input series.
+
+__Example:__
+
+%--
+python: |
+ from datamatrix import series as srs
+
+ dm = DataMatrix(length=1)
+ dm.s1 = SeriesColumn(depth=3)
+ dm.s1[:] = 1,2,3
+ dm.s2 = SeriesColumn(depth=3)
+ dm.s2[:] = 3,2,1
+ dm.s = srs.concatenate(dm.s1, dm.s2)
+ print(dm.s)
+--%
+
+__Argument list:__
+
+- `*series`: A list of series.
+
+__Returns:__
+
+A new series.
+
+- Type: SeriesColumn
+
+</div>
+
+[concatenate]: #concatenate
+
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function \_Deprecate\.\_\_call\_\_\.<locals>\.newfunc at 0x7f266fb5f1e0>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7faf25f9b048>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times shorter.
 The depth of the downsampled series is the highest multiple of the depth
@@ -178,7 +214,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function _Deprecate.__call__.<locals>.newfunc at 0x7f266fb5f1e0>
+	- Default: <function nanmean at 0x7faf25f9b048>
 
 __Returns:__
 
@@ -256,7 +292,7 @@ An end-locked signal.
 
 <div class="FunctionDoc YAMLDoc" id="reduce_" markdown="1">
 
-## function __reduce\___\(series, operation=<function \_Deprecate\.\_\_call\_\_\.<locals>\.newfunc at 0x7f266fb5f1e0>\)
+## function __reduce\___\(series, operation=<function nanmean at 0x7faf25f9b048>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -287,7 +323,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function _Deprecate.__call__.<locals>.newfunc at 0x7f266fb5f1e0>
+	- Default: <function nanmean at 0x7faf25f9b048>
 
 __Returns:__
 

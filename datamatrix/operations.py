@@ -134,7 +134,7 @@ def replace(col, mappings={}):
 		 dm = DataMatrix(length=3)
 		 dm.old = 0, 1, 2
 		 dm.new = ops.replace(dm.old, {0 : 'a', 2 : 'c'})
-		 print(dm)
+		 print(dm_new)
 		--%
 		
 	arguments:
@@ -259,6 +259,18 @@ def filter_(fnc, obj):
 		 dm_new = ops.filter_(lambda **d: d['col'] % 2, dm)
 		 print(dm_new)
 		--%
+		
+	arguments:
+		fnc:
+			desc:	A filter function.
+			type:	callable
+		obj:
+			desc:	A datamatrix or column to filter.
+			type:	[BaseColumn, DataMatrix]
+
+	returns:
+		desc:	A new column or datamatrix.
+		type:	[BaseColumn, DataMatrix]		
 	"""
 	
 	if not callable(fnc):
@@ -298,13 +310,13 @@ def split(col, *values):
 		 for A, dm in ops.split(dm.A):
 		 	print('dm.A = %s' % A)
 		 	print(dm)
-		# If values are specific an iterator over DataMatrix objects is
-		# returned.
-		dm_a, dm_c = ops.split(dm.B, 'a', 'c')
-		print('dm.B == "a"')
-		print(dm_a)
-		print('dm.B == "c"')
-		print(dm_c)
+		 # If values are specific an iterator over DataMatrix objects is
+		 # returned.
+		 dm_a, dm_c = ops.split(dm.B, 'a', 'c')
+		 print('dm.B == "a"')
+		 print(dm_a)
+		 print('dm.B == "c"')
+		 print(dm_c)
 		--%
 
 	arguments:
@@ -358,14 +370,14 @@ def bin_split(col, bins):
 		
 		%--
 		python: |
-			 from datamatrix import DataMatrix, operations
-			 
-			 dm = DataMatrix(length=5)
-			 dm.A = 1, 0, 3, 2, 4
-			 dm.B = 'a', 'b', 'c', 'd', 'e'
-			 for bin, dm in enumerate(operations.bin_split(dm.A, bins=3)):
-			 	print('bin %d' % bin)
-			 	print(dm)
+		 from datamatrix import DataMatrix, operations
+		 
+		 dm = DataMatrix(length=5)
+		 dm.A = 1, 0, 3, 2, 4
+		 dm.B = 'a', 'b', 'c', 'd', 'e'
+		 for bin, dm in enumerate(operations.bin_split(dm.A, bins=3)):
+		 	print('bin %d' % bin)
+		 	print(dm)
 		--%
 
 	arguments:
@@ -681,18 +693,17 @@ def keep_only(dm, *cols):
 		 dm.A = 'a', 'b', 'c', 'd', 'e'
 		 dm.B = range(5)
 		 dm.C = range(5, 10)
-		 dm = ops.keep_only(dm, dm.A, dm.C)
-		 print(dm)
+		 dm_new = ops.keep_only(dm, dm.A, dm.C)
+		 print(dm_new)
 		--%
 
 	arguments:
 		dm:
 			type:	DataMatrix
 
-	keywords:
+	argument-list:
 		cols:
 			desc:	A list of column names, or columns.
-			type:	list
 	"""
 
 	# For backwards compatibility, accept also a list as a single argument
@@ -723,10 +734,10 @@ def auto_type(dm):
 		 dm.A = 'a'
 		 dm.B = 1
 		 dm.C = 1.1
-		 operations.auto_type(dm)
-		 print('dm.A: %s' % type(dm.A))
-		 print('dm.B: %s' % type(dm.B))
-		 print('dm.C: %s' % type(dm.C))
+		 dm_new = operations.auto_type(dm)
+		 print('dm_new.A: %s' % type(dm_new.A))
+		 print('dm_new.B: %s' % type(dm_new.B))
+		 print('dm_new.C: %s' % type(dm_new.C))
 		--%
 
 	arguments:

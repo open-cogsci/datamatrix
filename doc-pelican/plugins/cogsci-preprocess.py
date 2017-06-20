@@ -55,9 +55,19 @@ class AcademicMarkdownReader(MarkdownReader):
 
 		self._source_path = source_path
 		self._md = Markdown(
-			extensions=self.extensions + [TocExtension(title='Overview'),
-				TableExtension()],
-			extpeension_configs=self.extensions)
+			extensions=[
+				'markdown.extensions.toc',
+				'markdown.extensions.tables',
+				'markdown.extensions.meta',
+				'markdown.extensions.headerid',
+				'markdown.extensions.extra',
+				'markdown.extensions.codehilite(css_class=highlight)',
+				],
+			)		
+		# self._md = Markdown(
+		# 	extensions=self.extensions + [TocExtension(title='Overview'),
+		# 		TableExtension()],
+		# 	extpeension_configs=self.extensions)
 		img_path = os.path.dirname(source_path) + '/img/' \
 			+ os.path.basename(source_path)[:-3]
 		lst_path = os.path.dirname(source_path) + '/lst/' \
