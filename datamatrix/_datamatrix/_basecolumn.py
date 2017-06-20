@@ -118,7 +118,7 @@ class BaseColumn(object):
 
 		n = self._numbers
 		if len(n) == 0:
-			return None
+			return nan
 		return sum(n) / len(n)
 
 	@property
@@ -135,7 +135,7 @@ class BaseColumn(object):
 
 		n = sorted(self._numbers)
 		if len(n) == 0:
-			return None
+			return nan
 		i = int(len(n)/2)
 		if len(n) % 2 == 1:
 			return n[i]
@@ -156,7 +156,7 @@ class BaseColumn(object):
 		m = self.mean
 		n = self._numbers
 		if len(n) <= 1:
-			return None
+			return nan
 		return math.sqrt(sum((i-m)**2 for i in n)/(len(n)-1))
 
 	@property
@@ -172,7 +172,7 @@ class BaseColumn(object):
 
 		n = self._numbers
 		if not len(n):
-			return None
+			return nan
 		return max(n)
 
 	@property
@@ -188,7 +188,7 @@ class BaseColumn(object):
 
 		n = self._numbers
 		if not len(n):
-			return None
+			return nan
 		return min(n)
 
 	@property
@@ -204,17 +204,39 @@ class BaseColumn(object):
 
 		n = self._numbers
 		if not len(n):
-			return None
+			return nan
 		return sum(n)
 
 	@property
 	def name(self):
+		
+		"""
+		name:	name
 
-		for colname, col in self._datamatrix.columns:
-			if col is self:
-				return colname
-		raise NameError(
-			u'Column not found in DataMatrix, and therefore nameless')
+		desc:
+			The name of the column in the associated DataMatrix, or a
+			list of names if the column occurs multiple times in the DataMatrix.
+		"""
+
+		l = [name for name, col in self._datamatrix.columns if col is self]
+		if not l:
+			raise NameError(
+				u'Column not found in DataMatrix, and therefore nameless')
+		if len(l) == 1:
+			return l[0]
+		return l
+			
+	@property
+	def dm(self):
+		
+		"""
+		name:	dm
+
+		desc:
+			The associated DataMatrix.
+		"""		
+		
+		return self._datamatrix
 
 	# Private functions
 
@@ -314,7 +336,7 @@ class BaseColumn(object):
 			return value
 		if isinstance(value, bytes):
 			return safe_decode(value)
-		raise Exception('Invalid type: %s' % value)
+		raise TypeError('Invalid type: %s' % value)
 
 	def _merge(self, other, _rowid):
 

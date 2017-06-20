@@ -22,6 +22,11 @@ from datamatrix._datamatrix._index import Index
 import numpy as np
 
 
+def all_nan(*l):
+	
+	return all([np.isnan(v) for v in l])
+	
+
 def check_dm(dm, ref):
 
 	ok_(dm.column_names == ref.column_names)
