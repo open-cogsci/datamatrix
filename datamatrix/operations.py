@@ -165,6 +165,44 @@ def replace(col, mappings={}):
 	return col
 
 
+def map_(fnc, col):
+	
+	"""
+	desc: |
+		Maps a function onto each cell in a column, and returns a new
+		column object. The main difference with Python's built-in `map()` is
+		that this function allows you to preserve the column type.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations as ops
+		 
+		 dm = DataMatrix(length=3)
+		 dm.old = 0, 1, 2
+		 dm.new = ops.map_(lambda i: i*2, dm.old)
+		 print(dm)
+		--%
+		
+	arguments:
+		fnc:
+			desc:	A function to apply to each value from the column.
+			type:	callable
+		col:
+			desc:	The column to apply `fnc` to.
+			type:	BaseColumn
+
+	returns:
+		desc:	A new column.
+		type:	BaseColumn
+	"""
+	
+	newcol = col._empty_col()
+	newcol[:] = [fnc(row) for row in col]
+	return newcol
+
+
 def split(col, *values):
 
 	"""

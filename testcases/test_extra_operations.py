@@ -221,3 +221,13 @@ def test_auto_type():
 	ok_(isinstance(dm.a, MixedColumn))
 	ok_(isinstance(dm.b, FloatColumn))
 	ok_(isinstance(dm.c, IntColumn))
+
+
+def test_map_():
+	
+	for coltype in (MixedColumn, FloatColumn, IntColumn):
+		dm = DataMatrix(length=2, default_col_type=coltype)
+		dm.a = 1, 2
+		dm.a = ops.map_(lambda x: x*2, dm.a)
+		eq_(dm.a, [2, 4])
+		ok_(isinstance(dm.a, coltype))
