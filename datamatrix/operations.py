@@ -165,13 +165,22 @@ def replace(col, mappings={}):
 	return col
 
 
-def map_(fnc, col):
+def map_(fnc, obj):
 	
 	"""
 	desc: |
-		Maps a function onto each cell in a column, and returns a new
-		column object. The main difference with Python's built-in `map()` is
-		that this function allows you to preserve the column type.
+		Maps a function (`fnc`) onto rows of datamatrix or cells of a column.
+	
+		If `obj` is a column, the function `fnc` is mapped is mapped onto each
+		cell of the column, and a new column is returned. In this case,
+		`fnc` should be a function that accepts and returns a single value.
+		
+		If `obj` is a datamatrix, the function `fnc` is mapped onto each row,
+		and a new datamatrix is returned. In this case, `fnc` should be a
+		function that accepts a keyword `dict`, where column names are keys and
+		cells are values. The return value should be another `dict`, again with
+		column names as keys, and cells as values. Columns that are not part of
+		the returned `dict` are left unchanged.
 		
 		__Example:__
 		
@@ -181,26 +190,92 @@ def map_(fnc, col):
 		 
 		 dm = DataMatrix(length=3)
 		 dm.old = 0, 1, 2
+		 # Map a 2x function onto dm.old to create dm.new
 		 dm.new = ops.map_(lambda i: i*2, dm.old)
 		 print(dm)
+		 # Map a 2x function onto the entire dm to create dm_new, using a fancy
+		 # dict comprehension wrapped inside a lambda function.
+		 dm_new = ops.map_(
+		 	lambda **d: {col : 2*val for col, val in d.items()},
+			dm)
+		 print(dm_new)
 		--%
 		
 	arguments:
 		fnc:
-			desc:	A function to apply to each value from the column.
+			desc:	A function to map onto each row or each cell.
 			type:	callable
-		col:
-			desc:	The column to apply `fnc` to.
-			type:	BaseColumn
+		obj:
+			desc:	A datamatrix or column to map `fnc` onto.
+			type:	[BaseColumn, DataMatrix]
 
 	returns:
-		desc:	A new column.
-		type:	BaseColumn
+		desc:	A new column or datamatrix.
+		type:	[BaseColumn, DataMatrix]
 	"""
 	
-	newcol = col._empty_col()
-	newcol[:] = [fnc(row) for row in col]
-	return newcol
+	if not callable(fnc):
+		raise TypeError('fnc should be callable')	
+	if isinstance(obj, BaseColumn):
+		newcol = obj._empty_col()
+		newcol[:] = [fnc(cell) for cell in obj]
+		return newcol
+	if isinstance(obj, DataMatrix):
+		dm = obj[:]
+		for row in dm:
+			d = {col : val for col, val in row}
+			d.update(fnc(**d))
+			for col, val in d.items():
+				row[col] = val
+		return dm
+	raise TypeError(u'obj should be DataMatrix or BaseColumn')
+	
+	
+def filter_(fnc, obj):
+	
+	"""
+	desc: |
+		Filters rows from a datamatrix or column based on filter function
+		(`fnc`).
+		
+		If `obj` is a column, `fnc` should be a function that accepts a single
+		value. If `obj` is a datamatrix, `fnc` should be a function that accepts
+		a keyword `dict`, where column names are keys and cells are values. In
+		both cases, `fnc` should return a `bool` indicating whether the row or
+		value should be included.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations as ops
+		 
+		 dm = DataMatrix(length=5)
+		 dm.col = range(5)
+		 # Create a column with only odd values
+		 col_new = ops.filter_(lambda x: x % 2, dm.col)
+		 print(col_new)
+		 # Create a new datamatrix with only odd values in col
+		 dm_new = ops.filter_(lambda **d: d['col'] % 2, dm)
+		 print(dm_new)
+		--%
+	"""
+	
+	if not callable(fnc):
+		raise TypeError('fnc should be callable')	
+	if isinstance(obj, DataMatrix):
+		dm = obj
+		keep = lambda fnc, row: fnc(**{col : val for col, val in row})
+	elif isinstance(obj, BaseColumn):
+		dm = obj.dm
+		keep = lambda fnc, row: fnc(row)
+	else:
+		raise TypeError(u'obj should be DataMatrix or BaseColumn')
+	dm = dm._selectrowid(Index(
+		[rowid for rowid, row in zip(dm._rowid, obj) if keep(fnc, row)]))
+	if isinstance(obj, DataMatrix):
+		return dm
+	return dm[obj.name]
 
 
 def split(col, *values):

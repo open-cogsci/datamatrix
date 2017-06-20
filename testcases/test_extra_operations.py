@@ -231,3 +231,18 @@ def test_map_():
 		dm.a = ops.map_(lambda x: x*2, dm.a)
 		eq_(dm.a, [2, 4])
 		ok_(isinstance(dm.a, coltype))
+		dm = ops.map_(lambda **d: {'a' : 0}, dm)
+		eq_(dm.a, [0, 0])
+		ok_(isinstance(dm.a, coltype))
+		
+
+def test_filter_():
+	
+	dm = DataMatrix(length=4)
+	dm.a = range(4)
+	odd = ops.filter_(lambda x: x%2, dm.a)
+	ok_(all([x%2 for x in odd]))
+	print(type(dm._rowid))
+	dm = ops.filter_(lambda **d: d['a']%2, dm)
+	print(type(dm._rowid))
+	eq_(dm.a, [1, 3])
