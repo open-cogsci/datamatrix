@@ -27,3 +27,5 @@ from datamatrix._datamatrix._datamatrix import DataMatrix
 from datamatrix._cache import cached, iscached
 
 __version__ = '0.5.0'
+NAN = float('nan')
+INF = float('inf')

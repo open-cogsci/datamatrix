@@ -27,16 +27,18 @@ import numbers
 import operator
 import math
 import warnings
-inf = float('inf')
-nan = float('nan')
+
+INF = float('inf')
+NAN = float('nan')
+
 try:
 	import fastnumbers
 	
 	def _sortkey(val):
 		try:
-			return fastnumbers.fast_float(val[0], default=inf, nan=inf)
+			return fastnumbers.fast_float(val[0], default=INF, nan=INF)
 		except TypeError:
-			return inf
+			return INF
 
 except ImportError:
 	warnings.warn('Install fastnumbers for better performance')
@@ -47,9 +49,9 @@ except ImportError:
 		try:
 			val = float(val[0])
 		except (ValueError, TypeError):
-			return inf
+			return INF
 		if math.isnan(val):
-			return inf
+			return INF
 		return val
 
 
@@ -118,7 +120,7 @@ class BaseColumn(object):
 
 		n = self._numbers
 		if len(n) == 0:
-			return nan
+			return NAN
 		return sum(n) / len(n)
 
 	@property
@@ -135,7 +137,7 @@ class BaseColumn(object):
 
 		n = sorted(self._numbers)
 		if len(n) == 0:
-			return nan
+			return NAN
 		i = int(len(n)/2)
 		if len(n) % 2 == 1:
 			return n[i]
@@ -156,7 +158,7 @@ class BaseColumn(object):
 		m = self.mean
 		n = self._numbers
 		if len(n) <= 1:
-			return nan
+			return NAN
 		return math.sqrt(sum((i-m)**2 for i in n)/(len(n)-1))
 
 	@property
@@ -172,7 +174,7 @@ class BaseColumn(object):
 
 		n = self._numbers
 		if not len(n):
-			return nan
+			return NAN
 		return max(n)
 
 	@property
@@ -188,7 +190,7 @@ class BaseColumn(object):
 
 		n = self._numbers
 		if not len(n):
-			return nan
+			return NAN
 		return min(n)
 
 	@property
@@ -204,7 +206,7 @@ class BaseColumn(object):
 
 		n = self._numbers
 		if not len(n):
-			return nan
+			return NAN
 		return sum(n)
 
 	@property
@@ -244,7 +246,7 @@ class BaseColumn(object):
 	def _numbers(self):
 
 		return [float(val) for val in self._seq \
-			if isinstance(val, numbers.Number)]
+			if isinstance(val, numbers.Number) and not self._nanorinf(val)]
 
 	def _printable_list(self):
 
@@ -319,7 +321,7 @@ class BaseColumn(object):
 		if value is None:
 			return value
 		if fastnumbers is not None:
-			value = fastnumbers.fast_real(value, nan=u'nan', inf=u'inf')
+			value = fastnumbers.fast_real(value, nan=NAN, inf=INF)
 		else:
 			try:
 				assert(int(value) == value)
@@ -670,6 +672,20 @@ class BaseColumn(object):
 		"""
 
 		return self.__class__(self._datamatrix)
+		
+	def _nanorinf(self, val):
+		
+		"""
+		visible: False
+		
+		desc:
+			Checks whether a value is nan or inf.
+			
+		returns:
+			bool
+		"""
+		
+		return val != val or val == INF
 		
 	# Implemented syntax
 
