@@ -118,3 +118,14 @@ def test_threshold():
 	check_series(dm.t2, [[0,0,1,0], [0,1,0,0]])
 	check_series(dm.t3, [[1,1,1,0], [0,0,0,0]])
 	check_integrity(dm)	
+
+
+def test_concatenate():
+
+	dm = DataMatrix(length=1)
+	dm.s1 = SeriesColumn(depth=3)
+	dm.s1[:] = 1,2,3
+	dm.s2 = SeriesColumn(depth=3)
+	dm.s2[:] = 3,2,1
+	dm.s = series.concatenate(dm.s1, dm.s2)
+	check_series(dm.s, [[1,2,3,3,2,1]])

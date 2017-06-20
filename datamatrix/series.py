@@ -30,6 +30,50 @@ from numpy import nanmean, nanmedian
 from scipy.interpolate import interp1d
 
 
+def concatenate(*series):
+	
+	"""
+	desc: |
+		Concatenates multiple series such that a new series is created with a
+		depth that is equal to the sum of the depths of all input series.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 from datamatrix import series as srs
+		
+		 dm = DataMatrix(length=1)
+		 dm.s1 = SeriesColumn(depth=3)
+		 dm.s1[:] = 1,2,3
+		 dm.s2 = SeriesColumn(depth=3)
+		 dm.s2[:] = 3,2,1
+		 dm.s = srs.concatenate(dm.s1, dm.s2)
+		 print(dm.s)
+		--%		
+		
+	argument-list:
+		series: A list of series.
+		
+	returns:
+		desc:	A new series.
+		type:	SeriesColumn
+	"""
+	
+	if not series or not all(isinstance(s, _SeriesColumn) for s in series):
+		raise TypeError(u'Expecting one or more SeriesColumn objects')
+	if not all(s.dm is series[0].dm for s in series):
+		raise ValueError(
+			u'SeriesColumn objects don\'t belong to the same DataMatrix')	
+	newseries = _SeriesColumn(series[0]._datamatrix,
+		depth=sum(s.depth for s in series))
+	i = 0
+	for s in series:
+		newseries[:,i:i+s.depth] = s
+		i += s.depth
+	return newseries
+
+
 def endlock(series):
 	
 	"""
