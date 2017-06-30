@@ -437,6 +437,10 @@ class DataMatrix(object):
 		self._mutate()
 
 	# Implemented syntax
+	
+	def __dir__(self):
+		
+		return self.column_names + object.__dir__(self)	
 
 	def __contains__(self, item):
 

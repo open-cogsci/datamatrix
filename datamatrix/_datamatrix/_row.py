@@ -43,6 +43,10 @@ class Row(object):
 	@property
 	def column_names(self):
 		return self._datamatrix.column_names
+		
+	def __dir__(self):
+		
+		return self.column_names + object.__dir__(self)			
 
 	def __len__(self):
 
