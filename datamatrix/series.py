@@ -143,6 +143,86 @@ def endlock(series):
 	return endlock_series
 	
 	
+def lock(series, lock):
+	
+	"""
+	desc: |
+		Shifts each row from a series by a certain number of steps along its
+		depth. This is useful to lock, or align, a series based on a sequence of
+		values.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 import numpy as np
+		 from matplotlib import pyplot as plt
+		 from datamatrix import DataMatrix, SeriesColumn, series as srs
+
+	 	 LENGTH = 5 # Number of rows
+		 DEPTH = 10 # Depth (or length) of SeriesColumns
+
+	 	 dm = DataMatrix(length=LENGTH)
+		 # First create five traces with a partial cosinewave. Each row is
+		 # offset slightly on the x and y axes
+		 dm.y = SeriesColumn(depth=DEPTH)
+		 dm.x_offset = -1
+		 dm.y_offset = -1
+		 for row in dm:
+		 	row.x_offset = np.random.randint(0, DEPTH)
+		 	row.y_offset = np.random.random()
+		 	row.y = np.roll(np.cos(np.linspace(0, np.pi, DEPTH)),
+		 		row.x_offset)+row.y_offset
+		 # Now use the x offset to lock the traces to the 0 point of the cosine,
+		 # i.e. to their peaks. 
+		 dm.y2, zero_point = srs.lock(dm.y, lock=dm.x_offset)
+		 
+		 plt.clf()
+		 plt.subplot(121)
+		 plt.title('Original')
+		 plt.plot(dm.y.plottable)
+		 plt.subplot(122)
+		 plt.title('Locked to peak')
+		 plt.plot(dm.y2.plottable)
+		 plt.axvline(zero_point, color='black', linestyle=':')
+		 plt.savefig('content/pages/img/series/lock.png')
+		--%
+		
+		%--
+		figure:
+		 source: lock.png
+		 id: FigLock
+		--%
+		
+	arguments:
+		series:
+			desc:	The signal to lock.
+			type:	SeriesColumn
+		lock:
+			desc:	A sequence of lock values with the same length as the
+					Series. This can be a column, a list, a numpy array, etc.
+					
+	returns:
+		desc:	A `(series, zero_point)` tuple, in which `series` is a
+				`SeriesColumn` and `zero_point` is the zero point to which the
+				signal has been locked.
+	"""
+	
+	if not isinstance(series, _SeriesColumn):
+		raise TypeError('series should be a SeriesColumn')
+	if len(series) != len(lock):
+		raise ValueError('lock and series should be the same length')
+	try:
+		zero_point = int(max(lock))
+	except TypeError:
+		raise TypeError('lock should be a sequence of integers')
+	lpad = [int(zero_point-l) for l in lock]
+	lock_series = _SeriesColumn(series.dm, series.depth+max(lpad))
+	for lpad, lock_row, orig_row in zip(lpad, lock_series, series):
+		lock_row[lpad:lpad+series.depth] = orig_row
+	return lock_series, zero_point
+
+	
 def reduce_(series, operation=nanmean):
 
 	"""

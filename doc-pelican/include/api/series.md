@@ -163,7 +163,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7faf25f9b048>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7f0b08b33048>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times shorter.
 The depth of the downsampled series is the highest multiple of the depth
@@ -214,7 +214,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7faf25f9b048>
+	- Default: <function nanmean at 0x7f0b08b33048>
 
 __Returns:__
 
@@ -290,9 +290,74 @@ An end-locked signal.
 
 [endlock]: #endlock
 
+<div class="FunctionDoc YAMLDoc" id="lock" markdown="1">
+
+## function __lock__\(series, lock\)
+
+Shifts each row from a series by a certain number of steps along its
+depth. This is useful to lock, or align, a series based on a sequence of
+values.
+
+__Example:__
+
+%--
+python: |
+ import numpy as np
+ from matplotlib import pyplot as plt
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
+
+ LENGTH = 5 # Number of rows
+ DEPTH = 10 # Depth (or length) of SeriesColumns
+
+ dm = DataMatrix(length=LENGTH)
+ # First create five traces with a partial cosinewave. Each row is
+ # offset slightly on the x and y axes
+ dm.y = SeriesColumn(depth=DEPTH)
+ dm.x_offset = -1
+ dm.y_offset = -1
+ for row in dm:
+        row.x_offset = np.random.randint(0, DEPTH)
+        row.y_offset = np.random.random()
+        row.y = np.roll(np.cos(np.linspace(0, np.pi, DEPTH)),
+                row.x_offset)+row.y_offset
+ # Now use the x offset to lock the traces to the 0 point of the cosine,
+ # i.e. to their peaks. 
+ dm.y2, zero_point = srs.lock(dm.y, lock=dm.x_offset)
+ 
+ plt.clf()
+ plt.subplot(121)
+ plt.title('Original')
+ plt.plot(dm.y.plottable)
+ plt.subplot(122)
+ plt.title('Locked to peak')
+ plt.plot(dm.y2.plottable)
+ plt.axvline(zero_point, color='black', linestyle=':')
+ plt.savefig('content/pages/img/series/lock.png')
+--%
+
+%--
+figure:
+ source: lock.png
+ id: FigLock
+--%
+
+__Arguments:__
+
+- `series` -- The signal to lock.
+	- Type: SeriesColumn
+- `lock` -- A sequence of lock values with the same length as the Series. This can be a column, a list, a numpy array, etc.
+
+__Returns:__
+
+A `(series, zero_point)` tuple, in which `series` is a `SeriesColumn` and `zero_point` is the zero point to which the signal has been locked.
+
+</div>
+
+[lock]: #lock
+
 <div class="FunctionDoc YAMLDoc" id="reduce_" markdown="1">
 
-## function __reduce\___\(series, operation=<function nanmean at 0x7faf25f9b048>\)
+## function __reduce\___\(series, operation=<function nanmean at 0x7f0b08b33048>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -323,7 +388,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7faf25f9b048>
+	- Default: <function nanmean at 0x7f0b08b33048>
 
 __Returns:__
 

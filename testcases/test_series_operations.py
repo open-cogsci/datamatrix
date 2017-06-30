@@ -40,6 +40,20 @@ def test_endlock():
 		[np.nan,1,2],
 		[np.nan,np.nan,2],
 		])
+		
+		
+def test_lock():
+	
+	dm = DataMatrix(length=2)
+	dm.s = SeriesColumn(depth=3)
+	dm.s[0] = 1, 2, 3
+	dm.s[1] = -1, -2, -3
+	dm.l, zero_point = series.lock(dm.s, [-1, 1])
+	eq_(zero_point, 1)
+	check_series(dm.l, [
+		[np.nan, np.nan, 1, 2, 3],
+		[-1, -2, -3, np.nan, np.nan]
+		])
 
 
 def test_reduce_():
