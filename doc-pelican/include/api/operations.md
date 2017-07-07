@@ -322,6 +322,45 @@ __Keywords:__
 
 [replace]: #replace
 
+<div class="FunctionDoc YAMLDoc" id="setcol" markdown="1">
+
+## function __setcol__\(dm, name, value\)
+
+Returns a new DataMatrix to which a column has been added or modified.
+
+The main difference with using a regular assignment (`dm.col = 'x'`) is
+that this does not modify the original DataMatrix, and is suitable for
+use in `lambda` expressions.
+
+__Example:__
+
+%--
+python: |
+ from datamatrix import DataMatrix, operations as ops
+
+ dm1 = DataMatrix(length=5)
+ dm2 = ops.setcol(dm1, 'y', range(5))
+ print(dm2)
+--%
+
+__Arguments:__
+
+- `dm` -- A DataMatrix.
+	- Type: DataMatrix
+- `name` -- A column name.
+	- Type: str
+- `value` -- The value to be assigned to the column. This can be any value this is valid for a regular column assignment.
+
+__Returns:__
+
+A new DataMatrix.
+
+- Type: DataMatrix]
+
+</div>
+
+[setcol]: #setcol
+
 <div class="FunctionDoc YAMLDoc" id="shuffle" markdown="1">
 
 ## function __shuffle__\(obj\)

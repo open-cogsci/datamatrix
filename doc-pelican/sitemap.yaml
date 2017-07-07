@@ -1,11 +1,13 @@
 Install: install
-Basic use: basic
+Tutorials:
+    Basic use: basic
+    Functional programming: functional
 Modules:
     datamatrix.operations: operations
     datamatrix.series: series
     datamatrix.io: io
     datamatrix.convert: convert
-Forum: http://forum.cogsci.nl/
+Forum: http://forum.cogsci.nl/categories/datamatrix
 Blog: http://www.cogsci.nl/
 v0.5:
     v0.5: http://datamatrix.cogsci.nl/0.5/
