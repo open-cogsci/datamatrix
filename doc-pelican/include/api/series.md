@@ -163,7 +163,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7f0b08b33048>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7f3634ddc0d0>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times shorter.
 The depth of the downsampled series is the highest multiple of the depth
@@ -214,7 +214,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7f0b08b33048>
+	- Default: <function nanmean at 0x7f3634ddc0d0>
 
 __Returns:__
 
@@ -290,6 +290,63 @@ An end-locked signal.
 
 [endlock]: #endlock
 
+<div class="FunctionDoc YAMLDoc" id="interpolate" markdown="1">
+
+## function __interpolate__\(series\)
+
+Linearly interpolates missing (`nan`) data.
+
+__Example:__
+
+%--
+python: |
+ import numpy as np
+ from matplotlib import pyplot as plt
+ from datamatrix import DataMatrix, SeriesColumn, series
+
+ LENGTH = 1 # Number of rows
+ DEPTH = 100 # Depth (or length) of SeriesColumns
+ MISSING = 50 # Nr of missing samples
+
+ # Create a sine wave with missing data
+ sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
+ sinewave[np.random.choice(np.arange(DEPTH), MISSING)] = np.nan
+ # And turns this into a DataMatrix
+ dm = DataMatrix(length=LENGTH)
+ dm.y = SeriesColumn(depth=DEPTH)
+ dm.y = sinewave
+ # Now interpolate the missing data!
+ dm.i = srs.interpolate(dm.y)
+
+ # And plot the original data as circles and the interpolated data as dotted
+ # lines
+ plt.clf()
+ plt.plot(dm.i.plottable, ':')
+ plt.plot(dm.y.plottable, 'o')
+ plt.savefig('content/pages/img/series/interpolate.png')
+--%
+
+%--
+figure:
+ source: interpolate.png
+ id: FigInterpolate
+--%
+
+__Arguments:__
+
+- `series` -- A signal to interpolate.
+	- Type: SeriesColumn
+
+__Returns:__
+
+The interpolated signal.
+
+- Type: SeriesColumn
+
+</div>
+
+[interpolate]: #interpolate
+
 <div class="FunctionDoc YAMLDoc" id="lock" markdown="1">
 
 ## function __lock__\(series, lock\)
@@ -357,7 +414,7 @@ A `(series, zero_point)` tuple, in which `series` is a `SeriesColumn` and `zero_
 
 <div class="FunctionDoc YAMLDoc" id="reduce_" markdown="1">
 
-## function __reduce\___\(series, operation=<function nanmean at 0x7f0b08b33048>\)
+## function __reduce\___\(series, operation=<function nanmean at 0x7f3634ddc0d0>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -388,7 +445,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7f0b08b33048>
+	- Default: <function nanmean at 0x7f3634ddc0d0>
 
 __Returns:__
 
