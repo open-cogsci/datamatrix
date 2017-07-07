@@ -21,6 +21,7 @@ title: DataMatrix
 
 - [An intuitive syntax](%link:basic%) that makes your code easy to read.
 - Requires only the Python standard libraries (but you can use `numpy` to improve performance).
+- Great support for functional programming.
 - Mix [two-dimensional](%link:series%) (series) and one-dimensional data in a single data structure.
 - `DataMatrix` does what it does really well, but it cannot do everything that libraries such as `pandas` can. Therefore, you can [convert](%link:convert%) to and from `pandas.DataFrame`.
 
