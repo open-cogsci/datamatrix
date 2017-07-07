@@ -300,6 +300,55 @@ def filter_(fnc, obj):
 	return dm[obj.name]
 
 
+def setcol(dm, name, value):
+	
+	"""
+	desc: |
+		Returns a new DataMatrix to which a column has been added or in which
+		a column has been modified.
+		
+		The main difference with regular assignment (`dm.col = 'x'`) is that
+		`setcol()` does not modify the original DataMatrix, and can be used in
+		`lambda` expressions.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 from datamatrix import DataMatrix, operations as ops
+
+		 dm1 = DataMatrix(length=5)
+		 dm2 = ops.setcol(dm1, 'y', range(5))
+		 print(dm2)
+		--%
+		
+	arguments:
+		dm:
+			desc:	A DataMatrix.
+			type:	DataMatrix
+		name:
+			desc:	A column name.
+			type:	str
+		value:
+			desc:	The value to be assigned to the column. This can be any
+					value this is valid for a regular column assignment.
+
+	returns:
+		desc:	A new DataMatrix.
+		type:	DataMatrix
+	"""	
+	
+	if not isinstance(name, basestring):
+		raise TypeError('name should be a string')
+	newdm = dm[:]
+	if isinstance(value, BaseColumn):
+		if value._datamatrix is not dm:
+			raise Exception('This column does not belong to this DataMatrix')
+		value._datamatrix = newdm
+	newdm[name] = value
+	return newdm
+
+
 def split(col, *values):
 
 	"""

@@ -246,3 +246,11 @@ def test_filter_():
 	dm = ops.filter_(lambda **d: d['a']%2, dm)
 	print(type(dm._rowid))
 	eq_(dm.a, [1, 3])
+
+
+def test_setcol():
+	
+	dm1 = DataMatrix(length=2)
+	dm2 = ops.setcol(dm1, 'y', range(2))
+	eq_(dm2.y, [0, 1])
+	ok_('y' not in dm1)
