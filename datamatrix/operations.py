@@ -215,7 +215,17 @@ def map_(fnc, obj):
 	"""
 	
 	if not callable(fnc):
-		raise TypeError('fnc should be callable')	
+		raise TypeError('fnc should be callable')
+	if isinstance(obj, _SeriesColumn):
+		# For a SeriesColumn, we need to make a special case, because the depth
+		# of the new SeriesColumn may be different from the depth of the
+		# original column.
+		for i, cell in enumerate(obj):	
+			a = fnc(cell)
+			if not i:
+				newcol = _SeriesColumn(obj.dm, depth=len(a))
+			newcol[i] = a
+		return newcol		
 	if isinstance(obj, BaseColumn):
 		newcol = obj._empty_col()
 		newcol[:] = [fnc(cell) for cell in obj]

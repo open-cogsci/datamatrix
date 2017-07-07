@@ -24,7 +24,7 @@ desc:
 
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
-from datamatrix import FloatColumn
+from datamatrix import FloatColumn, operations as ops
 import numpy as np
 from numpy import nanmean, nanmedian
 from scipy.interpolate import interp1d
@@ -473,7 +473,7 @@ def blinkreconstruct(series, vt=5, maxdur=500, margin=10, smooth_winlen=21,
 		type:	SeriesColumn
 	"""
 
-	return _apply_fnc(series, _blinkreconstruct, vt=vt, maxdur=maxdur,
+	return _map(series, _blinkreconstruct, vt=vt, maxdur=maxdur,
 		margin=margin, smooth_winlen=21, std_thr=3)
 
 
@@ -551,7 +551,7 @@ def smooth(series, winlen=11, wintype='hanning'):
 		type:	SeriesColumn
 	"""
 
-	return _apply_fnc(series, _smooth, winlen=winlen, wintype=wintype)
+	return _map(series, _smooth, winlen=winlen, wintype=wintype)
 		
 		
 def downsample(series, by, fnc=nanmean):
@@ -612,9 +612,9 @@ def downsample(series, by, fnc=nanmean):
 		desc:	A downsampled series.
 		type:	SeriesColumn
 	"""
-
-	return _apply_fnc(series, _downsample, by=by, fnc=fnc)
 	
+	return _map(series, _downsample, by=by, fnc=fnc)
+
 
 def threshold(series, fnc, min_length=1):
 
@@ -701,19 +701,19 @@ def threshold(series, fnc, min_length=1):
 
 # Private functions
 
-
-def _apply_fnc(series, _fnc, **kwdict):
-
+def _map(series, fnc_, **kwdict):
+	
 	"""
 	visible: False
 
 	desc:
-		Applies a function to each cell.
+		Applies a function to each cell. Or, if a numpy array is passed, only
+		that array is processed.
 
 	arguments:
 		series:
-			desc:	A signal to apply the function to.
-			type:	SeriesColumn
+			desc:	A signal to apply the function to, or a numpy array.
+			type:	[SeriesColumn, ndarray]
 		_fnc:
 			desc:	The function to apply.
 
@@ -722,17 +722,15 @@ def _apply_fnc(series, _fnc, **kwdict):
 
 	returns:
 		desc:	A new signal.
-		type:	SeriesColumn
-	"""
+		type:	[SeriesColumn, ndarray]
+	"""	
 	
-	if not series:
-		return _SeriesColumn(series._datamatrix, depth=series.depth)
-	for i, cell in enumerate(series):
-		new_cell = _fnc(cell, **kwdict)
-		if not i:
-			new_series = _SeriesColumn(series._datamatrix, depth=len(new_cell))
-		new_series[i] = new_cell
-	return new_series
+	f = lambda a: fnc_(a, **kwdict)
+	if isinstance(series, np.ndarray):
+		return f(series)
+	if isinstance(series, _SeriesColumn):
+		return ops.map_(f, series)
+	raise TypeError(u'Expects a SeriesColumn or NumPy array')	
 
 
 def _blinkreconstruct(a, vt=5, maxdur=500, margin=10, smooth_winlen=21,
@@ -853,7 +851,7 @@ def _smooth(a, winlen=11, wintype='hanning'):
 	else:
 		func = getattr(np, wintype)
 		w = func(winlen)
-	y = np.convolve(w/w.sum(), s, mode='valid')
+	y = np.convolve(w/np.nansum(w), s, mode='valid')
 	return y
 	
 
@@ -864,7 +862,8 @@ def _downsample(a, by, fnc=nanmean):
 
 	desc:
 		Downsamples a single array.
-	"""	
+	"""
+	
 	# Resize the array so that its length is a multiple of by
 	a = a[:by * (a.shape[0] // by)]
 	return fnc(a.reshape(-1, by), axis=1)
