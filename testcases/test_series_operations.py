@@ -143,3 +143,18 @@ def test_concatenate():
 	dm.s2[:] = 3,2,1
 	dm.s = series.concatenate(dm.s1, dm.s2)
 	check_series(dm.s, [[1,2,3,3,2,1]])
+
+
+def test_interpolate():
+
+	dm = DataMatrix(length=3)
+	dm.s = SeriesColumn(depth=4)
+	dm.s = 1, 2, 3, 4
+	dm.s[0] = np.nan
+	dm.s[1, 0] = np.nan
+	dm.s[1, 2] = np.nan
+	dm.i = series.interpolate(dm.s)
+	check_series(dm.i, [
+		[np.nan]*4,
+		[2,2,3,4],
+		[1,2,3,4]])

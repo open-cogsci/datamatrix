@@ -697,6 +697,62 @@ def threshold(series, fnc, min_length=1):
 		if nhit >= min_length:
 			threshold_series[i,j-nhit+1:j+1] = 1
 	return threshold_series
+	
+	
+def interpolate(series):
+	
+	"""
+	desc: |
+		Linearly interpolates missing (`nan`) data.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 import numpy as np
+		 from matplotlib import pyplot as plt
+		 from datamatrix import DataMatrix, SeriesColumn, series
+
+		 LENGTH = 1 # Number of rows
+		 DEPTH = 100 # Depth (or length) of SeriesColumns
+		 MISSING = 50 # Nr of missing samples
+
+		 # Create a sine wave with missing data
+		 sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
+		 sinewave[np.random.choice(np.arange(DEPTH), MISSING)] = np.nan
+		 # And turns this into a DataMatrix
+		 dm = DataMatrix(length=LENGTH)
+		 dm.y = SeriesColumn(depth=DEPTH)
+		 dm.y = sinewave
+		 # Now interpolate the missing data!
+		 dm.i = srs.interpolate(dm.y)
+
+		 # And plot the original data as circles and the interpolated data as dotted
+		 # lines
+		 plt.clf()
+		 plt.plot(dm.i.plottable, ':')
+		 plt.plot(dm.y.plottable, 'o')
+		 plt.savefig('content/pages/img/series/interpolate.png')
+		--%
+		
+		%--
+		figure:
+		 source: interpolate.png
+		 id: FigInterpolate
+		--%				
+
+	arguments:
+		series:
+			desc:	A signal to interpolate.
+			type:	SeriesColumn
+
+
+	returns:
+		desc:	The interpolated signal.
+		type:	SeriesColumn
+	"""		
+	
+	return ops.map_(_interpolate, series)
 
 
 # Private functions
@@ -714,7 +770,7 @@ def _map(series, fnc_, **kwdict):
 		series:
 			desc:	A signal to apply the function to, or a numpy array.
 			type:	[SeriesColumn, ndarray]
-		_fnc:
+		fnc_:
 			desc:	The function to apply.
 
 	keyword-dict:
@@ -867,3 +923,23 @@ def _downsample(a, by, fnc=nanmean):
 	# Resize the array so that its length is a multiple of by
 	a = a[:by * (a.shape[0] // by)]
 	return fnc(a.reshape(-1, by), axis=1)
+
+
+def _interpolate(y):
+	
+	"""
+	visible: False
+	
+	desc:
+		Performs linear interpolation of a single array.
+	"""
+
+	y = np.copy(y)
+	xnan = np.isnan(y)
+	if np.sum(xnan) == len(y):
+		warn(u'Cannot interpolate all-nan array')
+		return y
+	inan = np.where(xnan)
+	x = np.arange(len(y))
+	y[inan] = np.interp(x=inan, xp=x[~xnan], fp=y[~xnan])
+	return y
