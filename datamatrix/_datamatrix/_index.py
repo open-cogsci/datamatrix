@@ -90,6 +90,18 @@ class Index(OrderedState):
 		for i in self._l:
 			yield i
 			
+	def __getstate__(self):
+		
+		# Is used by pickle.dump. To make sure that Index objects with only a
+		# different _metaindex are considered identical
+		return OrderedState.__getstate__(self, ignore=u'_metaindex')
+		
+	def __setstate__(self, state):
+		
+		# Start with a _metaindex=None after unpickling		
+		self.__dict__.update(state)
+		self._metaindex = None
+			
 	def index(self, i):
 		
 		if self._metaindex is None:
