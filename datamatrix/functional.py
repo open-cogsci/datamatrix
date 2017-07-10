@@ -24,11 +24,106 @@ desc:
 
 import inspect
 import functools
+import os
+import pickle
+import hashlib
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._index import Index
+
+
+MEMOIZE_FOLDER = u'.memoize'
+
+
+def memoize(fnc=None, key=None, persistent=False):
+	
+	"""
+	desc: |
+		A memoization decorator that stores the result of a function call, and
+		returns the stored value when the function is called again with the same
+		arguments. This decorator only works for arguments and return values
+		that can be serialized (i.e. arguments that you can pickle).
+		
+		Memoization is an optimization technique.
+		
+		__Example:__
+		
+		%--
+		python: |
+		 from datamatrix import functional as fnc
+
+		 @fnc.memoize
+		 def add(a, b):
+		 	
+			print('Calculating %d + %d' % (a, b))
+		 	return a + b
+		 	
+		 three = add(1, 2) # Storing result in memory
+		 three = add(1, 2) # Re-using previous result
+		 
+		 @fnc.memoize(persistent=True, key='persistent-add')
+		 def persistent_add:
+			 
+			print('Calculating %d + %d' % (a, b))
+		 	return a + b
+
+		 three = persistent_add(1, 2) # Writing result to disk
+		 three = persistent_add(1, 2) # Re-using previous result	
+		--%
+		
+	arguments:
+		fnc:
+			desc:	A function to memoize.
+			type:	callable
+			
+	keywords:
+		persistent:
+			desc:	Indicates whether the result should be written to disk so
+					that the result can be re-used when the script is run again.
+					If set to `True`, the result is stored as a pickle in a
+					`.memoize` subfolder of the working directory.
+			type:	bool
+		key:
+			desc:	Indicates a key that identifies the results. If no key is
+					provided, a key is generated based on the function name,
+					and the arguments passed to the function. However, this
+					requires the arguments to be serialized, which can take some
+					time.
+			type:	[str, None]
+
+	returns:
+		desc:	A memoized version of fnc.
+		type:	callable
+	"""
+	
+	def inner(fnc):
+			
+		@functools.wraps(fnc)
+		def innermost(*args, **kwargs):
+			
+			memkey = hashlib.md5(pickle.dumps([args, kwargs])).hexdigest() \
+				if key is None else key
+			if memkey not in cache:
+				if persistent:
+					path = os.path.join(MEMOIZE_FOLDER, memkey)
+					if not os.path.exists(MEMOIZE_FOLDER):
+						os.mkdir(MEMOIZE_FOLDER)
+					if os.path.exists(path):
+						with open(path, u'rb') as fd:
+							cache[memkey] = pickle.load(fd)
+							return cache[memkey]
+				cache[memkey] = fnc(*args, **kwargs)
+				if persistent:
+					with open(path, u'wb') as fd:
+						pickle.dump(cache[memkey], fd)
+			return cache[memkey]
+
+		return innermost
+
+	cache = {}
+	return inner if fnc is None else inner(fnc)
 
 
 def curry(fnc):

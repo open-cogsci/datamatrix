@@ -70,4 +70,17 @@ def test_curry():
 	eq_(add(1)(2,3), 6)
 	eq_(add(1)(2)(3), 6)
 	if py3:
-		eq_(add.__doc__ == 'test')
+		eq_(add.__doc__, 'test')
+
+
+def test_memoize():
+	
+	@fnc.memoize
+	def add(a, b):
+		
+		"""test"""
+		
+		return a+b
+		
+	eq_(add(1,2), add(1,2))
+	eq_(add.__doc__, 'test')
