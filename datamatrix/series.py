@@ -347,7 +347,7 @@ def window(series, start=0, end=None):
 
 
 def baseline(series, baseline, bl_start=-100, bl_end=None, reduce_fnc=None,
-	method='divisive'):
+	method='subtractive'):
 
 	"""
 	desc: |
@@ -376,8 +376,7 @@ def baseline(series, baseline, bl_start=-100, bl_end=None, reduce_fnc=None,
 		 dm.y += .2*np.random.random( (LENGTH, DEPTH) )
 		 # Baseline-correct the traces, This will remove the vertical
 		 # offset
-		 dm.y2 = series.baseline(dm.y, dm.y, bl_start=0, bl_end=10,
-		 	method='subtractive')
+		 dm.y2 = series.baseline(dm.y, dm.y, bl_start=0, bl_end=10)
 		 
 		 plt.clf()
 		 plt.subplot(121)

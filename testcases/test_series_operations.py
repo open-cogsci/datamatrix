@@ -88,7 +88,7 @@ def test_baseline():
 	dm.baseline[0] = range(1,4)
 	dm.baseline[1] = range(3)
 	dm.norm = series.baseline(dm.series, dm.baseline)
-	check_series(dm.norm, [[0,.5,1], [1,2,3]])
+	check_series(dm.norm, [[-2,-1,0], [0,1,2]])
 	check_integrity(dm)
 	
 	
