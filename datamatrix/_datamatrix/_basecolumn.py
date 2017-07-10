@@ -22,6 +22,7 @@ desc: pass
 
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._index import Index
+from datamatrix._ordered_state import OrderedState
 import collections
 import numbers
 import operator
@@ -55,7 +56,7 @@ except ImportError:
 		return val
 
 
-class BaseColumn(object):
+class BaseColumn(OrderedState):
 
 	"""
 	desc:

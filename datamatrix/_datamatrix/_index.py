@@ -18,13 +18,14 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
+from datamatrix._ordered_state import OrderedState
 try:
 	import numpy as np
 except ImportError:
 	np = None
 
 
-class Index(object):
+class Index(OrderedState):
 	
 	"""
 	desc:
@@ -133,4 +134,4 @@ class Index(object):
 		i._l = sorted(self._l[:])
 		i._max = self._max
 		i._length = self._length
-		return i		
+		return i

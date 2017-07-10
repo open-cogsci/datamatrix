@@ -22,10 +22,12 @@ from datamatrix import Row
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._mixedcolumn import MixedColumn
 from datamatrix._datamatrix._index import Index
+from datamatrix._ordered_state import OrderedState
 import collections
 _id = 0
 
-class DataMatrix(object):
+
+class DataMatrix(OrderedState):
 
 	"""
 	desc:
@@ -442,7 +444,7 @@ class DataMatrix(object):
 		
 		# Is used by pickle.dump. To make sure that identical datamatrices with
 		# different _ids are considered identical, we strip the _id property.
-		return { k : v for k, v in self.__dict__.items() if k != u'_id' }
+		return OrderedState.__getstate__(self, ignore=u'_id')
 
 	def __setstate__(self, state):
 		
