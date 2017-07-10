@@ -435,12 +435,27 @@ class DataMatrix(object):
 			self._cols[name] = self._default_col_type(self)
 		self._cols[name][:] = value
 		self._mutate()
-
+		
 	# Implemented syntax
 	
+	def __getstate__(self):
+		
+		# Is used by pickle.dump. To make sure that identical datamatrices with
+		# different _ids are considered identical, we strip the _id property.
+		return { k : v for k, v in self.__dict__.items() if k != u'_id' }
+
+	def __setstate__(self, state):
+		
+		# Is used by pickle.load. Because __getstate__() strips the _id, we need
+		# to generate a new id for the DataMatrix upon unpickling.
+		global _id
+		self.__dict__.update(state)
+		object.__setattr__(self, u'_id', _id)
+		_id += 1
+		
 	def __dir__(self):
 		
-		return self.column_names + object.__dir__(self)	
+		return self.column_names + object.__dir__
 
 	def __contains__(self, item):
 
