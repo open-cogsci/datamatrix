@@ -54,3 +54,20 @@ def test_setcol():
 	dm2 = fnc.setcol(dm1, 'y', range(2))
 	eq_(dm2.y, [0, 1])
 	ok_('y' not in dm1)
+
+
+def test_curry():
+	
+	@fnc.curry
+	def add(a, b, c):
+		
+		"""test"""
+		
+		return a+b+c
+		
+	eq_(add(1,2,3), 6)
+	eq_(add(1,2)(3), 6)
+	eq_(add(1)(2,3), 6)
+	eq_(add(1)(2)(3), 6)
+	if py3:
+		eq_(add.__doc__ == 'test')

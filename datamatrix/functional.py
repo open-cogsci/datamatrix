@@ -22,11 +22,62 @@ desc:
 ---
 """
 
+import inspect
+import functools
 from datamatrix.py3compat import *
-from datamatrix import DataMatrix, IntColumn, SeriesColumn, MixedColumn
+from datamatrix import DataMatrix
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._index import Index
+
+
+def curry(fnc):
+	
+	"""
+	desc: |
+		A [currying](https://en.wikipedia.org/wiki/Currying) decorator that
+		turns a function with multiple arguments into a chain of partial
+		functions, each of which takes at least a single argument. The input
+		function may accept keywords, but the output function no longer does
+		(all keywords become positional arguments).			
+		
+		__Example:__
+		
+		%--
+		python: |
+		 from datamatrix import functional as fnc
+
+		 @fnc.curry
+		 def add(a, b, c):
+		 	
+		 	return a + b + c
+		 	
+		 print(add(1)(2)(3)) # Curried approach with single arguments
+		 print(add(1, 2)(3)) # Partly curried approach
+		 print(add(1)(2, 3)) # Partly curried approach
+		 print(add(1, 2, 3)) # Original approach multiple arguments
+		--%
+		
+	arguments:
+		fnc:
+			desc:	A function to curry.
+			type:	callable
+
+	returns:
+		desc:	A curried function that accepts at least the first argument, and
+				returns a function that accepts the second argument, etc.
+		type:	callable
+	"""
+	
+	def inner(*args):
+		
+		if _count_unbound_arguments(fnc) == len(args):
+			return fnc(*args)
+		return curry(functools.partial(fnc, *args))
+		
+	if py3:
+		return functools.wraps(fnc)(inner)
+	return inner
 
 
 def map_(fnc, obj):
@@ -211,3 +262,27 @@ def setcol(dm, name, value):
 		value._datamatrix = newdm
 	newdm[name] = value
 	return newdm
+
+
+# Private functions
+
+
+def _count_unbound_arguments(fnc):
+	
+	"""
+	visible: False
+	
+	desc:
+		Counts how many unbound arguments fnc takes. This is a wrapper function
+		that works around the quirk that partialed functions are not real
+		functions in Python 2.
+	"""
+
+	nbound = 0
+	# In Python 2, functools.partial doesn't return a real function object, so
+	# we need to dig to arrive at the actual funcion while remembering how many
+	# arguments were bound.
+	while isinstance(fnc, functools.partial):
+		nbound += len(fnc.args)
+		fnc = fnc.func
+	return len(inspect.getargspec(fnc).args) - nbound
