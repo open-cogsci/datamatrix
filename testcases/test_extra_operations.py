@@ -221,36 +221,3 @@ def test_auto_type():
 	ok_(isinstance(dm.a, MixedColumn))
 	ok_(isinstance(dm.b, FloatColumn))
 	ok_(isinstance(dm.c, IntColumn))
-
-
-def test_map_():
-	
-	for coltype in (MixedColumn, FloatColumn, IntColumn):
-		dm = DataMatrix(length=2, default_col_type=coltype)
-		dm.a = 1, 2
-		dm.a = ops.map_(lambda x: x*2, dm.a)
-		eq_(dm.a, [2, 4])
-		ok_(isinstance(dm.a, coltype))
-		dm = ops.map_(lambda **d: {'a' : 0}, dm)
-		eq_(dm.a, [0, 0])
-		ok_(isinstance(dm.a, coltype))
-		
-
-def test_filter_():
-	
-	dm = DataMatrix(length=4)
-	dm.a = range(4)
-	odd = ops.filter_(lambda x: x%2, dm.a)
-	ok_(all([x%2 for x in odd]))
-	print(type(dm._rowid))
-	dm = ops.filter_(lambda **d: d['a']%2, dm)
-	print(type(dm._rowid))
-	eq_(dm.a, [1, 3])
-
-
-def test_setcol():
-	
-	dm1 = DataMatrix(length=2)
-	dm2 = ops.setcol(dm1, 'y', range(2))
-	eq_(dm2.y, [0, 1])
-	ok_('y' not in dm1)
