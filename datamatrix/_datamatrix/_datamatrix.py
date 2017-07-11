@@ -451,8 +451,10 @@ class DataMatrix(OrderedState):
 		# Is used by pickle.load. Because __getstate__() strips the _id, we need
 		# to generate a new id for the DataMatrix upon unpickling.
 		global _id
-		self.__dict__.update(state)
+		OrderedState.__setstate__(self, state)
 		object.__setattr__(self, u'_id', _id)
+		for name, column in self.columns:
+			column._datamatrix = self
 		_id += 1
 		
 	def __dir__(self):

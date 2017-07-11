@@ -689,6 +689,12 @@ class BaseColumn(OrderedState):
 		return val != val or val == INF
 		
 	# Implemented syntax
+	
+	def __getstate__(self):
+		
+		# Is used by pickle.dump. To make sure that identical datamatrices with
+		# different _ids are considered identical, we strip the _id property.
+		return OrderedState.__getstate__(self, ignore=u'_datamatrix')
 
 	def __str__(self):
 

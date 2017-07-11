@@ -18,7 +18,6 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
-from collections import OrderedDict
 
 
 class OrderedState(object):
@@ -27,14 +26,23 @@ class OrderedState(object):
 	desc:
 		A base object that preserves the order of the object's __dict__ for
 		serialization (pickling). This is necessary to identify identical
-		objects.
+		objects. Based on trial and error it seems that two lists (one for
+		values and one for keys) can be consistenly pickled, whereas an
+		OrderedDict cannot.
 	"""
 	
 	def __getstate__(self, ignore=[]):
 				
-		d = OrderedDict()
+		keys = []
+		values = []
 		for k in sorted(self.__dict__):
 			if k in ignore:
 				continue
-			d[k] = self.__dict__[k]
-		return d
+			keys.append(k)
+			values.append(self.__dict__[k])
+		return keys, values
+		
+	def __setstate__(self, state):
+		
+		keys, values = state
+		self.__dict__.update({key : val for key, val in zip(keys, values)})

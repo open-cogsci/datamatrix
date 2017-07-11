@@ -98,8 +98,8 @@ class Index(OrderedState):
 		
 	def __setstate__(self, state):
 		
+		OrderedState.__setstate__(self, state)
 		# Start with a _metaindex=None after unpickling		
-		self.__dict__.update(state)
 		self._metaindex = None
 			
 	def index(self, i):
