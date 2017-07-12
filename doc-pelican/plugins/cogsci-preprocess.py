@@ -3,6 +3,7 @@
 import os
 import re
 import sys
+import shutil
 sys.path.insert(0, '/home/sebastiaan/git/academicmarkdown')
 sys.path.insert(0, '/home/sebastiaan/git/cachedurlget')
 import cachedurlget
@@ -44,6 +45,10 @@ with open('constants.yaml') as f:
 
 links = {}
 duplicate_names = []
+try:
+	shutil.rmtree('.memoize')
+except:
+	pass
 
 class AcademicMarkdownReader(MarkdownReader):
 

@@ -33,6 +33,10 @@ def main():
 		types=['function', 'module'], cls=None, exclude=[
 			'_SeriesColumn', 'BaseColumn', 'DataMatrix', 'FloatColumn',
 			'MixedColumn', 'Index', 'IntColumn', 'pivot_table', 'convert'])
+	createdoc('datamatrix/functional.py',
+		target='functional.md', onlyContents=True,
+		types=['function', 'module'], cls=None, exclude=[
+			'_SeriesColumn', 'BaseColumn', 'Index', 'DataMatrix'])
 	createdoc('datamatrix/convert.py',
 		target='convert.md', onlyContents=True,
 		types=['function', 'module'], cls=None, exclude=['DataMatrix'])

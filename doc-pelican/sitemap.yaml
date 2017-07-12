@@ -1,15 +1,17 @@
 Install: install
 Tutorials:
     Basic use: basic
-    Functional programming: functional
+    Memoization (caching): memoization
 Modules:
+    datamatrix.convert: convert
+    datamatrix.functional: functional
+    datamatrix.io: io
     datamatrix.operations: operations
     datamatrix.series: series
-    datamatrix.io: io
-    datamatrix.convert: convert
 Forum: http://forum.cogsci.nl/categories/datamatrix
 Blog: http://www.cogsci.nl/
-v0.5:
+v0.6:
+    v0.6: http://datamatrix.cogsci.nl/0.6/
     v0.5: http://datamatrix.cogsci.nl/0.5/
     v0.4: http://datamatrix.cogsci.nl/0.4/
     v0.3: http://datamatrix.cogsci.nl/0.3/

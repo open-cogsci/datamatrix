@@ -4,7 +4,7 @@
 
 <div class="FunctionDoc YAMLDoc" id="baseline" markdown="1">
 
-## function __baseline__\(series, baseline, bl\_start=-100, bl\_end=None, reduce\_fnc=None, method=u'divisive'\)
+## function __baseline__\(series, baseline, bl\_start=-100, bl\_end=None, reduce\_fnc=None, method=u'subtractive'\)
 
 Applies a baseline to a signal
 
@@ -31,8 +31,7 @@ python: |
  dm.y += .2*np.random.random( (LENGTH, DEPTH) )
  # Baseline-correct the traces, This will remove the vertical
  # offset
- dm.y2 = series.baseline(dm.y, dm.y, bl_start=0, bl_end=10,
-        method='subtractive')
+ dm.y2 = series.baseline(dm.y, dm.y, bl_start=0, bl_end=10)
  
  plt.clf()
  plt.subplot(121)
@@ -70,7 +69,7 @@ __Keywords:__
 	- Default: None
 - `method` -- Specifies whether divisive or subtrace correction should be used. Divisive is the default for historical purposes, but subtractive is generally preferred.
 	- Type: str
-	- Default: 'divisive'
+	- Default: 'subtractive'
 
 __Returns:__
 
@@ -163,7 +162,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7f97401040d0>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7ff1fd758f28>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times shorter.
 The depth of the downsampled series is the highest multiple of the depth
@@ -214,7 +213,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7f97401040d0>
+	- Default: <function nanmean at 0x7ff1fd758f28>
 
 __Returns:__
 
@@ -414,7 +413,7 @@ A `(series, zero_point)` tuple, in which `series` is a `SeriesColumn` and `zero_
 
 <div class="FunctionDoc YAMLDoc" id="reduce_" markdown="1">
 
-## function __reduce\___\(series, operation=<function nanmean at 0x7f97401040d0>\)
+## function __reduce\___\(series, operation=<function nanmean at 0x7ff1fd758f28>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -445,7 +444,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7f97401040d0>
+	- Default: <function nanmean at 0x7ff1fd758f28>
 
 __Returns:__
 

@@ -94,15 +94,15 @@ __Example:__
 
 %--
 python: |
- from datamatrix import DataMatrix, operations as ops
+ from datamatrix import DataMatrix, functional as fnc
  
  dm = DataMatrix(length=5)
  dm.col = range(5)
  # Create a column with only odd values
- col_new = ops.filter_(lambda x: x % 2, dm.col)
+ col_new = fnc.filter_(lambda x: x % 2, dm.col)
  print(col_new)
  # Create a new datamatrix with only odd values in col
- dm_new = ops.filter_(lambda **d: d['col'] % 2, dm)
+ dm_new = fnc.filter_(lambda **d: d['col'] % 2, dm)
  print(dm_new)
 --%
 
@@ -257,16 +257,16 @@ __Example:__
 
 %--
 python: |
- from datamatrix import DataMatrix, operations as ops
+ from datamatrix import DataMatrix, functional as fnc
  
  dm = DataMatrix(length=3)
  dm.old = 0, 1, 2
  # Map a 2x function onto dm.old to create dm.new
- dm.new = ops.map_(lambda i: i*2, dm.old)
+ dm.new = fnc.map_(lambda i: i*2, dm.old)
  print(dm)
  # Map a 2x function onto the entire dm to create dm_new, using a fancy
  # dict comprehension wrapped inside a lambda function.
- dm_new = ops.map_(
+ dm_new = fnc.map_(
         lambda **d: {col : 2*val for col, val in d.items()},
         dm)
  print(dm_new)
@@ -326,20 +326,21 @@ __Keywords:__
 
 ## function __setcol__\(dm, name, value\)
 
-Returns a new DataMatrix to which a column has been added or modified.
+Returns a new DataMatrix to which a column has been added or in which
+a column has been modified.
 
-The main difference with using a regular assignment (`dm.col = 'x'`) is
-that this does not modify the original DataMatrix, and is suitable for
-use in `lambda` expressions.
+The main difference with regular assignment (`dm.col = 'x'`) is that
+`setcol()` does not modify the original DataMatrix, and can be used in
+`lambda` expressions.
 
 __Example:__
 
 %--
 python: |
- from datamatrix import DataMatrix, operations as ops
+ from datamatrix import DataMatrix, functional as fnc
 
  dm1 = DataMatrix(length=5)
- dm2 = ops.setcol(dm1, 'y', range(5))
+ dm2 = fnc.setcol(dm1, 'y', range(5))
  print(dm2)
 --%
 
@@ -355,7 +356,7 @@ __Returns:__
 
 A new DataMatrix.
 
-- Type: DataMatrix]
+- Type: DataMatrix
 
 </div>
 
