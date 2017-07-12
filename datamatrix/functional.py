@@ -17,13 +17,14 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 ---
-desc:
-	Functions and decorators for functional programming.
+desc: |
+	A set of functions and decorators for functional programming.
 ---
 """
 
 import inspect
 import functools
+import sys
 import os
 import pickle
 import hashlib
@@ -37,16 +38,22 @@ from datamatrix._datamatrix._index import Index
 MEMOIZE_FOLDER = u'.memoize'
 
 
-def memoize(fnc=None, key=None, persistent=False):
+def memoize(fnc=None, key=None, persistent=False, lazy=False, debug=False):
 	
 	"""
 	desc: |
-		A memoization decorator that stores the result of a function call, and
-		returns the stored value when the function is called again with the same
-		arguments. This decorator only works for arguments and return values
+		A [memoization](https://en.wikipedia.org/wiki/Memoization) decorator
+		that stores the result of a function call, and returns the stored value
+		when the function is called again with the same arguments. That is,
+		memoization is a specific kind of caching that improves performance for
+		expensive function calls.
+		
+		This decorator only works for arguments and return values
 		that can be serialized (i.e. arguments that you can pickle).
 		
-		Memoization is an optimization technique.
+		To clear memoization, either pass `~[function name]` as a command line
+		argument to a script, or pass `memoclear=True` as a keyword to the
+		memoized function (not to the decorator).
 		
 		__Example:__
 		
@@ -57,28 +64,27 @@ def memoize(fnc=None, key=None, persistent=False):
 		 @fnc.memoize
 		 def add(a, b):
 		 	
-			print('Calculating %d + %d' % (a, b))
+		 	print('add(%d, %d)' % (a, b))
 		 	return a + b
 		 	
 		 three = add(1, 2) # Storing result in memory
 		 three = add(1, 2) # Re-using previous result
+		 three = add(1, 2, memoclear=True) # Clear cache!
 		 
 		 @fnc.memoize(persistent=True, key='persistent-add')
-		 def persistent_add:
-			 
-			print('Calculating %d + %d' % (a, b))
+		 def persistent_add(a, b):
+		 	
+		 	print('persistent_add(%d, %d)' % (a, b))
 		 	return a + b
-
+		 	
 		 three = persistent_add(1, 2) # Writing result to disk
 		 three = persistent_add(1, 2) # Re-using previous result	
 		--%
 		
-	arguments:
+	keywords:
 		fnc:
 			desc:	A function to memoize.
-			type:	callable
-			
-	keywords:
+			type:	callable	
 		persistent:
 			desc:	Indicates whether the result should be written to disk so
 					that the result can be re-used when the script is run again.
@@ -92,6 +98,20 @@ def memoize(fnc=None, key=None, persistent=False):
 					requires the arguments to be serialized, which can take some
 					time.
 			type:	[str, None]
+		lazy:
+			desc:	If `True`, any callable that is passed onto the memoized
+					function is automatically called, and the memoized function
+					receives the return value instead of the function object.
+					This allows for lazy evaluation.
+			type:	bool
+		debug:
+			desc:	If `True`, the memoized function returns a
+					`(retval, memkey, source)` tuple, where `retval` is the
+					function's return value, `memkey` is the key used for
+					caching, and `source` is one of 'memory', 'disk', or
+					'function', indicating whether and how the return value was
+					cached. This is mostly for debugging and testing.
+			type:	bool
 
 	returns:
 		desc:	A memoized version of fnc.
@@ -101,28 +121,44 @@ def memoize(fnc=None, key=None, persistent=False):
 	def inner(fnc):
 			
 		@functools.wraps(fnc)
-		def innermost(*args, **kwargs):
-			
-			memkey = hashlib.md5(pickle.dumps([args, kwargs])).hexdigest() \
-				if key is None else key
-			if memkey not in cache:
-				if persistent:
-					path = os.path.join(MEMOIZE_FOLDER, memkey)
-					if not os.path.exists(MEMOIZE_FOLDER):
-						os.mkdir(MEMOIZE_FOLDER)
-					if os.path.exists(path):
-						with open(path, u'rb') as fd:
-							cache[memkey] = pickle.load(fd)
-							return cache[memkey]
-				cache[memkey] = fnc(*args, **kwargs)
-				if persistent:
-					with open(path, u'wb') as fd:
-						pickle.dump(cache[memkey], fd)
-			return cache[memkey]
+		def innermost(*args, **kwdict):
+
+			clear = kwdict.pop('memoclear') if 'memoclear' in kwdict \
+				else '~%s' % fnc.__name__ in sys.argv
+			memkey = _memkey(fnc, *args, **kwdict) if key is None else key
+			# If persistent, determine the path for the memoization file and
+			# create a folder if necessary
+			if persistent:
+				path = os.path.join(MEMOIZE_FOLDER, memkey)
+				if not os.path.exists(MEMOIZE_FOLDER):
+					os.mkdir(MEMOIZE_FOLDER)
+			# Clear the cache both in memory and, if persistent, on disk.
+			if clear:
+				if memkey in cache:
+					del cache[memkey]
+				if persistent and os.path.exists(path):
+					os.remove(path)
+			if memkey in cache:
+				return ret_fnc(cache[memkey], memkey, u'memory')
+			# If ther result hasn't been cached yet, check if it's on disk,
+			# otherwise determine it.
+			if persistent:
+				found, obj = _read_persistent_cache(path)
+				if found:
+					cache[memkey] = obj
+					return ret_fnc(obj, memkey, u'disk')
+			if lazy:
+				args = [arg() if callable(arg) else arg for arg in args]
+				kwdict = {key : val() if callable(val) else val for key, val in kwdict.items()}
+			cache[memkey] = fnc(*args, **kwdict)
+			if persistent:
+				_write_persistent_cache(path, cache[memkey])
+			return ret_fnc(cache[memkey], memkey, u'function')
 
 		return innermost
 
 	cache = {}
+	ret_fnc = (lambda *args: args) if debug else (lambda *args: args[0])
 	return inner if fnc is None else inner(fnc)
 
 
@@ -134,7 +170,7 @@ def curry(fnc):
 		turns a function with multiple arguments into a chain of partial
 		functions, each of which takes at least a single argument. The input
 		function may accept keywords, but the output function no longer does
-		(all keywords become positional arguments).			
+		(i.e. currying turns all keywords into positional arguments).			
 		
 		__Example:__
 		
@@ -381,3 +417,31 @@ def _count_unbound_arguments(fnc):
 		nbound += len(fnc.args)
 		fnc = fnc.func
 	return len(inspect.getargspec(fnc).args) - nbound
+
+
+def _memkey(fnc, *args, **kwdict):
+	
+	"""
+	visible: False
+	
+	desc:
+		Generates a unique hash to serve as key for memoization.
+	"""
+	
+	args = [ (arg.__name__ if hasattr(arg, '__name') else '__nameless__') \
+		if callable(arg) else arg for arg in args]
+	return hashlib.md5(pickle.dumps([fnc.__name__, args, kwdict])).hexdigest()
+
+
+def _read_persistent_cache(path):
+	
+	if not os.path.exists(path):
+		return False, None
+	with open(path, u'rb') as fd:
+		return True, pickle.load(fd)
+
+		
+def _write_persistent_cache(path, obj):
+	
+	with open(path, u'wb') as fd:
+		pickle.dump(obj, fd)

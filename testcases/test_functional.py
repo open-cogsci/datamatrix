@@ -75,12 +75,33 @@ def test_curry():
 
 def test_memoize():
 	
-	@fnc.memoize
+	@fnc.memoize(debug=True)
 	def add(a, b):
 		
 		"""test"""
 		
 		return a+b
 		
-	eq_(add(1,2), add(1,2))
-	eq_(add.__doc__, 'test')
+	@fnc.memoize(debug=True, key='custom-key')
+	def add2(a, b):
+		
+		return a+b
+
+	@fnc.memoize()
+	def add3(a, b):
+		
+		return a+b
+	
+	retval, memkey, src = add(1,2)
+	eq_(retval, 3)
+	eq_(src, u'function')
+	eq_(add(1,2), (retval, memkey, u'memory'))
+	eq_(add(1,2, memoclear=True), (retval, memkey, u'function'))
+	eq_(add(1,2), (retval, memkey, u'memory'))
+	if py3:
+		eq_(add.__doc__, 'test')	
+	eq_(add2(1,2), (retval, u'custom-key', u'function'))
+	eq_(add2(1,2), (retval, u'custom-key', u'memory'))
+	eq_(add2(1,2, memoclear=True), (retval, u'custom-key', u'function'))
+	eq_(add2(1,2), (retval, u'custom-key', u'memory'))	
+	eq_(add3(1,2), add3(1,2))
