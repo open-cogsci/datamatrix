@@ -266,6 +266,6 @@ class _SeriesColumn(NumericColumn):
 			return
 		return super(_SeriesColumn, self).__setitem__(key, value)
 
-def SeriesColumn(depth, defaultnan=False):
+def SeriesColumn(depth, defaultnan=True):
 
 	return _SeriesColumn, {'depth' : depth, u'defaultnan' : defaultnan}
