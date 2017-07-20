@@ -57,6 +57,7 @@ class DataMatrix(OrderedState):
 		object.__setattr__(self, u'_rowid', Index(length))
 		object.__setattr__(self, u'_default_col_type', default_col_type)
 		object.__setattr__(self, u'_id', _id)
+		object.__setattr__(self, u'_sorted', True)
 		_id += 1
 		for column_name, val in columns.items():
 			self[column_name] = val
@@ -64,13 +65,13 @@ class DataMatrix(OrderedState):
 	@property
 	def columns(self):
 
-		return list(sorted(self._cols.items(), key=lambda col: col[0]))
+		return self._to_list(self._cols.items(), key=lambda col: col[0])
 
 	@property
 	def column_names(self):
 
-		return list(sorted(self._cols.keys()))
-
+		return self._to_list(self._cols.keys())
+		
 	@property
 	def rows(self):
 
@@ -80,6 +81,11 @@ class DataMatrix(OrderedState):
 	def length(self):
 
 		return len(self._rowid)
+		
+	@property
+	def sorted(self):
+		
+		return self._sorted
 
 	@property
 	def default_col_type(self):
@@ -437,6 +443,20 @@ class DataMatrix(OrderedState):
 			self._cols[name] = self._default_col_type(self)
 		self._cols[name][:] = value
 		self._mutate()
+				
+	def _to_list(self, seq, key=None):
+		
+		"""
+		visible: False
+		
+		desc:
+			Returns a list that is sorted if the DataMatrix is set to being
+			sorted.
+		"""				
+		
+		if self._sorted:
+			return list(sorted(seq, key=key))
+		return list(seq)
 		
 	# Implemented syntax
 	
@@ -505,6 +525,9 @@ class DataMatrix(OrderedState):
 		if name == u'length':
 			self._setlength(value)
 			return
+		if name == u'sorted':
+			object.__setattr__(self, u'_sorted', value)
+			return
 		if name == u'default_col_type':
 			self._set_default_col_type(value)
 			return
@@ -565,7 +588,7 @@ class DataMatrix(OrderedState):
 		import prettytable
 		t = prettytable.PrettyTable()
 		t.add_column('#', self._rowid)
-		for name, col in list(self._cols.items())[:6]:
+		for name, col in list(self.columns)[:6]:
 			t.add_column(name,
 				['%E' % i if isinstance(i, (int, float)) and i > 1000 else i for i in col._printable_list()]
 				)
