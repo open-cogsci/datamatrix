@@ -147,9 +147,9 @@ def test_seriescolumn():
 	dm2.col_shared = SeriesColumn(2)
 	dm2.col_shared = 7, 8
 	dm3 = dm1 << dm2
-	check_series(dm3.col1, [[1,1],[2,2],[0,0],[0,0]])
+	check_series(dm3.col1, [[1,1],[2,2],[np.nan,np.nan],[np.nan,np.nan]])
 	check_series(dm3.col_shared, [[3,3],[4,4],[7,7],[8,8]])
-	check_series(dm3.col2, [[0,0],[0,0],[5,5],[6,6]])
+	check_series(dm3.col2, [[np.nan,np.nan],[np.nan,np.nan],[5,5],[6,6]])
 	dm3.i = [4,0,2,1]
 	dm4 = dm3.i <= 2
 	dm5 = (dm3.i <= 2) | (dm3.i >= 3)
