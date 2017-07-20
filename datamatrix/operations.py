@@ -579,8 +579,7 @@ def keep_only(dm, *cols):
 			type:	DataMatrix
 
 	argument-list:
-		cols:
-			desc:	A list of column names, or columns.
+		cols:	A list of column names, or column objects.
 	"""
 
 	# For backwards compatibility, accept also a list as a single argument

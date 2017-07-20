@@ -162,7 +162,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7ff1fd758f28>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7f01bbf98f28>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times shorter.
 The depth of the downsampled series is the highest multiple of the depth
@@ -213,7 +213,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7ff1fd758f28>
+	- Default: <function nanmean at 0x7f01bbf98f28>
 
 __Returns:__
 
@@ -413,7 +413,7 @@ A `(series, zero_point)` tuple, in which `series` is a `SeriesColumn` and `zero_
 
 <div class="FunctionDoc YAMLDoc" id="reduce_" markdown="1">
 
-## function __reduce\___\(series, operation=<function nanmean at 0x7ff1fd758f28>\)
+## function __reduce\___\(series, operation=<function nanmean at 0x7f01bbf98f28>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -444,7 +444,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7ff1fd758f28>
+	- Default: <function nanmean at 0x7f01bbf98f28>
 
 __Returns:__
 

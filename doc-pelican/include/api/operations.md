@@ -77,52 +77,6 @@ A generator that iterates over the bins.
 
 [bin_split]: #bin_split
 
-<div class="FunctionDoc YAMLDoc" id="filter_" markdown="1">
-
-## function __filter\___\(fnc, obj\)
-
-Filters rows from a datamatrix or column based on filter function
-(`fnc`).
-
-If `obj` is a column, `fnc` should be a function that accepts a single
-value. If `obj` is a datamatrix, `fnc` should be a function that accepts
-a keyword `dict`, where column names are keys and cells are values. In
-both cases, `fnc` should return a `bool` indicating whether the row or
-value should be included.
-
-__Example:__
-
-%--
-python: |
- from datamatrix import DataMatrix, functional as fnc
- 
- dm = DataMatrix(length=5)
- dm.col = range(5)
- # Create a column with only odd values
- col_new = fnc.filter_(lambda x: x % 2, dm.col)
- print(col_new)
- # Create a new datamatrix with only odd values in col
- dm_new = fnc.filter_(lambda **d: d['col'] % 2, dm)
- print(dm_new)
---%
-
-__Arguments:__
-
-- `fnc` -- A filter function.
-	- Type: callable
-- `obj` -- A datamatrix or column to filter.
-	- Type: BaseColumn, DataMatrix
-
-__Returns:__
-
-A new column or datamatrix.
-
-- Type: BaseColumn, DataMatrix
-
-</div>
-
-[filter_]: #filter_
-
 <div class="FunctionDoc YAMLDoc" id="fullfactorial" markdown="1">
 
 ## function __fullfactorial__\(dm, ignore=u''\)
@@ -230,64 +184,11 @@ __Arguments:__
 
 __Argument list:__
 
-- `*cols`: OrderedDict([('desc', 'A list of column names, or columns.')])
+- `*cols`: A list of column names, or column objects.
 
 </div>
 
 [keep_only]: #keep_only
-
-<div class="FunctionDoc YAMLDoc" id="map_" markdown="1">
-
-## function __map\___\(fnc, obj\)
-
-Maps a function (`fnc`) onto rows of datamatrix or cells of a column.
-
-If `obj` is a column, the function `fnc` is mapped is mapped onto each
-cell of the column, and a new column is returned. In this case,
-`fnc` should be a function that accepts and returns a single value.
-
-If `obj` is a datamatrix, the function `fnc` is mapped onto each row,
-and a new datamatrix is returned. In this case, `fnc` should be a
-function that accepts a keyword `dict`, where column names are keys and
-cells are values. The return value should be another `dict`, again with
-column names as keys, and cells as values. Columns that are not part of
-the returned `dict` are left unchanged.
-
-__Example:__
-
-%--
-python: |
- from datamatrix import DataMatrix, functional as fnc
- 
- dm = DataMatrix(length=3)
- dm.old = 0, 1, 2
- # Map a 2x function onto dm.old to create dm.new
- dm.new = fnc.map_(lambda i: i*2, dm.old)
- print(dm)
- # Map a 2x function onto the entire dm to create dm_new, using a fancy
- # dict comprehension wrapped inside a lambda function.
- dm_new = fnc.map_(
-        lambda **d: {col : 2*val for col, val in d.items()},
-        dm)
- print(dm_new)
---%
-
-__Arguments:__
-
-- `fnc` -- A function to map onto each row or each cell.
-	- Type: callable
-- `obj` -- A datamatrix or column to map `fnc` onto.
-	- Type: BaseColumn, DataMatrix
-
-__Returns:__
-
-A new column or datamatrix.
-
-- Type: BaseColumn, DataMatrix
-
-</div>
-
-[map_]: #map_
 
 <div class="FunctionDoc YAMLDoc" id="replace" markdown="1">
 
@@ -321,46 +222,6 @@ __Keywords:__
 </div>
 
 [replace]: #replace
-
-<div class="FunctionDoc YAMLDoc" id="setcol" markdown="1">
-
-## function __setcol__\(dm, name, value\)
-
-Returns a new DataMatrix to which a column has been added or in which
-a column has been modified.
-
-The main difference with regular assignment (`dm.col = 'x'`) is that
-`setcol()` does not modify the original DataMatrix, and can be used in
-`lambda` expressions.
-
-__Example:__
-
-%--
-python: |
- from datamatrix import DataMatrix, functional as fnc
-
- dm1 = DataMatrix(length=5)
- dm2 = fnc.setcol(dm1, 'y', range(5))
- print(dm2)
---%
-
-__Arguments:__
-
-- `dm` -- A DataMatrix.
-	- Type: DataMatrix
-- `name` -- A column name.
-	- Type: str
-- `value` -- The value to be assigned to the column. This can be any value this is valid for a regular column assignment.
-
-__Returns:__
-
-A new DataMatrix.
-
-- Type: DataMatrix
-
-</div>
-
-[setcol]: #setcol
 
 <div class="FunctionDoc YAMLDoc" id="shuffle" markdown="1">
 

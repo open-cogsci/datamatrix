@@ -42,11 +42,10 @@ def memoize(fnc=None, key=None, persistent=False, lazy=False, debug=False):
 	
 	"""
 	desc: |
-		A [memoization](https://en.wikipedia.org/wiki/Memoization) decorator
-		that stores the result of a function call, and returns the stored value
-		when the function is called again with the same arguments. That is,
-		memoization is a specific kind of caching that improves performance for
-		expensive function calls.
+		A memoization decorator that stores the result of a function call, and
+		returns the stored value when the function is called again with the same
+		arguments. That is, memoization is a specific kind of caching that
+		improves performance for expensive function calls.
 		
 		This decorator only works for arguments and return values
 		that can be serialized (i.e. arguments that you can pickle).
@@ -54,6 +53,10 @@ def memoize(fnc=None, key=None, persistent=False, lazy=False, debug=False):
 		To clear memoization, either pass `~[function name]` as a command line
 		argument to a script, or pass `memoclear=True` as a keyword to the
 		memoized function (not to the decorator).
+		
+		For a more detailed description, see:
+		
+		- %link:memoization%
 		
 		__Example:__
 		

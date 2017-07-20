@@ -37,6 +37,17 @@ video:
   Using <code>datamatrix</code> to play with movie data.
 --%
 
+%--
+video:
+ source: youtube
+ id: VidTutorial2
+ videoid: PtUmhQ2vupw
+ width: 640
+ height: 360
+ caption: |
+  Using <code>datamatrix</code> to analyze eye-movement data.
+--%
+
 
 ## Example
 

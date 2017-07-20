@@ -1,6 +1,7 @@
 Install: install
 Tutorials:
     Basic use: basic
+    Working with series: series-tutorial
     Memoization (caching): memoization
 Modules:
     datamatrix.convert: convert
