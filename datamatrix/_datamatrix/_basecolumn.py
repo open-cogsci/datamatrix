@@ -359,7 +359,7 @@ class BaseColumn(OrderedState):
 		"""
 
 		col = self._empty_col()
-		col._rowid = _rowid
+		col._rowid = Index(_rowid)
 		col._seq = []
 		for row in _rowid:
 			if row in self._rowid:

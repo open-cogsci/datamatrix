@@ -90,6 +90,18 @@ class Index(OrderedState):
 		for i in self._l:
 			yield i
 			
+	def __unicode__(self):
+		
+		return u'Index(%s)' % self._l
+		
+	def __str__(self):
+		
+		return safe_str(self.__unicode__())
+		
+	def __repr__(self):
+		
+		return u'%s[0x%x]\n%s' % (self.__class__.__name__, id(self), str(self))		
+			
 	def __getstate__(self):
 		
 		# Is used by pickle.dump. To make sure that Index objects with only a
