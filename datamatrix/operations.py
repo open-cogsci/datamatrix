@@ -314,11 +314,22 @@ def fullfactorial(dm, ignore=u''):
 	"""
 
 
+	if not dm.columns:
+		return DataMatrix()
+	if not all(isinstance(col, MixedColumn) for colname, col in dm.columns):
+		raise TypeError(u'fullfactorial only works with MixedColumns')	
+	# Create a new DataMatrix that strips all empty cells, and packs them such
+	# that empty cells are moved toward the end.
+	dm = dm[:]
 	for colname, col in dm.columns:
-		if not isinstance(col, MixedColumn):
-			raise ValueError(u'fullfactorial only works with MixedColumns')
-	design = [len(col != ignore) for name, col in dm.columns]
+		col = (col != ignore)[colname]
+		dm[colname][:len(col)] = col
+		dm[colname][len(col):] = ignore
+	# A list where each value is an int X that corresponds to a factor with X
+	# levels.
+	design = [len(c != ignore) for n, c in dm.columns]
 	a = _fullfact(design)
+	# Create an DataMatrix with empty columns
 	fdm = DataMatrix(a.shape[0])
 	for name in dm.column_names:
 		fdm[name] = u''
@@ -405,7 +416,7 @@ def group(dm, by):
 			except ValueError:
 				warn(u'Failed to create series for MixedColumn %s' % name)
 		for name, col in nogroupcols:
-			cm[name][i] = dm_[name][0]
+			cm[name][i] = dm_[name][0]			
 	return cm
 
 
@@ -685,7 +696,6 @@ def _fullfact(levels):
 	n = len(levels)  # number of factors
 	nb_lines = np.prod(levels)  # number of trial conditions
 	H = np.zeros((nb_lines, n))
-
 	level_repeat = 1
 	range_repeat = np.prod(levels)
 	for i in range(n):
@@ -696,5 +706,4 @@ def _fullfact(levels):
 		rng = lvl*range_repeat
 		level_repeat *= levels[i]
 		H[:, i] = rng
-
 	return H
