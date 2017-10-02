@@ -99,6 +99,32 @@ def lmer_series(dm, formula, winlen=1):
 			rmrow.se[i:i+winlen] = lmrow.se
 	return rm
 
+@cached
+def glmer_series(dm, formula, family, winlen=1):
+
+	col = formula.split()[0]
+	depth = dm[col].depth
+	rm = None
+	for i in range(0, depth, winlen):
+		wm = dm[:]
+		wm[col] = series.reduce_(
+			series.window(wm[col], start=i, end=i+winlen))
+		lm = glmer(wm, formula, family=family)
+		print('Sample %d' % i)
+		print(lm)
+		if rm is None:
+			rm = DataMatrix(length=len(lm))
+			rm.effect = list(lm.effect)
+			rm.p = SeriesColumn(depth=depth)
+			rm.z = SeriesColumn(depth=depth)
+			rm.est = SeriesColumn(depth=depth)
+			rm.se = SeriesColumn(depth=depth)
+		for lmrow, rmrow in zip(lm, rm):
+			rmrow.p[i:i+winlen] = lmrow.p
+			rmrow.z[i:i+winlen] = lmrow.z
+			rmrow.est[i:i+winlen] = lmrow.est
+			rmrow.se[i:i+winlen] = lmrow.se
+	return rm
 
 def _launchr(dm, cmd):
 
