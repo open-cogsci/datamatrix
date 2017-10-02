@@ -27,17 +27,17 @@ try:
 except ImportError:
 	np = None
 
-def readxlsx(path, default_col_type=MixedColumn):
+def readxlsx(path, default_col_type=MixedColumn, sheet=None):
 
 	"""
 	desc: |
 		Reads a DataMatrix from an Excel 2010 xlsx file.
-		
+
 		__Example:__
-		
-		~~~.python 
+
+		~~~.python
 		dm = io.readxlsx('data.xlsx')
-		~~~		
+		~~~
 
 	arguments:
 		path:	The path to the xlsx file.
@@ -52,7 +52,8 @@ def readxlsx(path, default_col_type=MixedColumn):
 	from openpyxl import load_workbook
 
 	wb = load_workbook(path)
-	rows = list(wb.active.rows)
+	ws = wb.active if sheet is None else wb[sheet]
+	rows = list(ws.rows)
 	dm = DataMatrix(default_col_type=default_col_type, length=len(rows)-1)
 	column_names = []
 	for cell in rows.pop(0):
@@ -77,12 +78,12 @@ def writexlsx(dm, path):
 		Writes a DataMatrix to an Excel 2010 xlsx file. The first sheet will
 		contain a regular table with all non-series columns. SeriesColumns are
 		saved as individual sheets.
-		
+
 		__Example:__
-		
-		~~~ .python				
+
+		~~~ .python
 		io.writexlsx(dm, 'data.xlsx')
-		~~~		
+		~~~
 
 	arguments:
 		dm:		The DataMatrix to write.
@@ -110,7 +111,7 @@ def writexlsx(dm, path):
 			ws[utils.get_column_letter(colnr+1)+str(rownr+2)] = value
 	# Next we will write all series to individual sheets
 	series_columns = [colname for colname, column in dm.columns \
-		if isinstance(column, _SeriesColumn)]	
+		if isinstance(column, _SeriesColumn)]
 	for colname in series_columns:
 		ws = wb.create_sheet(title=colname)
 		for rownr, row in enumerate(dm[colname]):
@@ -121,17 +122,17 @@ def writexlsx(dm, path):
 					continue
 				ws[utils.get_column_letter(colnr+1)+str(rownr+2)] = float(value)
 	wb.save(path)
-	
-	
+
+
 def _excel_safe(value):
 
 	"""
 	visible: False
-	
+
 	desc:
 		Openpyxl chokes on numpy values, so these are converted to int/ float
 	"""
-	
+
 	if np is None:
 		return value
 	if isinstance(value, np.int64):
