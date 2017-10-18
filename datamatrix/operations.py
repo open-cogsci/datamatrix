@@ -598,6 +598,12 @@ def keep_only(dm, *cols):
 		cols = cols[0]
 	dm = dm[:]
 	colnames = [_colname(col) for col in cols]
+	for colname in colnames:
+		if isinstance(colname, list):
+			raise TypeError(
+				(u'Column object has multiple names: %s. '
+				u'Specify name as str instead.') % colname
+			)
 	for colname in dm.column_names:
 		if colname not in colnames:
 			del dm[colname]
