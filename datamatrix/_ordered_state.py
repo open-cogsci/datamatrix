@@ -41,8 +41,12 @@ class OrderedState(object):
 			keys.append(k)
 			values.append(self.__dict__[k])
 		return keys, values
-		
+
 	def __setstate__(self, state):
-		
+
+		if isinstance(state, dict):
+			warn(u'Unpickling an old datamatrix')
+			self.__dict__.update(state)
+			return
 		keys, values = state
 		self.__dict__.update({key : val for key, val in zip(keys, values)})

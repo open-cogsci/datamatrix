@@ -443,31 +443,35 @@ class DataMatrix(OrderedState):
 			self._cols[name] = self._default_col_type(self)
 		self._cols[name][:] = value
 		self._mutate()
-				
+
 	def _to_list(self, seq, key=None):
-		
+
 		"""
 		visible: False
-		
+
 		desc:
 			Returns a list that is sorted if the DataMatrix is set to being
 			sorted.
-		"""				
-		
+		"""
+
 		if self._sorted:
 			return list(sorted(seq, key=key))
 		return list(seq)
-		
+
 	# Implemented syntax
-	
+
 	def __getstate__(self):
-		
+
 		# Is used by pickle.dump. To make sure that identical datamatrices with
 		# different _ids are considered identical, we strip the _id property.
 		return OrderedState.__getstate__(self, ignore=u'_id')
 
 	def __setstate__(self, state):
-		
+
+		if isinstance(state, dict):
+			warn(u'Unpickling an old datamatrix')
+			self.__dict__.update(state)
+			return
 		# Is used by pickle.load. Because __getstate__() strips the _id, we need
 		# to generate a new id for the DataMatrix upon unpickling.
 		global _id
