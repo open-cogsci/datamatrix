@@ -44,6 +44,9 @@ def readxlsx(path, default_col_type=MixedColumn, sheet=None):
 
 	keywords:
 		default_col_type:	The default column type.
+		sheet:				The name of a sheet, or None to open the active
+							sheet. The activate sheet is not necessarily the
+							first sheet. *(New in 0.7.0)*
 
 	returns:
 		A DataMatrix.

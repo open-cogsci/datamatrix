@@ -35,16 +35,30 @@ except (ImportError, AttributeError, RuntimeError):
 def wrap_pandas(fnc):
 
 	"""
-	visible: False
-
 	desc:
 		A decorator for pandas functions. It converts a DataMatrix to a
 		DataFrame, passes it to a function, and then converts the returned
 		DataFrame back to a DataMatrix.
+
+	arguments:
+		fnc:
+			desc:	A function that takes a DataFrame as first argument and
+					returns a DataFrame as sole return argument.
+			type:	callable
+
+	returns:
+		desc:	A function takes a DataMatrix as first argument and returns
+				a DataMatrix as sole return argument.
+
+	example: |
+		import pandas as pd
+		from datamatrix import convert as cnv
+
+		pivot_table = cnv.wrap_pandas(pd.pivot_table)
 	"""
 
 	def inner(dm, *arglist, **kwdict):
-		
+
 		df_in = to_pandas(dm)
 		df_out = fnc(df_in, *arglist, **kwdict)
 		return from_pandas(df_out)
@@ -58,13 +72,13 @@ def to_pandas(dm):
 	"""
 	desc: |
 		Converts a DataMatrix to a pandas DataFrame.
-		
+
 		__Example:__
-		
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, convert
-		 
+
 		 dm = DataMatrix(length=3)
 		 dm.col = 1, 2, 3
 		 df = convert.to_pandas(dm)
@@ -90,14 +104,14 @@ def from_pandas(df):
 	"""
 	desc: |
 		Converts a pandas DataFrame to a DataMatrix.
-		
+
 		__Example:__
-		
+
 		%--
 		python: |
 		 import pandas as pd
 		 from datamatrix import convert
-		 
+
 		 df = pd.DataFrame( {'col' : [1,2,3] } )
 		 dm = convert.from_pandas(df)
 		 print(dm)
@@ -114,6 +128,9 @@ def from_pandas(df):
 	from datamatrix import operations as ops
 
 	dm = DataMatrix(length=len(df))
+	if isinstance(df, pd.Series):
+		dm.series = df
+		return dm
 	for colname in df.columns:
 		if isinstance(colname, tuple):
 			_colname = u'_'.join([str(i) for i in colname])
