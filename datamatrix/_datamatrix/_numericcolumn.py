@@ -104,6 +104,7 @@ class NumericColumn(BaseColumn):
 	def _init_rowid(self):
 
 		self._rowid = self._datamatrix._rowid.asarray
+		self._rowid_argsort_cache = None, None
 
 	def _init_seq(self):
 
@@ -117,7 +118,7 @@ class NumericColumn(BaseColumn):
 		if fastnumbers is not None:
 			if not fastnumbers.isreal(value, allow_inf=True, allow_nan=True):
 				return self.invalid
-			return fastnumbers.fast_real(value, nan=np.nan, inf=np.inf)		
+			return fastnumbers.fast_real(value, nan=np.nan, inf=np.inf)
 		try:
 			return float(value)
 		except:
@@ -126,7 +127,7 @@ class NumericColumn(BaseColumn):
 	def _tosequence(self, value, length=None):
 
 		if length is None:
-			length = len(self._datamatrix)		
+			length = len(self._datamatrix)
 		if value is None or isinstance(value, basestring):
 			a = np.empty(length, dtype=self.dtype)
 			a[:] = self._checktype(value)
@@ -157,9 +158,9 @@ class NumericColumn(BaseColumn):
 			b = op(self._seq, _other)
 		i = np.where(b)[0]
 		return self._datamatrix._selectrowid(Index(self._rowid[i]))
-		
+
 	def _compare_sequence(self, other, op):
-		
+
 		_other = self._tosequence(other)
 		i = np.where(op(self._seq, _other))
 		return self._datamatrix._selectrowid(Index(self._rowid[i]))
@@ -195,13 +196,23 @@ class NumericColumn(BaseColumn):
 		# See also: http://stackoverflow.com/questions/9566592/\
 		#  find-multiple-values-within-a-numpy-array
 		col = self._empty_col()
-		orig_indices = self._rowid.argsort()
+		orig_indices = self._rowid_argsort()
 		matching_indices = np.searchsorted(self._rowid[orig_indices], key)
 		selected_indices = orig_indices[matching_indices]
 		col._rowid = self._rowid[selected_indices]
 		col._seq = self._seq[selected_indices]
 		return col
-		
+
+	def _rowid_argsort(self):
+
+		# In some cases, we need to argsort very often, which is time consuming.
+		# Therefore, this function acts as a cached argsort.
+		rowid_hash = self._rowid.tostring()
+		if rowid_hash == self._rowid_argsort_cache[0]:
+			return self._rowid_argsort_cache[1]
+		self._rowid_argsort_cache = rowid_hash, self._rowid.argsort()
+		return self._rowid_argsort_cache[1]
+
 	def _getslicekey(self, key):
 
 		# We need to override the original get slice key so that we get a deep
@@ -209,7 +220,7 @@ class NumericColumn(BaseColumn):
 		col = self._empty_col()
 		col._rowid = self._rowid[key]
 		col._seq = np.copy(self._seq[key])
-		return col		
+		return col
 
 	def _sortedrowid(self):
 
@@ -263,7 +274,7 @@ class IntColumn(NumericColumn):
 		return super(NumericColumn, self)._tosequence(value, length)
 
 	def _checktype(self, value):
-				
+
 		if value is not None and fastnumbers is not None:
 			value = fastnumbers.fast_forceint(value)
 			if isinstance(value, int):
@@ -283,9 +294,9 @@ class IntColumn(NumericColumn):
 		col = super(IntColumn, self)._operate(other, number_op, str_op=None)
 		col._seq = col._seq.astype(self.dtype)
 		return col
-		
+
 	def __eq__(self, other):
-		
+
 		if isinstance(other, type):
 			if other is self.dtype:
 				return self._datamatrix
@@ -300,13 +311,13 @@ class IntColumn(NumericColumn):
 				lambda x, y: np.zeros(len(self._datamatrix)))
 
 	def __ne__(self, other):
-		
+
 		if isinstance(other, type):
 			if other is not self.dtype:
 				return self._datamatrix
-			return self._datamatrix._selectrowid(Index(0))		
+			return self._datamatrix._selectrowid(Index(0))
 		if self._issequence(other):
-			return super(IntColumn, self).__eq__(other)		
+			return super(IntColumn, self).__eq__(other)
 		try:
 			return super(IntColumn, self).__ne__(other)
 		except TypeError:
