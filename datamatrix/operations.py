@@ -47,13 +47,13 @@ def z(col):
 	"""
 	desc: |
 		Transforms a column into z scores.
-		
+
 		__Example:__
-		
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, operations
-		 
+
 		 dm = DataMatrix(length=5)
 		 dm.col = range(5)
 		 dm.z = operations.z(dm.col)
@@ -80,11 +80,11 @@ def weight(col):
 		repeated as many times as the value in the weighting column.
 
 		__Example:__
-		
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, operations
-		 
+
 		 dm = DataMatrix(length=3)
 		 dm.A = 1, 2, 0
 		 dm.B = 'x', 'y', 'z'
@@ -94,7 +94,7 @@ def weight(col):
 		 print('Weighted by A:')
 		 print(dm)
 		--%
-		
+
 	arguments:
 		col:
 			desc:	The column to weight by.
@@ -122,35 +122,35 @@ def weight(col):
 
 
 def replace(col, mappings={}):
-	
+
 	"""
 	desc: |
 		Replaces values in a column by other values.
-		
+
 		__Example:__
-		
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, operations as ops
-		 
+
 		 dm = DataMatrix(length=3)
 		 dm.old = 0, 1, 2
 		 dm.new = ops.replace(dm.old, {0 : 'a', 2 : 'c'})
 		 print(dm_new)
 		--%
-		
+
 	arguments:
 		col:
 			desc:	The column to weight by.
 			type:	BaseColumn
-			
+
 	keywords:
 		mappings:
 			desc:	A dict where old values are keys and new values are values.
 			type:	dict
 	"""
-	
-	col = col[:]	
+
+	col = col[:]
 	# For MixedColumns
 	if isinstance(col._seq, list):
 		for old, new in mappings.items():
@@ -172,13 +172,13 @@ def split(col, *values):
 	"""
 	desc: |
 		Splits a DataMatrix by unique values in a column.
-		
+
 		__Example:__
-		
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, operations as ops
-		  
+
 		 dm = DataMatrix(length=4)
 		 dm.A = 0, 0, 1, 1
 		 dm.B = 'a', 'b', 'c', 'd'
@@ -200,7 +200,7 @@ def split(col, *values):
 		col:
 			desc:	The column to split by.
 			type:	BaseColumn
-			
+
 	argument-list:
 		values:		Splits the DataMatrix based on these values. If this is
 					provided, an iterator over DataMatrix objects is returned,
@@ -242,13 +242,13 @@ def bin_split(col, bins):
 		Splits a DataMatrix into bins; that is, the DataMatrix is first sorted
 		by a column, and then split into equal-size (or roughly equal-size)
 		bins.
-		
+
 		__Example:__
-		
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, operations
-		 
+
 		 dm = DataMatrix(length=5)
 		 dm.A = 1, 0, 3, 2, 4
 		 dm.B = 'a', 'b', 'c', 'd', 'e'
@@ -287,13 +287,13 @@ def fullfactorial(dm, ignore=u''):
 		Creates a new DataMatrix that uses a specified DataMatrix as the base of
 		a full-factorial design. That is, each value of every row is combined
 		with each value from every other row. For example:
-			
+
 		__Example:__
-				
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, operations
-		 
+
 		 dm = DataMatrix(length=2)
 		 dm.A = 'x', 'y'
 		 dm.B = 3, 4
@@ -317,7 +317,7 @@ def fullfactorial(dm, ignore=u''):
 	if not dm.columns:
 		return DataMatrix()
 	if not all(isinstance(col, MixedColumn) for colname, col in dm.columns):
-		raise TypeError(u'fullfactorial only works with MixedColumns')	
+		raise TypeError(u'fullfactorial only works with MixedColumns')
 	# Create a new DataMatrix that strips all empty cells, and packs them such
 	# that empty cells are moved toward the end.
 	dm = dm[:]
@@ -348,14 +348,15 @@ def group(dm, by):
 
 		Groups the DataMatrix by unique values in a set of grouping columns.
 		Grouped columns are stored as SeriesColumns. The columns that are
-		grouped should contain numeric values.
-		
+		grouped should contain numeric values. The order in which groups appear
+		in the grouped DataMatrix is unpredictable.
+
 		__Example:__
-				
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, operations
-		 
+
 		 dm = DataMatrix(length=4)
 		 dm.A = 'x', 'x', 'y', 'y'
 		 dm.B = 0, 1, 2, 3
@@ -364,7 +365,7 @@ def group(dm, by):
 		 dm = operations.group(dm, by=dm.A)
 		 print('Grouped by A:')
 		 print(dm)
-		--%		
+		--%
 
 	arguments:
 		dm:
@@ -390,7 +391,9 @@ def group(dm, by):
 				raise ValueError(u'By-columns are from a different DataMatrix')
 			bycol += col
 			bynames += [col.name]
-	keys = bycol.unique	
+	bycol_hashed = IntColumn(datamatrix=dm)
+	bycol_hashed[:] = [hash(key) for key in bycol]
+	keys = bycol_hashed.unique
 	groupcols = [(name, col) for name, col in dm.columns if name not in bynames]
 	nogroupcols = [(name, col) for name, col in dm.columns if name in bynames]
 	cm = DataMatrix(length=len(keys))
@@ -403,7 +406,7 @@ def group(dm, by):
 		cm[name] = col.__class__
 
 	for i, key in enumerate(keys):
-		dm_ = bycol == key
+		dm_ = bycol_hashed == key
 		for name, col in groupcols:
 			if isinstance(col, _SeriesColumn):
 				continue
@@ -416,7 +419,7 @@ def group(dm, by):
 			except ValueError:
 				warn(u'Failed to create series for MixedColumn %s' % name)
 		for name, col in nogroupcols:
-			cm[name][i] = dm_[name][0]			
+			cm[name][i] = dm_[name][0]
 	return cm
 
 
@@ -427,21 +430,21 @@ def sort(obj, by=None):
 		Sorts a column or DataMatrix. In the case of a DataMatrix, a column must
 		be specified to determine the sort order. In the case of a column, this
 		needs to be specified if the column should be sorted by another column.
-		
+
 		The sort order depends on the version of Python. Python 2 is more
 		flexible, and allows comparisons between types such as `str` and `int`.
 		Python 3 does not allow such comparisons.
-		
+
 		In general, whenever incomparable values are encountered, all values are
 		forced to `float`. Values that cannot be converted to float are
 		considered `inf`.
-		
+
 		__Example:__
-				
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, operations
-		 
+
 		 dm = DataMatrix(length=3)
 		 dm.A = 2, 0, 1
 		 dm.B = 'a', 'b', 'c'
@@ -452,7 +455,7 @@ def sort(obj, by=None):
 	arguments:
 		obj:
 			type:	[DataMatrix, BaseColumn]
-			
+
 	keywords:
 		by:
 			desc:	The sort key, that is, the column that is used for sorting
@@ -483,13 +486,13 @@ def shuffle(obj):
 		Shuffles a DataMatrix or a column. If a DataMatrix is shuffled, the order
 		of the rows is shuffled, but values that were in the same row will stay
 		in the same row.
-		
+
 		__Example:__
-				
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, operations
-		 
+
 		 dm = DataMatrix(length=5)
 		 dm.A = 'a', 'b', 'c', 'd', 'e'
 		 dm.B = operations.shuffle(dm.A)
@@ -521,19 +524,19 @@ def shuffle_horiz(*obj):
 		Shuffles a DataMatrix, or several columns from a DataMatrix,
 		horizontally. That is, the values are shuffled between columns from the
 		same row.
-		
+
 		__Example:__
-				
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, operations
-		 
+
 		 dm = DataMatrix(length=5)
 		 dm.A = 'a', 'b', 'c', 'd', 'e'
 		 dm.B = range(5)
 		 dm = operations.shuffle_horiz(dm.A, dm.B)
 		 print(dm)
-		--%			
+		--%
 
 	argument-list:
 	 	desc:	A list of BaseColumns, or a single DataMatrix.
@@ -556,7 +559,7 @@ def shuffle_horiz(*obj):
 		raise ValueError(
 			u'Expecting a DataMatrix or multiple BaseColumns from the same DataMatrix')
 	dm = dm[:]
-	dm_shuffle = keep_only(dm, *obj)	
+	dm_shuffle = keep_only(dm, *obj)
 	for row in dm_shuffle:
 		random.shuffle(row)
 	for colname, column in dm_shuffle.columns:
@@ -572,11 +575,11 @@ def keep_only(dm, *cols):
 		Removes all columns from the DataMatrix, except those listed in `cols`.
 
 		__Example:__
-				
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, operations as ops
-		 
+
 		 dm = DataMatrix(length=5)
 		 dm.A = 'a', 'b', 'c', 'd', 'e'
 		 dm.B = range(5)
@@ -615,14 +618,14 @@ def auto_type(dm):
 	"""
 	desc: |
 		*Requires fastnumbers*
-	
+
 		Converts all columns of type MixedColumn to IntColumn if all values are
 		integer numbers, or FloatColumn if all values are non-integer numbes.
 
 		%--
 		python: |
 		 from datamatrix import DataMatrix, operations
-		 
+
 		 dm = DataMatrix(length=5)
 		 dm.A = 'a'
 		 dm.B = 1
@@ -636,13 +639,13 @@ def auto_type(dm):
 	arguments:
 		dm:
 			type:	DataMatrix
-			
+
 	returns:
 		type:	DataMatrix
 	"""
-	
+
 	new_dm = DataMatrix(length=len(dm))
-	for name, col in dm.columns:		
+	for name, col in dm.columns:
 		new_dm[name] = _best_fitting_col_type(col)
 		new_dm[name][:] = col
 	return new_dm
@@ -650,33 +653,33 @@ def auto_type(dm):
 # Private function
 
 def _colname(col):
-	
+
 	"""
 	visible: False
-	
+
 	desc:
 		Gets the name of column. Column can be specified as a name or as a
 		BaseColumn.
 	"""
-	
+
 	if isinstance(col, basestring):
 		return col
 	if isinstance(col, BaseColumn):
 		return col.name
-	raise ValueError(u'Expecting column names or BaseColumn objects')	
+	raise ValueError(u'Expecting column names or BaseColumn objects')
 
 
 def _best_fitting_col_type(col):
-	
+
 	"""
 	visible: False
-	
+
 	desc:
 		Determines the best fitting type for a column.
 	"""
-		
+
 	from fastnumbers import isreal, isintlike
-		
+
 	if isinstance(col, _SeriesColumn):
 		return SeriesColumn(depth=col.depth)
 	if isinstance(col, (FloatColumn, IntColumn)):
@@ -686,13 +689,13 @@ def _best_fitting_col_type(col):
 	if not all(isintlike(val) for val in col):
 		return FloatColumn
 	return IntColumn
-	
+
 
 def _fullfact(levels):
 
 	"""
 	visible: False
-	
+
 	desc: |
 		Taken from pydoe. See:
 		<https://github.com/tisimst/pyDOE/blob/master/pyDOE/doe_factorial.py>
