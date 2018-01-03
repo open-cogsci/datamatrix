@@ -39,55 +39,55 @@ MEMOIZE_FOLDER = u'.memoize'
 
 
 def memoize(fnc=None, key=None, persistent=False, lazy=False, debug=False):
-	
+
 	"""
 	desc: |
 		A memoization decorator that stores the result of a function call, and
 		returns the stored value when the function is called again with the same
 		arguments. That is, memoization is a specific kind of caching that
 		improves performance for expensive function calls.
-		
+
 		This decorator only works for arguments and return values
 		that can be serialized (i.e. arguments that you can pickle).
-		
+
 		To clear memoization, either pass `~[function name]` as a command line
 		argument to a script, or pass `memoclear=True` as a keyword to the
 		memoized function (not to the decorator).
-		
+
 		For a more detailed description, see:
-		
+
 		- %link:memoization%
-		
+
 		__Example:__
-		
+
 		%--
 		python: |
 		 from datamatrix import functional as fnc
 
 		 @fnc.memoize
 		 def add(a, b):
-		 	
+
 		 	print('add(%d, %d)' % (a, b))
 		 	return a + b
-		 	
+
 		 three = add(1, 2) # Storing result in memory
 		 three = add(1, 2) # Re-using previous result
 		 three = add(1, 2, memoclear=True) # Clear cache!
-		 
+
 		 @fnc.memoize(persistent=True, key='persistent-add')
 		 def persistent_add(a, b):
-		 	
+
 		 	print('persistent_add(%d, %d)' % (a, b))
 		 	return a + b
-		 	
+
 		 three = persistent_add(1, 2) # Writing result to disk
-		 three = persistent_add(1, 2) # Re-using previous result	
+		 three = persistent_add(1, 2) # Re-using previous result
 		--%
-		
+
 	keywords:
 		fnc:
 			desc:	A function to memoize.
-			type:	callable	
+			type:	callable
 		persistent:
 			desc:	Indicates whether the result should be written to disk so
 					that the result can be re-used when the script is run again.
@@ -120,9 +120,9 @@ def memoize(fnc=None, key=None, persistent=False, lazy=False, debug=False):
 		desc:	A memoized version of fnc.
 		type:	callable
 	"""
-	
+
 	def inner(fnc):
-			
+
 		@functools.wraps(fnc)
 		def innermost(*args, **kwdict):
 
@@ -143,7 +143,7 @@ def memoize(fnc=None, key=None, persistent=False, lazy=False, debug=False):
 					os.remove(path)
 			if memkey in cache:
 				return ret_fnc(cache[memkey], memkey, u'memory')
-			# If ther result hasn't been cached yet, check if it's on disk,
+			# If the result hasn't been cached yet, check if it's on disk,
 			# otherwise determine it.
 			if persistent:
 				found, obj = _read_persistent_cache(path)
@@ -152,7 +152,10 @@ def memoize(fnc=None, key=None, persistent=False, lazy=False, debug=False):
 					return ret_fnc(obj, memkey, u'disk')
 			if lazy:
 				args = [arg() if callable(arg) else arg for arg in args]
-				kwdict = {key : val() if callable(val) else val for key, val in kwdict.items()}
+				kwdict = {
+					key : val() if callable(val) else val
+					for key, val in kwdict.items()
+				}
 			cache[memkey] = fnc(*args, **kwdict)
 			if persistent:
 				_write_persistent_cache(path, cache[memkey])
@@ -166,32 +169,32 @@ def memoize(fnc=None, key=None, persistent=False, lazy=False, debug=False):
 
 
 def curry(fnc):
-	
+
 	"""
 	desc: |
 		A [currying](https://en.wikipedia.org/wiki/Currying) decorator that
 		turns a function with multiple arguments into a chain of partial
 		functions, each of which takes at least a single argument. The input
 		function may accept keywords, but the output function no longer does
-		(i.e. currying turns all keywords into positional arguments).			
-		
+		(i.e. currying turns all keywords into positional arguments).
+
 		__Example:__
-		
+
 		%--
 		python: |
 		 from datamatrix import functional as fnc
 
 		 @fnc.curry
 		 def add(a, b, c):
-		 	
+
 		 	return a + b + c
-		 	
+
 		 print(add(1)(2)(3)) # Curried approach with single arguments
 		 print(add(1, 2)(3)) # Partly curried approach
 		 print(add(1)(2, 3)) # Partly curried approach
 		 print(add(1, 2, 3)) # Original approach multiple arguments
 		--%
-		
+
 	arguments:
 		fnc:
 			desc:	A function to curry.
@@ -202,41 +205,41 @@ def curry(fnc):
 				returns a function that accepts the second argument, etc.
 		type:	callable
 	"""
-	
+
 	def inner(*args):
-		
+
 		if _count_unbound_arguments(fnc) == len(args):
 			return fnc(*args)
 		return curry(functools.partial(fnc, *args))
-		
+
 	if py3:
 		return functools.wraps(fnc)(inner)
 	return inner
 
 
 def map_(fnc, obj):
-	
+
 	"""
 	desc: |
 		Maps a function (`fnc`) onto rows of datamatrix or cells of a column.
-	
+
 		If `obj` is a column, the function `fnc` is mapped is mapped onto each
 		cell of the column, and a new column is returned. In this case,
 		`fnc` should be a function that accepts and returns a single value.
-		
+
 		If `obj` is a datamatrix, the function `fnc` is mapped onto each row,
 		and a new datamatrix is returned. In this case, `fnc` should be a
 		function that accepts a keyword `dict`, where column names are keys and
 		cells are values. The return value should be another `dict`, again with
 		column names as keys, and cells as values. Columns that are not part of
 		the returned `dict` are left unchanged.
-		
+
 		__Example:__
-		
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, functional as fnc
-		 
+
 		 dm = DataMatrix(length=3)
 		 dm.old = 0, 1, 2
 		 # Map a 2x function onto dm.old to create dm.new
@@ -249,7 +252,7 @@ def map_(fnc, obj):
 			dm)
 		 print(dm_new)
 		--%
-		
+
 	arguments:
 		fnc:
 			desc:	A function to map onto each row or each cell.
@@ -262,19 +265,19 @@ def map_(fnc, obj):
 		desc:	A new column or datamatrix.
 		type:	[BaseColumn, DataMatrix]
 	"""
-	
+
 	if not callable(fnc):
 		raise TypeError('fnc should be callable')
 	if isinstance(obj, _SeriesColumn):
 		# For a SeriesColumn, we need to make a special case, because the depth
 		# of the new SeriesColumn may be different from the depth of the
 		# original column.
-		for i, cell in enumerate(obj):	
+		for i, cell in enumerate(obj):
 			a = fnc(cell)
 			if not i:
 				newcol = _SeriesColumn(obj.dm, depth=len(a))
 			newcol[i] = a
-		return newcol		
+		return newcol
 	if isinstance(obj, BaseColumn):
 		newcol = obj._empty_col()
 		newcol[:] = [fnc(cell) for cell in obj]
@@ -288,27 +291,27 @@ def map_(fnc, obj):
 				row[col] = val
 		return dm
 	raise TypeError(u'obj should be DataMatrix or BaseColumn')
-	
-	
+
+
 def filter_(fnc, obj):
-	
+
 	"""
 	desc: |
 		Filters rows from a datamatrix or column based on filter function
 		(`fnc`).
-		
+
 		If `obj` is a column, `fnc` should be a function that accepts a single
 		value. If `obj` is a datamatrix, `fnc` should be a function that accepts
 		a keyword `dict`, where column names are keys and cells are values. In
 		both cases, `fnc` should return a `bool` indicating whether the row or
 		value should be included.
-		
+
 		__Example:__
-		
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, functional as fnc
-		 
+
 		 dm = DataMatrix(length=5)
 		 dm.col = range(5)
 		 # Create a column with only odd values
@@ -318,7 +321,7 @@ def filter_(fnc, obj):
 		 dm_new = fnc.filter_(lambda **d: d['col'] % 2, dm)
 		 print(dm_new)
 		--%
-		
+
 	arguments:
 		fnc:
 			desc:	A filter function.
@@ -329,11 +332,11 @@ def filter_(fnc, obj):
 
 	returns:
 		desc:	A new column or datamatrix.
-		type:	[BaseColumn, DataMatrix]		
+		type:	[BaseColumn, DataMatrix]
 	"""
-	
+
 	if not callable(fnc):
-		raise TypeError('fnc should be callable')	
+		raise TypeError('fnc should be callable')
 	if isinstance(obj, DataMatrix):
 		dm = obj
 		keep = lambda fnc, row: fnc(**{col : val for col, val in row})
@@ -350,18 +353,18 @@ def filter_(fnc, obj):
 
 
 def setcol(dm, name, value):
-	
+
 	"""
 	desc: |
 		Returns a new DataMatrix to which a column has been added or in which
 		a column has been modified.
-		
+
 		The main difference with regular assignment (`dm.col = 'x'`) is that
 		`setcol()` does not modify the original DataMatrix, and can be used in
 		`lambda` expressions.
-		
+
 		__Example:__
-		
+
 		%--
 		python: |
 		 from datamatrix import DataMatrix, functional as fnc
@@ -370,7 +373,7 @@ def setcol(dm, name, value):
 		 dm2 = fnc.setcol(dm1, 'y', range(5))
 		 print(dm2)
 		--%
-		
+
 	arguments:
 		dm:
 			desc:	A DataMatrix.
@@ -385,8 +388,8 @@ def setcol(dm, name, value):
 	returns:
 		desc:	A new DataMatrix.
 		type:	DataMatrix
-	"""	
-	
+	"""
+
 	if not isinstance(name, basestring):
 		raise TypeError('name should be a string')
 	newdm = dm[:]
@@ -402,10 +405,10 @@ def setcol(dm, name, value):
 
 
 def _count_unbound_arguments(fnc):
-	
+
 	"""
 	visible: False
-	
+
 	desc:
 		Counts how many unbound arguments fnc takes. This is a wrapper function
 		that works around the quirk that partialed functions are not real
@@ -423,28 +426,28 @@ def _count_unbound_arguments(fnc):
 
 
 def _memkey(fnc, *args, **kwdict):
-	
+
 	"""
 	visible: False
-	
+
 	desc:
 		Generates a unique hash to serve as key for memoization.
 	"""
-	
+
 	args = [ (arg.__name__ if hasattr(arg, '__name') else '__nameless__') \
 		if callable(arg) else arg for arg in args]
 	return hashlib.md5(pickle.dumps([fnc.__name__, args, kwdict])).hexdigest()
 
 
 def _read_persistent_cache(path):
-	
+
 	if not os.path.exists(path):
 		return False, None
 	with open(path, u'rb') as fd:
 		return True, pickle.load(fd)
 
-		
+
 def _write_persistent_cache(path, obj):
-	
+
 	with open(path, u'wb') as fd:
 		pickle.dump(obj, fd)
