@@ -24,8 +24,6 @@ A DataMatrix.
 
 </div>
 
-[readpickle]: #readpickle
-
 <div class="FunctionDoc YAMLDoc" id="readtxt" markdown="1">
 
 ## function __readtxt__\(path, delimiter=u',', quotechar=u'"', default\_col\_type=<class 'datamatrix\.\_datamatrix\.\_mixedcolumn\.MixedColumn'>\)
@@ -57,17 +55,15 @@ A DataMatrix.
 
 </div>
 
-[readtxt]: #readtxt
-
 <div class="FunctionDoc YAMLDoc" id="readxlsx" markdown="1">
 
-## function __readxlsx__\(path, default\_col\_type=<class 'datamatrix\.\_datamatrix\.\_mixedcolumn\.MixedColumn'>\)
+## function __readxlsx__\(path, default\_col\_type=<class 'datamatrix\.\_datamatrix\.\_mixedcolumn\.MixedColumn'>, sheet=None\)
 
 Reads a DataMatrix from an Excel 2010 xlsx file.
 
 __Example:__
 
-~~~.python 
+~~~.python
 dm = io.readxlsx('data.xlsx')
 ~~~
 
@@ -79,14 +75,14 @@ __Keywords:__
 
 - `default_col_type` -- The default column type.
 	- Default: <class 'datamatrix._datamatrix._mixedcolumn.MixedColumn'>
+- `sheet` -- The name of a sheet, or None to open the active sheet. The activate sheet is not necessarily the first sheet. *(New in 0.7.0)*
+	- Default: None
 
 __Returns:__
 
 A DataMatrix.
 
 </div>
-
-[readxlsx]: #readxlsx
 
 <div class="FunctionDoc YAMLDoc" id="writepickle" markdown="1">
 
@@ -111,8 +107,6 @@ __Keywords:__
 	- Default: -1
 
 </div>
-
-[writepickle]: #writepickle
 
 <div class="FunctionDoc YAMLDoc" id="writetxt" markdown="1">
 
@@ -140,8 +134,6 @@ __Keywords:__
 
 </div>
 
-[writetxt]: #writetxt
-
 <div class="FunctionDoc YAMLDoc" id="writexlsx" markdown="1">
 
 ## function __writexlsx__\(dm, path\)
@@ -152,7 +144,7 @@ saved as individual sheets.
 
 __Example:__
 
-~~~ .python                             
+~~~ .python
 io.writexlsx(dm, 'data.xlsx')
 ~~~
 
@@ -163,9 +155,5 @@ __Arguments:__
 
 </div>
 
-[writexlsx]: #writexlsx
-
 </div>
-
-[dummy]: #dummy
 

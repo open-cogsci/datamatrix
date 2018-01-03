@@ -3,12 +3,13 @@
 from __future__ import unicode_literals
 import os
 
-BRANCH = '0.6'
+BRANCH = '0.7'
 PLUGIN_PATHS = ["plugins"]
 PLUGINS = ["cogsci-preprocess", "page_hierarchy"]
 LOCALE = 'en_US'
 
-MD_EXTENSIONS = ['codehilite(css_class=highlight)','extra','headerid']
+#MD_EXTENSIONS = ['codehilite(css_class=highlight)','extra','headerid']
+MARKDOWN = {}
 
 AUTHOR = u'Sebastiaan Math\xf4t'
 SITENAME = u'DataMatrix documentation'

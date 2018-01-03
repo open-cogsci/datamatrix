@@ -15,12 +15,12 @@ python: |
  import numpy as np
  from matplotlib import pyplot as plt
  from datamatrix import DataMatrix, SeriesColumn, series
- 
+
  LENGTH = 5 # Number of rows
  DEPTH = 10 # Depth (or length) of SeriesColumns
- 
+
  sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
- 
+
  dm = DataMatrix(length=LENGTH)
  # First create five identical rows with a sinewave
  dm.y = SeriesColumn(depth=DEPTH)
@@ -32,7 +32,7 @@ python: |
  # Baseline-correct the traces, This will remove the vertical
  # offset
  dm.y2 = series.baseline(dm.y, dm.y, bl_start=0, bl_end=10)
- 
+
  plt.clf()
  plt.subplot(121)
  plt.title('Original')
@@ -67,7 +67,9 @@ __Keywords:__
 - `reduce_fnc` -- The function to reduce the baseline epoch to a single value. If None, np.nanmedian() is used.
 	- Type: FunctionType, None
 	- Default: None
-- `method` -- Specifies whether divisive or subtrace correction should be used. Divisive is the default for historical purposes, but subtractive is generally preferred.
+- `method` -- Specifies whether divisive or subtractive baseline
+correction should be used. (*Changed in v0.7.0: subtractive
+is now the default*)
 	- Type: str
 	- Default: 'subtractive'
 
@@ -78,8 +80,6 @@ A baseline-correct version of the signal.
 - Type: SeriesColumn
 
 </div>
-
-[baseline]: #baseline
 
 <div class="FunctionDoc YAMLDoc" id="blinkreconstruct" markdown="1">
 
@@ -122,8 +122,6 @@ A reconstructed singal.
 
 </div>
 
-[blinkreconstruct]: #blinkreconstruct
-
 <div class="FunctionDoc YAMLDoc" id="concatenate" markdown="1">
 
 ## function __concatenate__\(\*series\)
@@ -158,11 +156,9 @@ A new series.
 
 </div>
 
-[concatenate]: #concatenate
-
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7f01bbf98f28>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7f4d31935158>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times shorter.
 The depth of the downsampled series is the highest multiple of the depth
@@ -176,17 +172,17 @@ python: |
  import numpy as np
  from matplotlib import pyplot as plt
  from datamatrix import DataMatrix, SeriesColumn, series
- 
+
  LENGTH = 1 # Number of rows
  DEPTH = 100 # Depth (or length) of SeriesColumns
- 
+
  sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
- 
+
  dm = DataMatrix(length=LENGTH)
  dm.y = SeriesColumn(depth=DEPTH)
  dm.y.setallrows(sinewave)
  dm.y2 = series.downsample(dm.y, by=10)
- 
+
  plt.clf()
  plt.subplot(121)
  plt.title('Original')
@@ -213,7 +209,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7f01bbf98f28>
+	- Default: <function nanmean at 0x7f4d31935158>
 
 __Returns:__
 
@@ -222,8 +218,6 @@ A downsampled series.
 - Type: SeriesColumn
 
 </div>
-
-[downsample]: #downsample
 
 <div class="FunctionDoc YAMLDoc" id="endlock" markdown="1">
 
@@ -239,12 +233,12 @@ python: |
  import numpy as np
  from matplotlib import pyplot as plt
  from datamatrix import DataMatrix, SeriesColumn, series
- 
+
  LENGTH = 5 # Number of rows
  DEPTH = 10 # Depth (or length) of SeriesColumns
- 
+
  sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
- 
+
  dm = DataMatrix(length=LENGTH)
  # First create five identical rows with a sinewave
  dm.y = SeriesColumn(depth=DEPTH)
@@ -257,7 +251,7 @@ python: |
  # Lock the degraded traces to the end, so that all nans
  # now come at the start of the trace
  dm.y2 = series.endlock(dm.y)
- 
+
  plt.clf()
  plt.subplot(121)
  plt.title('Original (nans at end)')
@@ -286,8 +280,6 @@ An end-locked signal.
 - Type: SeriesColumn
 
 </div>
-
-[endlock]: #endlock
 
 <div class="FunctionDoc YAMLDoc" id="interpolate" markdown="1">
 
@@ -344,8 +336,6 @@ The interpolated signal.
 
 </div>
 
-[interpolate]: #interpolate
-
 <div class="FunctionDoc YAMLDoc" id="lock" markdown="1">
 
 ## function __lock__\(series, lock\)
@@ -377,9 +367,9 @@ python: |
         row.y = np.roll(np.cos(np.linspace(0, np.pi, DEPTH)),
                 row.x_offset)+row.y_offset
  # Now use the x offset to lock the traces to the 0 point of the cosine,
- # i.e. to their peaks. 
+ # i.e. to their peaks.
  dm.y2, zero_point = srs.lock(dm.y, lock=dm.x_offset)
- 
+
  plt.clf()
  plt.subplot(121)
  plt.title('Original')
@@ -409,11 +399,77 @@ A `(series, zero_point)` tuple, in which `series` is a `SeriesColumn` and `zero_
 
 </div>
 
-[lock]: #lock
+<div class="FunctionDoc YAMLDoc" id="normalize_time" markdown="1">
+
+## function __normalize\_time__\(dataseries, timeseries\)
+
+*New in v0.7.0*
+
+Creates a new series in which a series of timestamps (`timeseries`) is
+used as the indices for a series of data point (`dataseries`). This is
+useful, for example, if you have a series of measurements and a
+separate series of timestamps, and you want to combine the two.
+
+The resulting series will generally contain a lot of `nan` values, which
+you can interpolate with `interpolate()`.
+
+__Example:__
+
+%--
+python: |
+ from matplotlib import pyplot as plt
+ from datamatrix import DataMatrix, SeriesColumn, series as srs, NAN
+
+ # Create a DataMatrix with one series column that contains samples
+ # and one series column that contains timestamps.
+ dm = DataMatrix(length=2)
+ dm.samples = SeriesColumn(depth=3)
+ dm.time = SeriesColumn(depth=3)
+ dm.samples[0] = 3, 1, 2
+ dm.time[0]    = 1, 2, 3
+ dm.samples[1] = 1, 3, 2
+ dm.time[1]    = 0, 5, 10
+ # Create a normalized column with samples spread out according to
+ # the timestamps, and also create an interpolate version of this
+ # column for smooth plotting.
+ dm.normalized = srs.normalize_time(
+        dataseries=dm.samples,
+        timeseries=dm.time
+ )
+ dm.interpolated = srs.interpolate(dm.normalized)
+ # And plot!
+ plt.clf()
+ plt.plot(dm.normalized.plottable, 'o')
+ plt.plot(dm.interpolated.plottable, ':')
+ plt.xlabel('Time')
+ plt.ylabel('Data')
+ plt.savefig('content/pages/img/series/normalize_time.png')
+--%
+
+%--
+figure:
+ source: normalize_time.png
+ id: FigNormalizeTime
+--%
+
+__Arguments:__
+
+- `dataseries` -- A column with datapoints.
+	- Type: SeriesColumn
+- `timeseries` -- A column with timestamps. This should be an increasing list of the same depth as `dataseries`. NAN values are allowed, but only at the end.
+	- Type: SeriesColumn
+
+__Returns:__
+
+A new series in which the data points are spread according to the timestamps.
+
+- Type: SeriesColumn
+
+</div>
 
 <div class="FunctionDoc YAMLDoc" id="reduce_" markdown="1">
 
-## function __reduce\___\(series, operation=<function nanmean at 0x7f01bbf98f28>\)
+## function __reduce\___\(series, operation=<function nanmean at 0x7f4d31935158>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -424,15 +480,15 @@ __Example:__
 python: |
  import numpy as np
  from datamatrix import DataMatrix, SeriesColumn, series
- 
+
  LENGTH = 5 # Number of rows
  DEPTH = 10 # Depth (or length) of SeriesColumns
- 
+
  dm = DataMatrix(length=LENGTH)
  dm.y = SeriesColumn(depth=DEPTH)
  dm.y = np.random.random( (LENGTH, DEPTH) )
  dm.mean_y = series.reduce_(dm.y)
- 
+
  print(dm)
 --%
 
@@ -444,7 +500,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7f01bbf98f28>
+	- Default: <function nanmean at 0x7f4d31935158>
 
 __Returns:__
 
@@ -453,8 +509,6 @@ A reduction of the signal.
 - Type: FloatColumn
 
 </div>
-
-[reduce_]: #reduce_
 
 <div class="FunctionDoc YAMLDoc" id="smooth" markdown="1">
 
@@ -478,12 +532,12 @@ python: |
  import numpy as np
  from matplotlib import pyplot as plt
  from datamatrix import DataMatrix, SeriesColumn, series
- 
+
  LENGTH = 5 # Number of rows
  DEPTH = 100 # Depth (or length) of SeriesColumns
- 
+
  sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
- 
+
  dm = DataMatrix(length=LENGTH)
  # First create five identical rows with a sinewave
  dm.y = SeriesColumn(depth=DEPTH)
@@ -492,7 +546,7 @@ python: |
  dm.y += np.random.random( (LENGTH, DEPTH) )
  # Smooth the traces to reduce the jitter
  dm.y2 = series.smooth(dm.y)
- 
+
  plt.clf()
  plt.subplot(121)
  plt.title('Original')
@@ -531,8 +585,6 @@ A smoothed signal.
 
 </div>
 
-[smooth]: #smooth
-
 <div class="FunctionDoc YAMLDoc" id="threshold" markdown="1">
 
 ## function __threshold__\(series, fnc, min\_length=1\)
@@ -546,12 +598,12 @@ python: |
  import numpy as np
  from matplotlib import pyplot as plt
  from datamatrix import DataMatrix, SeriesColumn, series
- 
+
  LENGTH = 1 # Number of rows
  DEPTH = 100 # Depth (or length) of SeriesColumns
- 
+
  sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
- 
+
  dm = DataMatrix(length=LENGTH)
  # First create five identical rows with a sinewave
  dm.y = SeriesColumn(depth=DEPTH)
@@ -560,13 +612,13 @@ python: |
  dm.y += np.random.random( (LENGTH, DEPTH) )
  # Threshold the signal by > 0 for at least 10 samples
  dm.t = series.threshold(dm.y, fnc=lambda y: y > 0, min_length=10)
- 
+
  plt.clf()
  # Mark the thresholded signal
  plt.fill_between(np.arange(DEPTH), dm.t[0], color='black', alpha=.25)
  plt.plot(dm.y.plottable)
  plt.savefig('content/pages/img/series/threshold.png')
- 
+
  print(dm)
 --%
 
@@ -597,8 +649,6 @@ A series where 0 indicates below threshold, and 1 indicates above threshold.
 
 </div>
 
-[threshold]: #threshold
-
 <div class="FunctionDoc YAMLDoc" id="window" markdown="1">
 
 ## function __window__\(series, start=0, end=None\)
@@ -612,12 +662,12 @@ python: |
  import numpy as np
  from matplotlib import pyplot as plt
  from datamatrix import DataMatrix, SeriesColumn, series
- 
+
  LENGTH = 5 # Number of rows
  DEPTH = 10 # Depth (or length) of SeriesColumnsplt.show()
- 
+
  sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
- 
+
  dm = DataMatrix(length=LENGTH)
  # First create five identical rows with a sinewave
  dm.y = SeriesColumn(depth=DEPTH)
@@ -626,7 +676,7 @@ python: |
  dm.y += np.random.random(LENGTH)
  # Look only the middle half of the signal
  dm.y2 = series.window(dm.y, start=DEPTH//4, end=-DEPTH//4)
- 
+
  plt.clf()
  plt.subplot(121)
  plt.title('Original')
@@ -665,9 +715,5 @@ A window of the signal.
 
 </div>
 
-[window]: #window
-
 </div>
-
-[dummy]: #dummy
 

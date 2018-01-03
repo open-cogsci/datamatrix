@@ -19,7 +19,7 @@ if 'publishconf.py' in sys.argv:
 	from publishconf import *
 else:
 	from pelicanconf import *
-	
+
 _FigureParser.figureTemplate[u'jekyll'] = u"""
 ![%%(source)s](/%s%%(source)s)
 
@@ -68,11 +68,7 @@ class AcademicMarkdownReader(MarkdownReader):
 				'markdown.extensions.extra',
 				'markdown.extensions.codehilite(css_class=highlight)',
 				],
-			)		
-		# self._md = Markdown(
-		# 	extensions=self.extensions + [TocExtension(title='Overview'),
-		# 		TableExtension()],
-		# 	extpeension_configs=self.extensions)
+			)
 		img_path = os.path.dirname(source_path) + '/img/' \
 			+ os.path.basename(source_path)[:-3]
 		lst_path = os.path.dirname(source_path) + '/lst/' \
@@ -110,7 +106,7 @@ class AcademicMarkdownReader(MarkdownReader):
 				content = content.replace(u'$%s$' % var, str(val))
 			for item_type in ITEM_TYPES:
 				content = content.replace(item_type,
-					u'<span class="item-type">%s</span>' % item_type.lower())			
+					u'<span class="item-type">%s</span>' % item_type.lower())
 		metadata = self._parse_metadata(self._md.Meta)
 		build.path = build.path[3:]
 		return content, metadata

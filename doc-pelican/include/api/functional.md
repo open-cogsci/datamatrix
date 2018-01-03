@@ -10,7 +10,7 @@ A [currying](https://en.wikipedia.org/wiki/Currying) decorator that
 turns a function with multiple arguments into a chain of partial
 functions, each of which takes at least a single argument. The input
 function may accept keywords, but the output function no longer does
-(i.e. currying turns all keywords into positional arguments).                   
+(i.e. currying turns all keywords into positional arguments).
 
 __Example:__
 
@@ -20,9 +20,9 @@ python: |
 
  @fnc.curry
  def add(a, b, c):
-        
+
         return a + b + c
-        
+
  print(add(1)(2)(3)) # Curried approach with single arguments
  print(add(1, 2)(3)) # Partly curried approach
  print(add(1)(2, 3)) # Partly curried approach
@@ -42,8 +42,6 @@ A curried function that accepts at least the first argument, and returns a funct
 
 </div>
 
-[curry]: #curry
-
 <div class="FunctionDoc YAMLDoc" id="filter_" markdown="1">
 
 ## function __filter\___\(fnc, obj\)
@@ -62,7 +60,7 @@ __Example:__
 %--
 python: |
  from datamatrix import DataMatrix, functional as fnc
- 
+
  dm = DataMatrix(length=5)
  dm.col = range(5)
  # Create a column with only odd values
@@ -88,8 +86,6 @@ A new column or datamatrix.
 
 </div>
 
-[filter_]: #filter_
-
 <div class="FunctionDoc YAMLDoc" id="map_" markdown="1">
 
 ## function __map\___\(fnc, obj\)
@@ -112,7 +108,7 @@ __Example:__
 %--
 python: |
  from datamatrix import DataMatrix, functional as fnc
- 
+
  dm = DataMatrix(length=3)
  dm.old = 0, 1, 2
  # Map a 2x function onto dm.old to create dm.new
@@ -140,8 +136,6 @@ A new column or datamatrix.
 - Type: BaseColumn, DataMatrix
 
 </div>
-
-[map_]: #map_
 
 <div class="FunctionDoc YAMLDoc" id="memoize" markdown="1">
 
@@ -171,22 +165,22 @@ python: |
 
  @fnc.memoize
  def add(a, b):
-        
+
         print('add(%d, %d)' % (a, b))
         return a + b
-        
+
  three = add(1, 2) # Storing result in memory
  three = add(1, 2) # Re-using previous result
  three = add(1, 2, memoclear=True) # Clear cache!
- 
+
  @fnc.memoize(persistent=True, key='persistent-add')
  def persistent_add(a, b):
-        
+
         print('persistent_add(%d, %d)' % (a, b))
         return a + b
-        
+
  three = persistent_add(1, 2) # Writing result to disk
- three = persistent_add(1, 2) # Re-using previous result        
+ three = persistent_add(1, 2) # Re-using previous result
 --%
 
 __Keywords:__
@@ -214,8 +208,6 @@ A memoized version of fnc.
 - Type: callable
 
 </div>
-
-[memoize]: #memoize
 
 <div class="FunctionDoc YAMLDoc" id="setcol" markdown="1">
 
@@ -255,9 +247,5 @@ A new DataMatrix.
 
 </div>
 
-[setcol]: #setcol
-
 </div>
-
-[dummy]: #dummy
 

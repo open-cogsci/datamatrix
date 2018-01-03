@@ -14,7 +14,7 @@ integer numbers, or FloatColumn if all values are non-integer numbes.
 %--
 python: |
  from datamatrix import DataMatrix, operations
- 
+
  dm = DataMatrix(length=5)
  dm.A = 'a'
  dm.B = 1
@@ -38,8 +38,6 @@ No description
 
 </div>
 
-[auto_type]: #auto_type
-
 <div class="FunctionDoc YAMLDoc" id="bin_split" markdown="1">
 
 ## function __bin\_split__\(col, bins\)
@@ -53,7 +51,7 @@ __Example:__
 %--
 python: |
  from datamatrix import DataMatrix, operations
- 
+
  dm = DataMatrix(length=5)
  dm.A = 1, 0, 3, 2, 4
  dm.B = 'a', 'b', 'c', 'd', 'e'
@@ -75,8 +73,6 @@ A generator that iterates over the bins.
 
 </div>
 
-[bin_split]: #bin_split
-
 <div class="FunctionDoc YAMLDoc" id="fullfactorial" markdown="1">
 
 ## function __fullfactorial__\(dm, ignore=u''\)
@@ -86,13 +82,13 @@ A generator that iterates over the bins.
 Creates a new DataMatrix that uses a specified DataMatrix as the base of
 a full-factorial design. That is, each value of every row is combined
 with each value from every other row. For example:
-        
+
 __Example:__
-                
+
 %--
 python: |
  from datamatrix import DataMatrix, operations
- 
+
  dm = DataMatrix(length=2)
  dm.A = 'x', 'y'
  dm.B = 3, 4
@@ -112,8 +108,6 @@ __Keywords:__
 
 </div>
 
-[fullfactorial]: #fullfactorial
-
 <div class="FunctionDoc YAMLDoc" id="group" markdown="1">
 
 ## function __group__\(dm, by\)
@@ -122,14 +116,15 @@ __Keywords:__
 
 Groups the DataMatrix by unique values in a set of grouping columns.
 Grouped columns are stored as SeriesColumns. The columns that are
-grouped should contain numeric values.
+grouped should contain numeric values. The order in which groups appear
+in the grouped DataMatrix is unpredictable.
 
 __Example:__
-                
+
 %--
 python: |
  from datamatrix import DataMatrix, operations
- 
+
  dm = DataMatrix(length=4)
  dm.A = 'x', 'x', 'y', 'y'
  dm.B = 0, 1, 2, 3
@@ -155,8 +150,6 @@ A grouped DataMatrix.
 
 </div>
 
-[group]: #group
-
 <div class="FunctionDoc YAMLDoc" id="keep_only" markdown="1">
 
 ## function __keep\_only__\(dm, \*cols\)
@@ -164,11 +157,11 @@ A grouped DataMatrix.
 Removes all columns from the DataMatrix, except those listed in `cols`.
 
 __Example:__
-                
+
 %--
 python: |
  from datamatrix import DataMatrix, operations as ops
- 
+
  dm = DataMatrix(length=5)
  dm.A = 'a', 'b', 'c', 'd', 'e'
  dm.B = range(5)
@@ -188,8 +181,6 @@ __Argument list:__
 
 </div>
 
-[keep_only]: #keep_only
-
 <div class="FunctionDoc YAMLDoc" id="replace" markdown="1">
 
 ## function __replace__\(col, mappings=\{\}\)
@@ -201,7 +192,7 @@ __Example:__
 %--
 python: |
  from datamatrix import DataMatrix, operations as ops
- 
+
  dm = DataMatrix(length=3)
  dm.old = 0, 1, 2
  dm.new = ops.replace(dm.old, {0 : 'a', 2 : 'c'})
@@ -221,8 +212,6 @@ __Keywords:__
 
 </div>
 
-[replace]: #replace
-
 <div class="FunctionDoc YAMLDoc" id="shuffle" markdown="1">
 
 ## function __shuffle__\(obj\)
@@ -232,11 +221,11 @@ of the rows is shuffled, but values that were in the same row will stay
 in the same row.
 
 __Example:__
-                
+
 %--
 python: |
  from datamatrix import DataMatrix, operations
- 
+
  dm = DataMatrix(length=5)
  dm.A = 'a', 'b', 'c', 'd', 'e'
  dm.B = operations.shuffle(dm.A)
@@ -256,8 +245,6 @@ The shuffled DataMatrix or column.
 
 </div>
 
-[shuffle]: #shuffle
-
 <div class="FunctionDoc YAMLDoc" id="shuffle_horiz" markdown="1">
 
 ## function __shuffle\_horiz__\(\*obj\)
@@ -267,11 +254,11 @@ horizontally. That is, the values are shuffled between columns from the
 same row.
 
 __Example:__
-                
+
 %--
 python: |
  from datamatrix import DataMatrix, operations
- 
+
  dm = DataMatrix(length=5)
  dm.A = 'a', 'b', 'c', 'd', 'e'
  dm.B = range(5)
@@ -292,8 +279,6 @@ The shuffled DataMatrix.
 
 </div>
 
-[shuffle_horiz]: #shuffle_horiz
-
 <div class="FunctionDoc YAMLDoc" id="sort" markdown="1">
 
 ## function __sort__\(obj, by=None\)
@@ -311,11 +296,11 @@ forced to `float`. Values that cannot be converted to float are
 considered `inf`.
 
 __Example:__
-                
+
 %--
 python: |
  from datamatrix import DataMatrix, operations
- 
+
  dm = DataMatrix(length=3)
  dm.A = 2, 0, 1
  dm.B = 'a', 'b', 'c'
@@ -342,8 +327,6 @@ The sorted DataMatrix, or the sorted column.
 
 </div>
 
-[sort]: #sort
-
 <div class="FunctionDoc YAMLDoc" id="split" markdown="1">
 
 ## function __split__\(col, \*values\)
@@ -355,7 +338,7 @@ __Example:__
 %--
 python: |
  from datamatrix import DataMatrix, operations as ops
-  
+
  dm = DataMatrix(length=4)
  dm.A = 0, 0, 1, 1
  dm.B = 'a', 'b', 'c', 'd'
@@ -390,8 +373,6 @@ A iterator over (value, DataMatrix) tuples if no values are provided; an iterato
 
 </div>
 
-[split]: #split
-
 <div class="FunctionDoc YAMLDoc" id="weight" markdown="1">
 
 ## function __weight__\(col\)
@@ -404,7 +385,7 @@ __Example:__
 %--
 python: |
  from datamatrix import DataMatrix, operations
- 
+
  dm = DataMatrix(length=3)
  dm.A = 1, 2, 0
  dm.B = 'x', 'y', 'z'
@@ -428,8 +409,6 @@ No description
 
 </div>
 
-[weight]: #weight
-
 <div class="FunctionDoc YAMLDoc" id="z" markdown="1">
 
 ## function __z__\(col\)
@@ -441,7 +420,7 @@ __Example:__
 %--
 python: |
  from datamatrix import DataMatrix, operations
- 
+
  dm = DataMatrix(length=5)
  dm.col = range(5)
  dm.z = operations.z(dm.col)
@@ -461,9 +440,5 @@ No description
 
 </div>
 
-[z]: #z
-
 </div>
-
-[dummy]: #dummy
 
