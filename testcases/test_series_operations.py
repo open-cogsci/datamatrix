@@ -40,10 +40,10 @@ def test_endlock():
 		[np.nan,1,2],
 		[np.nan,np.nan,2],
 		])
-		
-		
+
+
 def test_lock():
-	
+
 	dm = DataMatrix(length=2)
 	dm.s = SeriesColumn(depth=3)
 	dm.s[0] = 1, 2, 3
@@ -90,10 +90,10 @@ def test_baseline():
 	dm.norm = series.baseline(dm.series, dm.baseline)
 	check_series(dm.norm, [[-2,-1,0], [0,1,2]])
 	check_integrity(dm)
-	
-	
+
+
 def test_downsample():
-	
+
 	dm = DataMatrix(length=2)
 	dm.series = SeriesColumn(depth=10)
 	dm.series[0] = range(10)
@@ -103,10 +103,10 @@ def test_downsample():
 	check_series(dm.d3, [[1,4,7], [1./3, 2./3, 1./3]])
 	check_series(dm.d5, [[2,7], [.4, .6]])
 	check_integrity(dm)
-	
-	
+
+
 def test_smooth():
-	
+
 	dm = DataMatrix(length=2)
 	dm.series = SeriesColumn(depth=6)
 	dm.series[0] = range(6)
@@ -116,11 +116,11 @@ def test_smooth():
 		[2./3, 1, 2, 3, 4, 4+1./3],
 		[2./3, 1, 1, 1, 1, 1+1./3]
 		])
-	check_integrity(dm)	
+	check_integrity(dm)
 
 
 def test_threshold():
-	
+
 	dm = DataMatrix(length=2)
 	dm.series = SeriesColumn(depth=4)
 	dm.series[0] = range(4)
@@ -131,7 +131,7 @@ def test_threshold():
 	check_series(dm.t1, [[0,0,1,1], [0,1,1,1]])
 	check_series(dm.t2, [[0,0,1,0], [0,1,0,0]])
 	check_series(dm.t3, [[1,1,1,0], [0,0,0,0]])
-	check_integrity(dm)	
+	check_integrity(dm)
 
 
 def test_concatenate():
@@ -158,3 +158,19 @@ def test_interpolate():
 		[np.nan]*4,
 		[2,2,3,4],
 		[1,2,3,4]])
+
+
+def test_normalize_time():
+
+	dm = DataMatrix(length=2)
+	dm.s = SeriesColumn(depth=2)
+	dm.s[0] = 1,2
+	dm.s[1] = np.nan, 3
+	dm.t = SeriesColumn(depth=2)
+	dm.t[0] = 0,3
+	dm.t[1] = 1, 2
+	dm.n = series.normalize_time(dm.s, dm.t)
+	check_series(dm.n, [
+		[1, np.nan, np.nan, 2],
+		[np.nan, np.nan, 3, np.nan]
+	])
