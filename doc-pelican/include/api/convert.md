@@ -33,8 +33,6 @@ No description
 
 </div>
 
-[from_pandas]: #from_pandas
-
 <div class="FunctionDoc YAMLDoc" id="to_pandas" markdown="1">
 
 ## function __to\_pandas__\(dm\)
@@ -66,9 +64,5 @@ No description
 
 </div>
 
-[to_pandas]: #to_pandas
-
 </div>
-
-[dummy]: #dummy
 

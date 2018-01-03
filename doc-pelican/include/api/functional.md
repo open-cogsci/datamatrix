@@ -42,8 +42,6 @@ A curried function that accepts at least the first argument, and returns a funct
 
 </div>
 
-[curry]: #curry
-
 <div class="FunctionDoc YAMLDoc" id="filter_" markdown="1">
 
 ## function __filter\___\(fnc, obj\)
@@ -87,8 +85,6 @@ A new column or datamatrix.
 - Type: BaseColumn, DataMatrix
 
 </div>
-
-[filter_]: #filter_
 
 <div class="FunctionDoc YAMLDoc" id="map_" markdown="1">
 
@@ -140,8 +136,6 @@ A new column or datamatrix.
 - Type: BaseColumn, DataMatrix
 
 </div>
-
-[map_]: #map_
 
 <div class="FunctionDoc YAMLDoc" id="memoize" markdown="1">
 
@@ -215,8 +209,6 @@ A memoized version of fnc.
 
 </div>
 
-[memoize]: #memoize
-
 <div class="FunctionDoc YAMLDoc" id="setcol" markdown="1">
 
 ## function __setcol__\(dm, name, value\)
@@ -255,9 +247,5 @@ A new DataMatrix.
 
 </div>
 
-[setcol]: #setcol
-
 </div>
-
-[dummy]: #dummy
 

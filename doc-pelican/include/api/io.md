@@ -24,8 +24,6 @@ A DataMatrix.
 
 </div>
 
-[readpickle]: #readpickle
-
 <div class="FunctionDoc YAMLDoc" id="readtxt" markdown="1">
 
 ## function __readtxt__\(path, delimiter=u',', quotechar=u'"', default\_col\_type=<class 'datamatrix\.\_datamatrix\.\_mixedcolumn\.MixedColumn'>\)
@@ -57,8 +55,6 @@ A DataMatrix.
 
 </div>
 
-[readtxt]: #readtxt
-
 <div class="FunctionDoc YAMLDoc" id="readxlsx" markdown="1">
 
 ## function __readxlsx__\(path, default\_col\_type=<class 'datamatrix\.\_datamatrix\.\_mixedcolumn\.MixedColumn'>\)
@@ -86,8 +82,6 @@ A DataMatrix.
 
 </div>
 
-[readxlsx]: #readxlsx
-
 <div class="FunctionDoc YAMLDoc" id="writepickle" markdown="1">
 
 ## function __writepickle__\(dm, path, protocol=-1\)
@@ -111,8 +105,6 @@ __Keywords:__
 	- Default: -1
 
 </div>
-
-[writepickle]: #writepickle
 
 <div class="FunctionDoc YAMLDoc" id="writetxt" markdown="1">
 
@@ -140,8 +132,6 @@ __Keywords:__
 
 </div>
 
-[writetxt]: #writetxt
-
 <div class="FunctionDoc YAMLDoc" id="writexlsx" markdown="1">
 
 ## function __writexlsx__\(dm, path\)
@@ -163,9 +153,5 @@ __Arguments:__
 
 </div>
 
-[writexlsx]: #writexlsx
-
 </div>
-
-[dummy]: #dummy
 

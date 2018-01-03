@@ -79,8 +79,6 @@ A baseline-correct version of the signal.
 
 </div>
 
-[baseline]: #baseline
-
 <div class="FunctionDoc YAMLDoc" id="blinkreconstruct" markdown="1">
 
 ## function __blinkreconstruct__\(series, vt=5, maxdur=500, margin=10, smooth\_winlen=21, std\_thr=3\)
@@ -122,8 +120,6 @@ A reconstructed singal.
 
 </div>
 
-[blinkreconstruct]: #blinkreconstruct
-
 <div class="FunctionDoc YAMLDoc" id="concatenate" markdown="1">
 
 ## function __concatenate__\(\*series\)
@@ -158,11 +154,9 @@ A new series.
 
 </div>
 
-[concatenate]: #concatenate
-
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7f01bbf98f28>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7f10b8e56158>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times shorter.
 The depth of the downsampled series is the highest multiple of the depth
@@ -213,7 +207,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7f01bbf98f28>
+	- Default: <function nanmean at 0x7f10b8e56158>
 
 __Returns:__
 
@@ -222,8 +216,6 @@ A downsampled series.
 - Type: SeriesColumn
 
 </div>
-
-[downsample]: #downsample
 
 <div class="FunctionDoc YAMLDoc" id="endlock" markdown="1">
 
@@ -287,8 +279,6 @@ An end-locked signal.
 
 </div>
 
-[endlock]: #endlock
-
 <div class="FunctionDoc YAMLDoc" id="interpolate" markdown="1">
 
 ## function __interpolate__\(series\)
@@ -343,8 +333,6 @@ The interpolated signal.
 - Type: SeriesColumn
 
 </div>
-
-[interpolate]: #interpolate
 
 <div class="FunctionDoc YAMLDoc" id="lock" markdown="1">
 
@@ -409,11 +397,9 @@ A `(series, zero_point)` tuple, in which `series` is a `SeriesColumn` and `zero_
 
 </div>
 
-[lock]: #lock
-
 <div class="FunctionDoc YAMLDoc" id="reduce_" markdown="1">
 
-## function __reduce\___\(series, operation=<function nanmean at 0x7f01bbf98f28>\)
+## function __reduce\___\(series, operation=<function nanmean at 0x7f10b8e56158>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -444,7 +430,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7f01bbf98f28>
+	- Default: <function nanmean at 0x7f10b8e56158>
 
 __Returns:__
 
@@ -453,8 +439,6 @@ A reduction of the signal.
 - Type: FloatColumn
 
 </div>
-
-[reduce_]: #reduce_
 
 <div class="FunctionDoc YAMLDoc" id="smooth" markdown="1">
 
@@ -531,8 +515,6 @@ A smoothed signal.
 
 </div>
 
-[smooth]: #smooth
-
 <div class="FunctionDoc YAMLDoc" id="threshold" markdown="1">
 
 ## function __threshold__\(series, fnc, min\_length=1\)
@@ -596,8 +578,6 @@ A series where 0 indicates below threshold, and 1 indicates above threshold.
 - Type: SeriesColumn
 
 </div>
-
-[threshold]: #threshold
 
 <div class="FunctionDoc YAMLDoc" id="window" markdown="1">
 
@@ -665,9 +645,5 @@ A window of the signal.
 
 </div>
 
-[window]: #window
-
 </div>
-
-[dummy]: #dummy
 

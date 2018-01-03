@@ -38,8 +38,6 @@ No description
 
 </div>
 
-[auto_type]: #auto_type
-
 <div class="FunctionDoc YAMLDoc" id="bin_split" markdown="1">
 
 ## function __bin\_split__\(col, bins\)
@@ -75,8 +73,6 @@ A generator that iterates over the bins.
 
 </div>
 
-[bin_split]: #bin_split
-
 <div class="FunctionDoc YAMLDoc" id="fullfactorial" markdown="1">
 
 ## function __fullfactorial__\(dm, ignore=u''\)
@@ -111,8 +107,6 @@ __Keywords:__
 	- Default: ''
 
 </div>
-
-[fullfactorial]: #fullfactorial
 
 <div class="FunctionDoc YAMLDoc" id="group" markdown="1">
 
@@ -155,8 +149,6 @@ A grouped DataMatrix.
 
 </div>
 
-[group]: #group
-
 <div class="FunctionDoc YAMLDoc" id="keep_only" markdown="1">
 
 ## function __keep\_only__\(dm, \*cols\)
@@ -188,8 +180,6 @@ __Argument list:__
 
 </div>
 
-[keep_only]: #keep_only
-
 <div class="FunctionDoc YAMLDoc" id="replace" markdown="1">
 
 ## function __replace__\(col, mappings=\{\}\)
@@ -220,8 +210,6 @@ __Keywords:__
 	- Default: {}
 
 </div>
-
-[replace]: #replace
 
 <div class="FunctionDoc YAMLDoc" id="shuffle" markdown="1">
 
@@ -256,8 +244,6 @@ The shuffled DataMatrix or column.
 
 </div>
 
-[shuffle]: #shuffle
-
 <div class="FunctionDoc YAMLDoc" id="shuffle_horiz" markdown="1">
 
 ## function __shuffle\_horiz__\(\*obj\)
@@ -291,8 +277,6 @@ The shuffled DataMatrix.
 - Type: DataMatrix
 
 </div>
-
-[shuffle_horiz]: #shuffle_horiz
 
 <div class="FunctionDoc YAMLDoc" id="sort" markdown="1">
 
@@ -342,8 +326,6 @@ The sorted DataMatrix, or the sorted column.
 
 </div>
 
-[sort]: #sort
-
 <div class="FunctionDoc YAMLDoc" id="split" markdown="1">
 
 ## function __split__\(col, \*values\)
@@ -390,8 +372,6 @@ A iterator over (value, DataMatrix) tuples if no values are provided; an iterato
 
 </div>
 
-[split]: #split
-
 <div class="FunctionDoc YAMLDoc" id="weight" markdown="1">
 
 ## function __weight__\(col\)
@@ -428,8 +408,6 @@ No description
 
 </div>
 
-[weight]: #weight
-
 <div class="FunctionDoc YAMLDoc" id="z" markdown="1">
 
 ## function __z__\(col\)
@@ -461,9 +439,5 @@ No description
 
 </div>
 
-[z]: #z
-
 </div>
-
-[dummy]: #dummy
 
