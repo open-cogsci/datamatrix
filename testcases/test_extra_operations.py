@@ -27,7 +27,7 @@ import numpy as np
 
 
 def test_replace():
-	
+
 	dm = DataMatrix(length=3)
 	dm.a = 0, 1, 2
 	dm.c = FloatColumn
@@ -81,17 +81,17 @@ def test_split():
 	val, dm = next(g)
 	eq_(val, 'b')
 	check_col(dm.a, ['b', 'b'])
-	check_col(dm.b, [2, 3])	
+	check_col(dm.b, [2, 3])
 	# With values
 	dm = DataMatrix(length=4)
 	dm.a = 'a', 'a', 'b', 'b'
-	dm.b = 0, 1, 2, 3	
+	dm.b = 0, 1, 2, 3
 	dma, dmb = ops.split(dm.a, 'a', 'b')
 	check_col(dma.a, ['a', 'a'])
 	check_col(dma.b, [0, 1])
 	check_col(dmb.a, ['b', 'b'])
 	check_col(dmb.b, [2, 3])
-	
+
 
 def test_bin_split():
 
@@ -131,7 +131,7 @@ def test_group():
 	dm.c = IntColumn
 	dm.c = 0, 1, 2, 3
 	dm = ops.group(dm, [dm.a, dm.b])
-	check_series(dm.c, [[2, np.nan], [3, np.nan], [0, 1]])
+	check_series(dm.c, [[3, np.nan], [2, np.nan], [0, 1]]) # Order guaranteed?
 
 
 def test_sort():
