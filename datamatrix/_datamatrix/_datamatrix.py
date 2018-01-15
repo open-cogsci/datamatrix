@@ -44,7 +44,7 @@ class DataMatrix(OrderedState):
 			length:
 				desc:	The starting length of the DataMatrix.
 				type:	int
-				
+
 		keyword-dict:
 			columns:
 				Columns can be initialized by passing them as keywords, where
@@ -53,6 +53,10 @@ class DataMatrix(OrderedState):
 		"""
 
 		global _id
+		try:
+			length = int(length)
+		except ValueError:
+			raise TypeError('length should be an integer')
 		object.__setattr__(self, u'_cols', collections.OrderedDict())
 		object.__setattr__(self, u'_rowid', Index(length))
 		object.__setattr__(self, u'_default_col_type', default_col_type)
@@ -71,7 +75,7 @@ class DataMatrix(OrderedState):
 	def column_names(self):
 
 		return self._to_list(self._cols.keys())
-		
+
 	@property
 	def rows(self):
 
@@ -81,10 +85,10 @@ class DataMatrix(OrderedState):
 	def length(self):
 
 		return len(self._rowid)
-		
+
 	@property
 	def sorted(self):
-		
+
 		return self._sorted
 
 	@property
@@ -409,17 +413,17 @@ class DataMatrix(OrderedState):
 			exec('%s = None' % name)
 		except SyntaxError:
 			raise ValueError(u'Invalid column name: %s' % name)
-			
+
 	def _set_col(self, name, value):
-		
+
 		"""
 		visible: False
-		
+
 		desc:
 			Sets columns in various formats. Is used by __setitem__ and
 			__setattr__.
-		"""			
-		
+		"""
+
 		if isinstance(name, bytes):
 			name = safe_decode(name)
 		# Create a new column by type
@@ -480,9 +484,9 @@ class DataMatrix(OrderedState):
 		for name, column in self.columns:
 			column._datamatrix = self
 		_id += 1
-		
+
 	def __dir__(self):
-		
+
 		return self.column_names + object.__dir__(self)
 
 	def __contains__(self, item):
@@ -599,9 +603,9 @@ class DataMatrix(OrderedState):
 		if len(self._cols) > 6:
 			return str(t) + u'\n(+ %d columns not shown)' % (len(self._cols)-5)
 		return str(t)
-		
+
 	def __repr__(self):
-	
+
 		return u'DataMatrix[%d, 0x%x]\n%s' % (self._id, id(self), str(self))
 
 	def __lshift__(self, other):
