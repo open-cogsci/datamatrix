@@ -33,12 +33,20 @@ def check_select(col_type):
 	check_col(dm_.col, [1])
 	dm_ = dm.col == 2
 	check_col(dm_.col, [2])
-	dm_ = (dm.col == 1) | (dm.col == 2)
+	dm_ = (dm.col == 1) | (dm.col == 2) # or
 	check_col(dm_.col, [1,2])
-	dm_ = (dm.col == 1) & (dm.col == 2)
+	dm_ = (dm.col == 1) & (dm.col == 2) # and
 	check_col(dm_.col, [])
-	dm_ = (dm.col == 1) ^ (dm.col == 2)
+	dm_ = (dm.col == 1) ^ (dm.col == 2) # xor
 	check_col(dm_.col, [1,2])
+	# Pair-wise select by matching-length sequence
+	dm_ = dm.col == (1,3)
+	check_col(dm_.col, [1])
+	# Check by set multimatching
+	dm_ = dm.col == {2, 3, 4}
+	check_col(dm_.col, [2])
+	dm_ = dm.col != {1, 3, 4}
+	check_col(dm_.col, [2])
 	check_integrity(dm)
 
 
@@ -68,7 +76,7 @@ def test_mixedcolumn():
 	eq_(len(dm.col == str), 1)
 	eq_(len(dm.col != str), 5)
 	eq_(len(dm.col == int), 3)
-	eq_(len(dm.col != int), 3)		
+	eq_(len(dm.col != int), 3)
 
 
 def test_floatcolumn():
@@ -83,7 +91,7 @@ def test_floatcolumn():
 	dm2 = dm.col == ''
 	check_col(dm2.col, [np.nan])
 	dm2 = dm.col != ''
-	check_col(dm2.col, [1, 2, np.inf])	
+	check_col(dm2.col, [1, 2, np.inf])
 	dm2 = dm.col == np.nan
 	check_col(dm2.col, [np.nan])
 	dm2 = dm.col != np.nan
@@ -104,13 +112,13 @@ def test_floatcolumn():
 	eq_(len(dm.col == str), 0)
 	eq_(len(dm.col != str), 2)
 	eq_(len(dm.col == int), 0)
-	eq_(len(dm.col != int), 2)	
+	eq_(len(dm.col != int), 2)
 
 
 def test_intcolumn():
 
 	check_select(IntColumn)
-	check_concat(IntColumn, invalid=0)	
+	check_concat(IntColumn, invalid=0)
 	# Check selections with non-int types
 	dm = DataMatrix(length=2, default_col_type=IntColumn)
 	dm.col = 1, 2

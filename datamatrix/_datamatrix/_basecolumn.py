@@ -34,7 +34,7 @@ NAN = float('nan')
 
 try:
 	import fastnumbers
-	
+
 	def _sortkey(val):
 		try:
 			return fastnumbers.fast_float(val[0], default=INF, nan=INF)
@@ -46,7 +46,7 @@ except ImportError:
 	fastnumbers = None
 
 	def _sortkey(val):
-		
+
 		try:
 			val = float(val[0])
 		except (ValueError, TypeError):
@@ -79,7 +79,7 @@ class BaseColumn(OrderedState):
 		self._datamatrix = datamatrix
 		self._typechecking = True
 		self._init_rowid()
-		self._init_seq()		
+		self._init_seq()
 
 	@property
 	def unique(self):
@@ -212,7 +212,7 @@ class BaseColumn(OrderedState):
 
 	@property
 	def name(self):
-		
+
 		"""
 		name:	name
 
@@ -228,17 +228,17 @@ class BaseColumn(OrderedState):
 		if len(l) == 1:
 			return l[0]
 		return l
-			
+
 	@property
 	def dm(self):
-		
+
 		"""
 		name:	dm
 
 		desc:
 			The associated DataMatrix.
-		"""		
-		
+		"""
+
 		return self._datamatrix
 
 	# Private functions
@@ -318,7 +318,7 @@ class BaseColumn(OrderedState):
 		returns:
 			A suitably typed value.
 		"""
-		
+
 		if value is None:
 			return value
 		if fastnumbers is not None:
@@ -379,7 +379,7 @@ class BaseColumn(OrderedState):
 
 		arguments:
 			value:	The value to turn into a sequence.
-			
+
 		keywords:
 			length:	The length of the sequence, or None to use length of\
 					DataMatrix.
@@ -555,10 +555,14 @@ class BaseColumn(OrderedState):
 			if _key < 0 or _key >= len(self):
 				raise Exception('Outside of range')
 			self._seq[_key] = _val
-			
+
 	def _issequence(self, val):
-		
-		if isinstance(val, basestring) or not hasattr(val, u'__len__'):
+
+		if (
+			isinstance(val, set)
+			or isinstance(val, basestring)
+			or not hasattr(val, u'__len__')
+		):
 			return False
 		if len(val) != len(self._datamatrix):
 			raise TypeError(u'Sequence has invalid length')
@@ -582,12 +586,14 @@ class BaseColumn(OrderedState):
 
 		if isinstance(other, type):
 			return self._compare_type(other, op)
+		if isinstance(other, set):
+			return self._compare_set(other, op)
 		if self._issequence(other):
 			return self._compare_sequence(other, op)
 		return self._compare_value(other, op)
-		
+
 	def _compare_type(self, type_, op):
-		
+
 		_rowid = Index(0)
 		if op is operator.eq:
 			for rowid, val in zip(self._rowid, self._seq):
@@ -599,8 +605,8 @@ class BaseColumn(OrderedState):
 					_rowid.append(rowid)
 		else:
 			raise TypeError('types can only be compared with == or !=')
-		return self._datamatrix._selectrowid(_rowid)		
-		
+		return self._datamatrix._selectrowid(_rowid)
+
 	def _compare_value(self, other, op):
 
 		_rowid = Index(0)
@@ -611,9 +617,26 @@ class BaseColumn(OrderedState):
 			except:
 				pass
 		return self._datamatrix._selectrowid(_rowid)
-		
+
+	def _compare_set(self, other, op):
+
+		if op == operator.__eq__:
+			test = lambda val: any(val == v for v in other)
+		elif op == operator.__ne__:
+			test = lambda val: all(val != v for v in other)
+		else:
+			raise TypeError('sets can only be compared with == or !=')
+		_rowid = Index(0)
+		for rowid, val in zip(self._rowid, self._seq):
+			try:
+				if test(val):
+					_rowid.append(rowid)
+			except:
+				pass
+		return self._datamatrix._selectrowid(_rowid)
+
 	def _compare_sequence(self, other, op):
-		
+
 		_rowid = Index(0)
 		for rowid, val, ref in \
 				zip(self._rowid, self._seq, self._tosequence(other)):
@@ -622,7 +645,7 @@ class BaseColumn(OrderedState):
 					_rowid.append(rowid)
 			except:
 				pass
-		return self._datamatrix._selectrowid(_rowid)				
+		return self._datamatrix._selectrowid(_rowid)
 
 	def _operate(self, other, number_op, str_op=None):
 
@@ -673,25 +696,25 @@ class BaseColumn(OrderedState):
 		"""
 
 		return self.__class__(self._datamatrix)
-		
+
 	def _nanorinf(self, val):
-		
+
 		"""
 		visible: False
-		
+
 		desc:
 			Checks whether a value is nan or inf.
-			
+
 		returns:
 			bool
 		"""
-		
+
 		return val != val or val == INF
-		
+
 	# Implemented syntax
-	
+
 	def __getstate__(self):
-		
+
 		# Is used by pickle.dump. To make sure that identical datamatrices with
 		# different _ids are considered identical, we strip the _id property.
 		return OrderedState.__getstate__(self, ignore=u'_datamatrix')
@@ -699,9 +722,9 @@ class BaseColumn(OrderedState):
 	def __str__(self):
 
 		return u'col%s' % str(self._seq)
-		
+
 	def __repr__(self):
-		
+
 		return u'%s[0x%x]\n%s' % (self.__class__.__name__, id(self), str(self))
 
 	def __len__(self):
@@ -758,4 +781,3 @@ class BaseColumn(OrderedState):
 		return self._operate(other, operator.mod)
 	def __pow__(self, other):
 		return self._operate(other, operator.pow)
-	
