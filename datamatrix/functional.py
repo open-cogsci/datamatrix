@@ -306,6 +306,10 @@ def filter_(fnc, obj):
 		both cases, `fnc` should return a `bool` indicating whether the row or
 		value should be included.
 
+		*New in v0.8.0*: You can also directly compare a column with a function
+		or `lambda` expression. However, this is different from `filter_()` in
+		that it returns a datamatrix object and not a column.
+
 		__Example:__
 
 		%--
@@ -337,19 +341,15 @@ def filter_(fnc, obj):
 
 	if not callable(fnc):
 		raise TypeError('fnc should be callable')
-	if isinstance(obj, DataMatrix):
-		dm = obj
-		keep = lambda fnc, row: fnc(**{col : val for col, val in row})
-	elif isinstance(obj, BaseColumn):
-		dm = obj.dm
-		keep = lambda fnc, row: fnc(row)
-	else:
+	if isinstance(obj, BaseColumn):
+		return (obj == fnc)[obj.name]
+	if not isinstance(obj, DataMatrix):
 		raise TypeError(u'obj should be DataMatrix or BaseColumn')
-	dm = dm._selectrowid(Index(
-		[rowid for rowid, row in zip(dm._rowid, obj) if keep(fnc, row)]))
-	if isinstance(obj, DataMatrix):
-		return dm
-	return dm[obj.name]
+	dm = obj
+	keep = lambda fnc, row: fnc(**{col : val for col, val in row})
+	return dm._selectrowid(
+		Index([rowid for rowid, row in zip(dm._rowid, obj) if keep(fnc, row)])
+	)
 
 
 def setcol(dm, name, value):

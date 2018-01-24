@@ -28,6 +28,8 @@ import numbers
 import operator
 import math
 import warnings
+import inspect
+import types
 
 INF = float('inf')
 NAN = float('nan')
@@ -588,6 +590,8 @@ class BaseColumn(OrderedState):
 			return self._compare_type(other, op)
 		if isinstance(other, set):
 			return self._compare_set(other, op)
+		if isinstance(other, types.FunctionType):
+			return self._compare_function(other, op)
 		if self._issequence(other):
 			return self._compare_sequence(other, op)
 		return self._compare_value(other, op)
@@ -635,11 +639,30 @@ class BaseColumn(OrderedState):
 				pass
 		return self._datamatrix._selectrowid(_rowid)
 
+	def _compare_function(self, other, op):
+
+		if op == operator.__eq__:
+			test = other
+		elif op == operator.__ne__:
+			test = lambda val: not other(val)
+		else:
+			raise TypeError('functions can only be compared with == or !=')
+		if not len(inspect.getargspec(other).args) == 1:
+			raise TypeError('function must take exactly one argument')
+		return self._datamatrix._selectrowid(
+			Index([
+				rowid for rowid, val
+				in zip(self._rowid, self._seq)
+				if test(val)
+			])
+		)
+
 	def _compare_sequence(self, other, op):
 
 		_rowid = Index(0)
-		for rowid, val, ref in \
-				zip(self._rowid, self._seq, self._tosequence(other)):
+		for rowid, val, ref in zip(
+			self._rowid, self._seq, self._tosequence(other)
+		):
 			try:
 				if op(val, ref):
 					_rowid.append(rowid)

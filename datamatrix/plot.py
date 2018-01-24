@@ -62,7 +62,7 @@ def new(size=r):
 	return fig
 
 
-def trace(series, x=None, color=blue[1], err=True, **kwdict):
+def trace(series, x=None, color=blue[1], err=True, binomial=False, **kwdict):
 
 	"""
 	desc:
@@ -87,11 +87,16 @@ def trace(series, x=None, color=blue[1], err=True, **kwdict):
 	"""
 
 	y = series.mean
-	ymin = y - series.std/np.sqrt(len(series))
-	ymax = y + series.std/np.sqrt(len(series))
 	if x is None:
 		x = np.arange(len(y))
 	if err:
+		n = (~np.isnan(series)).sum(axis=0)
+		if binomial:
+			yerr = np.sqrt((1./n) * y * (1-y))
+		else:
+			yerr = series.std/np.sqrt(n)
+		ymin = y-yerr
+		ymax = y+yerr
 		plt.fill_between(x, ymin, ymax, color=color, alpha=.2)
 	plt.plot(x, y, color=color, **kwdict)
 

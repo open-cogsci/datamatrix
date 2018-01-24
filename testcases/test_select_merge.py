@@ -47,6 +47,11 @@ def check_select(col_type):
 	check_col(dm_.col, [2])
 	dm_ = dm.col != {1, 3, 4}
 	check_col(dm_.col, [2])
+	# Check by lambda comparison
+	dm_ = dm.col == (lambda x: x == 2)
+	check_col(dm_.col, [2])
+	dm_ = dm.col != (lambda x: x == 2)
+	check_col(dm_.col, [1])
 	check_integrity(dm)
 
 
