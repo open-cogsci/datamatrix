@@ -151,7 +151,7 @@ class Index(OrderedState):
 		if i > self._max:
 			self._max = i
 
-	def clone(self):
+	def copy(self):
 
 		i = Index(0)
 		i._l = self._l.copy()

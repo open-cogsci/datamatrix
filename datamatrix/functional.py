@@ -234,6 +234,10 @@ def map_(fnc, obj):
 		column names as keys, and cells as values. Columns that are not part of
 		the returned `dict` are left unchanged.
 
+		*New in v0.8.0*: In Python 3.5 and later, you can also map a function
+		onto a column using the `@` operator:
+		`dm.new = dm.old @ (lambda i: i*2)`
+
 		__Example:__
 
 		%--
@@ -268,29 +272,17 @@ def map_(fnc, obj):
 
 	if not callable(fnc):
 		raise TypeError('fnc should be callable')
-	if isinstance(obj, _SeriesColumn):
-		# For a SeriesColumn, we need to make a special case, because the depth
-		# of the new SeriesColumn may be different from the depth of the
-		# original column.
-		for i, cell in enumerate(obj):
-			a = fnc(cell)
-			if not i:
-				newcol = _SeriesColumn(obj.dm, depth=len(a))
-			newcol[i] = a
-		return newcol
 	if isinstance(obj, BaseColumn):
-		newcol = obj._empty_col()
-		newcol[:] = [fnc(cell) for cell in obj]
-		return newcol
-	if isinstance(obj, DataMatrix):
-		dm = obj[:]
-		for row in dm:
-			d = {col : val for col, val in row}
-			d.update(fnc(**d))
-			for col, val in d.items():
-				row[col] = val
-		return dm
-	raise TypeError(u'obj should be DataMatrix or BaseColumn')
+		return obj._map(fnc)
+	if not isinstance(obj, DataMatrix):
+		raise TypeError(u'obj should be DataMatrix or BaseColumn')
+	dm = obj[:]
+	for row in dm:
+		d = {col : val for col, val in row}
+		d.update(fnc(**d))
+		for col, val in d.items():
+			row[col] = val
+	return dm
 
 
 def filter_(fnc, obj):

@@ -239,7 +239,7 @@ class DataMatrix(OrderedState):
 		else:
 			startid = 0 if not len(self) else self._rowid.max+1
 			rowid = Index([i+startid for i in range(value-len(self))])
-			object.__setattr__(self, u'_rowid', self._rowid.clone()+rowid)
+			object.__setattr__(self, u'_rowid', self._rowid.copy()+rowid)
 			for name in self._cols:
 				self._cols[name]._addrowid(rowid)
 		self._mutate()

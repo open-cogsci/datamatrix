@@ -195,9 +195,21 @@ class _SeriesColumn(NumericColumn):
 			np.rot90(a2)[:] = a
 			a = a2
 		col = self._empty_col()
-		col._rowid = self._rowid
+		col._rowid = self._rowid.copy()
 		col._seq = number_op(self._seq, a)
 		return col
+
+	def _map(self, fnc):
+
+		# For a SeriesColumn, we need to make a special case, because the depth
+		# of the new SeriesColumn may be different from the depth of the
+		# original column.
+		for i, cell in enumerate(self):
+			a = fnc(cell)
+			if not i:
+				newcol = _SeriesColumn(self.dm, depth=len(a))
+			newcol[i] = a
+		return newcol
 
 	def _checktype(self, value):
 
@@ -207,11 +219,11 @@ class _SeriesColumn(NumericColumn):
 		except:
 			raise Exception('Invalid type: %s' % str(value))
 		return a
-	
+
 	def _compare(self, other, op):
-		
+
 		raise NotImplementedError(u'Cannot compare SeriesColumns')
-		
+
 	def _tosequence(self, value, length):
 
 		# For float and integers, we simply create a new (length, depth) array

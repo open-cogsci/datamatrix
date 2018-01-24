@@ -103,7 +103,7 @@ class NumericColumn(BaseColumn):
 
 	def _init_rowid(self):
 
-		self._rowid = self._datamatrix._rowid.asarray
+		self._rowid = self._datamatrix._rowid.asarray.copy()
 		self._rowid_argsort_cache = None, None
 
 	def _init_seq(self):
@@ -171,6 +171,13 @@ class NumericColumn(BaseColumn):
 		col._rowid = self._rowid
 		col._seq = number_op(self._seq,
 			self._tosequence(other, len(self._datamatrix)))
+		return col
+
+	def _map(self, fnc):
+
+		col = self._empty_col()
+		col._rowid = self._rowid.copy()
+		col._seq = np.array([fnc(val) for val in self._seq], dtype=self.dtype)
 		return col
 
 	def _addrowid(self, _rowid):

@@ -276,7 +276,7 @@ class BaseColumn(OrderedState):
 			the row ids.
 		"""
 
-		self._rowid = self._datamatrix._rowid.clone()
+		self._rowid = self._datamatrix._rowid.copy()
 
 	def _init_seq(self):
 
@@ -692,18 +692,29 @@ class BaseColumn(OrderedState):
 		"""
 
 		col = self._empty_col()
-		col._rowid = self._rowid
+		col._rowid = self._rowid.copy()
 		col._seq = []
 		for i, (_other, val) in enumerate(
-			zip(self._tosequence(other, len(self)), self._seq)):
-			if isinstance(val, numbers.Number) \
-				and isinstance(_other, numbers.Number):
-				col._seq.append(number_op(self._seq[i], _other))
+			zip(self._tosequence(other, len(self)), self._seq)
+		):
+			if (
+				isinstance(val, numbers.Number)
+				and isinstance(_other, numbers.Number)
+			):
+				col._seq.append(number_op(val, _other))
 			elif str_op is not None:
-				col._seq.append(str_op(safe_decode(self._seq[i]),
-					safe_decode(_other)))
+				col._seq.append(
+					str_op(safe_decode(val), safe_decode(_other))
+				)
 			else:
-				col._seq.append(self._seq[i])
+				col._seq.append(val)
+		return col
+
+	def _map(self, fnc):
+
+		col = self._empty_col()
+		col._rowid = self._rowid.copy()
+		col._seq = [fnc(val) for val in self._seq]
 		return col
 
 	def _empty_col(self):
@@ -804,3 +815,5 @@ class BaseColumn(OrderedState):
 		return self._operate(other, operator.mod)
 	def __pow__(self, other):
 		return self._operate(other, operator.pow)
+	def __matmul__(self, other):
+		return self._map(other)
