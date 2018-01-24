@@ -77,7 +77,9 @@ class AcademicMarkdownReader(MarkdownReader):
 			+ os.path.basename(source_path)[:-3]
 		build.path = [img_path, lst_path, tbl_path] + build.path
 		with open(source_path) as fd:
-			text = fd.read().decode('utf-8')
+			text = fd.read()
+			if hasattr(text, 'decode'): # Python 2
+				text = text.decode('utf-8')
 			text = build.MD(text)
 			# Process internal links
 			for m in re.finditer('%link:(?P<link>[\w/-]+)%', text):
