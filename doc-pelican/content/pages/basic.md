@@ -9,9 +9,13 @@ dm = DataMatrix(length=5)
 # The first two rows
 print(dm[:2])
 # Create a new column and initialize it with the Fibonacci series
-dm.fibonacci = 0, 1, 1, 2, 3 
-# A simple selection (remove 0 and 2)
-dm = (dm.fibonacci != 0) & (dm.fibonacci != 2)
+dm.fibonacci = 0, 1, 1, 2, 3
+# Remove 0 and 3 with a simple selection
+dm = (dm.fibonacci > 0) & (dm.fibonacci < 3)
+# Select 1, 1, and 2 by matching any of the values in a set
+dm = dm.fibonacci == {1, 2}
+# Select all odd numbers with a lambda expression
+dm = dm.fibonacci == (lambda x: x % 2)
 # The first two cells from the fibonacci column
 print(dm.fibonacci[:2])
 # Column mean
@@ -42,10 +46,14 @@ Create a new `DataMatrix` object, and add a column (named `col`). By default, th
 
 %--
 python: |
+ import sys
  from datamatrix import DataMatrix, __version__
  dm = DataMatrix(length=2)
  dm.col = ':-)'
- print('These examples were generated with DataMatrix v%s\n' % __version__)
+ print(
+ 	'Examples generated with DataMatrix v%s on Python %s\n'
+ 	% (__version__, sys.version)
+ )
  print(dm)
 --%
 
@@ -209,6 +217,8 @@ python: |
 
 ### Selecting data
 
+#### Comparing a column to a value
+
 You can select by directly comparing columns to values. This returns a new `DataMatrix` object with only the selected rows.
 
 %--
@@ -219,7 +229,9 @@ python: |
  print(dm_subset)
 --%
 
-You can select by multiple criteria using the `|` (or), `&` (and), and `^` (xor) operators (but not the actual words 'and' and 'or'). Note the parentheses, which are necessary because `|` and `&` have priority over other operators.
+#### Selecting by multiple criteria with `|` (or), `&` (and), and `^` (xor)
+
+You can select by multiple criteria using the `|` (or), `&` (and), and `^` (xor) operators (but not the actual words 'and' and 'or'). Note the parentheses, which are necessary because `|`, `&`, and `^` have priority over other operators.
 
 %--
 python: |
@@ -233,7 +245,29 @@ python: |
  print(dm_subset)
 --%
 
-You can also select by comparing to a series of values, in which case a row-by-row comparison is done:
+#### Selecting by multiple criteria by comparing to a set `{}`
+
+If you want to check whether column values are identical to, or different from, a set of test values, you can compare the column to a `set` object. (This is considerably faster than comparing the column values to each of the test values separately, and then merging the result using `&` or `|`.)
+
+%--
+python: |
+ dm_subset = dm.col == {1, 3, 5, 7}
+ print(dm_subset)
+--%
+
+#### Selecting with a function or lambda expression
+
+You can also use a function or `lambda` expression to select column values. The function must take a single argument and its return value determines whether the column value is selected. This is analogous to the classic `filter()` function.
+
+%--
+python: |
+ dm_subset = dm.col == (lambda x: x % 2)
+ print(dm_subset)
+--%
+
+#### Selecting values that match another column (or sequence)
+
+You can also select by comparing a column to a sequence, in which case a row-by-row comparison is done. This requires that the sequence has the same length as the column, is not a `set` object (because `set` objects are treated as described above).
 
 %--
 python: |
@@ -254,7 +288,9 @@ python: |
 --%
 
 
-### Basic column operations (multiplication, addition, etc.)
+### Element-wise column operations
+
+#### Multiplication, addition, etc.
 
 You can apply basic mathematical operations on all cells in a column simultaneously. Cells with non-numeric values are ignored, except by the `+` operator, which then results in concatenation.
 
@@ -266,6 +302,22 @@ python: |
  dm.col3 = dm.col+10
  dm.col4 = dm.col-10
  dm.col5 = dm.col/50
+ print(dm)
+--%
+
+#### Applying a function or lambda expression
+
+<div class="alert alert-warning">
+The <code>@</code> operator is only available in Python 3.5 and later.
+</div>
+
+You can apply a function or `lambda` expression to all cells in a column simulataneously with the `@` operator.
+
+%--
+python: |
+ dm = DataMatrix(length=3)
+ dm.col = 0, 1, 2
+ dm.col2 = dm.col @ (lambda x: x*2)
  print(dm)
 --%
 
@@ -304,7 +356,7 @@ python: |
 
 ### IntColumn (requires numpy)
 
-The `IntColumn` contains only `int` values. It does not support `nan` values. 
+The `IntColumn` contains only `int` values. It does not support `nan` values.
 
 %--
 python: |
@@ -388,7 +440,7 @@ python: |
  from datamatrix import DataMatrix, FloatColumn
  dm = DataMatrix(length=3)
  dm.f = FloatColumn
- dm.f = 0, np.nan, 1 
+ dm.f = 0, np.nan, 1
  print('NaN values')
  print(dm.f == np.nan)
  print('Non-NaN values')
@@ -408,20 +460,20 @@ python: |
  import numpy as np
  from matplotlib import pyplot as plt
  from datamatrix import SeriesColumn
- 
+
  length = 10 # Number of traces
  depth = 50 # Size of each trace
- 
+
  x = np.linspace(0, 2*np.pi, depth)
  sinewave = np.sin(x)
  noise = np.random.random(depth)*2-1
- 
+
  dm = DataMatrix(length=length)
  dm.series = SeriesColumn(depth=depth)
  dm.series[0] = noise
  dm.series[1:].setallrows(sinewave)
  dm.series[1:] *= np.linspace(-1, 1, 9)
- 
+
  plt.xlim(x.min(), x.max())
  plt.plot(x, dm.series.plottable, color='green', linestyle=':')
  y1 = dm.series.mean-dm.series.std

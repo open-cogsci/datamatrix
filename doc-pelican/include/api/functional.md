@@ -55,6 +55,10 @@ a keyword `dict`, where column names are keys and cells are values. In
 both cases, `fnc` should return a `bool` indicating whether the row or
 value should be included.
 
+*New in v0.8.0*: You can also directly compare a column with a function
+or `lambda` expression. However, this is different from `filter_()` in
+that it returns a datamatrix object and not a column.
+
 __Example:__
 
 %--
@@ -102,6 +106,10 @@ function that accepts a keyword `dict`, where column names are keys and
 cells are values. The return value should be another `dict`, again with
 column names as keys, and cells as values. Columns that are not part of
 the returned `dict` are left unchanged.
+
+*New in v0.8.0*: In Python 3.5 and later, you can also map a function
+onto a column using the `@` operator:
+`dm.new = dm.old @ (lambda i: i*2)`
 
 __Example:__
 
