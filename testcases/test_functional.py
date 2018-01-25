@@ -24,7 +24,7 @@ from nose.tools import eq_, ok_
 
 
 def test_map_():
-	
+
 	for coltype in (MixedColumn, FloatColumn, IntColumn):
 		dm = DataMatrix(length=2, default_col_type=coltype)
 		dm.a = 1, 2
@@ -34,10 +34,10 @@ def test_map_():
 		dm = fnc.map_(lambda **d: {'a' : 0}, dm)
 		eq_(dm.a, [0, 0])
 		ok_(isinstance(dm.a, coltype))
-		
+
 
 def test_filter_():
-	
+
 	dm = DataMatrix(length=4)
 	dm.a = range(4)
 	odd = fnc.filter_(lambda x: x%2, dm.a)
@@ -49,7 +49,7 @@ def test_filter_():
 
 
 def test_setcol():
-	
+
 	dm1 = DataMatrix(length=2)
 	dm2 = fnc.setcol(dm1, 'y', range(2))
 	eq_(dm2.y, [0, 1])
@@ -57,14 +57,14 @@ def test_setcol():
 
 
 def test_curry():
-	
+
 	@fnc.curry
 	def add(a, b, c):
-		
+
 		"""test"""
-		
+
 		return a+b+c
-		
+
 	eq_(add(1,2,3), 6)
 	eq_(add(1,2)(3), 6)
 	eq_(add(1)(2,3), 6)
@@ -74,34 +74,36 @@ def test_curry():
 
 
 def test_memoize():
-	
+
 	@fnc.memoize(debug=True)
 	def add(a, b):
-		
+
 		"""test"""
-		
+
 		return a+b
-		
+
 	@fnc.memoize(debug=True, key='custom-key')
 	def add2(a, b):
-		
+
 		return a+b
 
 	@fnc.memoize()
 	def add3(a, b):
-		
+
 		return a+b
-	
+
 	retval, memkey, src = add(1,2)
 	eq_(retval, 3)
 	eq_(src, u'function')
 	eq_(add(1,2), (retval, memkey, u'memory'))
-	eq_(add(1,2, memoclear=True), (retval, memkey, u'function'))
+	add.clear()
+	eq_(add(1,2), (retval, memkey, u'function'))
 	eq_(add(1,2), (retval, memkey, u'memory'))
 	if py3:
-		eq_(add.__doc__, 'test')	
+		eq_(add.__doc__, 'test')
 	eq_(add2(1,2), (retval, u'custom-key', u'function'))
 	eq_(add2(1,2), (retval, u'custom-key', u'memory'))
-	eq_(add2(1,2, memoclear=True), (retval, u'custom-key', u'function'))
-	eq_(add2(1,2), (retval, u'custom-key', u'memory'))	
+	add2.clear()
+	eq_(add2(1,2), (retval, u'custom-key', u'function'))
+	eq_(add2(1,2), (retval, u'custom-key', u'memory'))
 	eq_(add3(1,2), add3(1,2))
