@@ -145,9 +145,9 @@ A new column or datamatrix.
 
 </div>
 
-<div class="FunctionDoc YAMLDoc" id="memoize" markdown="1">
+<div class="ClassDoc YAMLDoc" id="memoize" markdown="1">
 
-## function __memoize__\(fnc=None, key=None, persistent=False, lazy=False, debug=False\)
+## class __memoize__
 
 A memoization decorator that stores the result of a function call, and
 returns the stored value when the function is called again with the same
@@ -157,13 +157,16 @@ improves performance for expensive function calls.
 This decorator only works for arguments and return values
 that can be serialized (i.e. arguments that you can pickle).
 
-To clear memoization, either pass `~[function name]` as a command line
-argument to a script, or pass `memoclear=True` as a keyword to the
-memoized function (not to the decorator).
+The memoized function becomes a callable object. To clear the
+memoization cache, call the `.clear()` function on the memoized
+function.
 
 For a more detailed description, see:
 
 - %link:memoization%
+
+*Changed in v0.8.0*: You can no longer pass the `memoclear` keyword to
+the memoized function.
 
 __Example:__
 
@@ -179,7 +182,8 @@ python: |
 
  three = add(1, 2) # Storing result in memory
  three = add(1, 2) # Re-using previous result
- three = add(1, 2, memoclear=True) # Clear cache!
+ add.clear() # Clear cache!
+ three = add(1, 2) # Calculate again
 
  @fnc.memoize(persistent=True, key='persistent-add')
  def persistent_add(a, b):
@@ -190,30 +194,6 @@ python: |
  three = persistent_add(1, 2) # Writing result to disk
  three = persistent_add(1, 2) # Re-using previous result
 --%
-
-__Keywords:__
-
-- `fnc` -- A function to memoize.
-	- Type: callable
-	- Default: None
-- `key` -- Indicates a key that identifies the results. If no key is provided, a key is generated based on the function name, and the arguments passed to the function. However, this requires the arguments to be serialized, which can take some time.
-	- Type: str, None
-	- Default: None
-- `persistent` -- Indicates whether the result should be written to disk so that the result can be re-used when the script is run again. If set to `True`, the result is stored as a pickle in a `.memoize` subfolder of the working directory.
-	- Type: bool
-	- Default: False
-- `lazy` -- If `True`, any callable that is passed onto the memoized function is automatically called, and the memoized function receives the return value instead of the function object. This allows for lazy evaluation.
-	- Type: bool
-	- Default: False
-- `debug` -- If `True`, the memoized function returns a `(retval, memkey, source)` tuple, where `retval` is the function's return value, `memkey` is the key used for caching, and `source` is one of 'memory', 'disk', or 'function', indicating whether and how the return value was cached. This is mostly for debugging and testing.
-	- Type: bool
-	- Default: False
-
-__Returns:__
-
-A memoized version of fnc.
-
-- Type: callable
 
 </div>
 

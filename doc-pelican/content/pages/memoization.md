@@ -28,13 +28,13 @@ python: |
  import time
  from itertools import dropwhile
  from datamatrix import functional as fnc
- 
- 
+
+
  @fnc.memoize
  def prime_below(x):
- 
+
  	"""Returns the highest prime that is lower than X."""
- 	
+
  	print('Calculating the highest prime number below %d' % x)
  	return next(
  		dropwhile(
@@ -42,14 +42,14 @@ python: |
  			range(x-1, 0, -1)
  			)
  		)
- 
- 
+
+
  t0 = time.time()
  prime_below(10000)
  t1 = time.time()
  prime_below(10000)
  t2 = time.time()
- 
+
  print('Fresh: %.2f ms' % (1000*(t1-t0)))
  print('Memoized: %.2f ms' % (1000*(t2-t1)))
 --%
@@ -65,11 +65,11 @@ Ideally, evaluation of the arguments occurs only when the memoized function actu
 python: |
  from itertools import dropwhile
  from datamatrix import functional as fnc
- 
- 
+
+
  @fnc.memoize(lazy=True)
  def prime_below(x):
- 	
+
  	print('Calculating the highest prime number below %d' % x)
  	return next(
  		dropwhile(
@@ -77,14 +77,14 @@ python: |
  			range(x-1, 0, -1)
  			)
  		)
- 		
- 		
+
+
  def thousand():
- 	
+
  	print('Returning a thousand!')
  	return 1000
- 	
- 
+
+
  print(prime_below(thousand))
  print(prime_below(thousand))
 --%
@@ -97,11 +97,11 @@ python: |
  from functools import partial
  from itertools import dropwhile
  from datamatrix import functional as fnc
- 
- 
+
+
  @fnc.memoize(lazy=True)
  def prime_below(x):
- 	
+
  	print('Calculating the highest prime number below %d' % x)
  	return next(
  		dropwhile(
@@ -109,7 +109,7 @@ python: |
  			range(x-1, 0, -1)
  			)
  		)
- 
+
  print(prime_below(partial(prime_below, 1000)))
  print(prime_below(partial(prime_below, 1000)))
 --%
@@ -121,18 +121,18 @@ If you pass `persistent=True` to the `memoize` decorator, the cache will be writ
 
 You can also specify a custom memoization key through the `key` keyword. If you specify a custom key, `memoize` will no longer distinguish between different arguments (and thus no longer be real `memoization`).
 
-To re-execute a memoized function, you can either specify `~[function_name]` as a command-line argument, or pass `memoclear=True` to the memoized function (not to the decorator).
+To re-execute a memoized function, you can clear the memoization cache by calling the `.clear()` method on the memoized function, as shown below. If memoization is persistent, this will clear all files in the cache folder. Otherwise, this will only clear the in-memory cache.
 
 
 %--
 python: |
  from itertools import dropwhile
  from datamatrix import functional as fnc
- 
- 
+
+
  @fnc.memoize(persistent=True, key='custom-key')
  def prime_below(x):
- 	
+
  	print('Calculating the highest prime number below %d' % x)
  	return next(
  		dropwhile(
@@ -140,9 +140,10 @@ python: |
  			range(x-1, 0, -1)
  			)
  		)
- 
-  
+
+
  print(prime_below(1000))
  print(prime_below(1000))
- print(prime_below(1000, memoclear=True)) # Clear the cache
+ prime_below.clear() # Clear the cache
+ print(prime_below(1000))
 --%
