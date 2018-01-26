@@ -149,10 +149,18 @@ class memoize(object):
 
 	def __rshift__(self, other):
 
+		if not self._lazy:
+			raise ValueError(
+				'You can only use the >> operator with lazy memoization'
+			)
 		return partial(other, self)
 
 	def __rrshift__(self, other):
 
+		if not self._lazy:
+			raise ValueError(
+				'You can only use the >> operator with lazy memoization'
+			)
 		return partial(self, other)
 
 	def _call_with_arguments(self, fnc):
