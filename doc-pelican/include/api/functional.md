@@ -149,13 +149,15 @@ A new column or datamatrix.
 
 ## class __memoize__
 
+*Requires json_tricks*
+
 A memoization decorator that stores the result of a function call, and
 returns the stored value when the function is called again with the same
 arguments. That is, memoization is a specific kind of caching that
 improves performance for expensive function calls.
 
-This decorator only works for arguments and return values
-that can be serialized (i.e. arguments that you can pickle).
+This decorator only works for return values that can be pickled, and
+arguments that can be serialized to `json`.
 
 The memoized function becomes a callable object. To clear the
 memoization cache, call the `.clear()` function on the memoized
@@ -194,6 +196,38 @@ python: |
  three = persistent_add(1, 2) # Writing result to disk
  three = persistent_add(1, 2) # Re-using previous result
 --%
+
+</div>
+
+<div class="FunctionDoc YAMLDoc" id="profile" markdown="1">
+
+## function __profile__\(\*args, \*\*kwds\)
+
+A context manager (`with`) for easy profiling, using cProfile. The
+results of the profile are written to the file specified in the `path`
+keyword (default=`u'profile'`), and the sorting order, as accepted by
+`pstats.Stats.sort_stats()`, is specified in the the `sortby` keyword
+(default=`u'cumulative'`).
+
+__Example:__
+
+%--
+python: |
+ from datamatrix import functional as fnc
+
+ with fnc.profile(path=u'profile.txt', sortby=u'cumulative'):
+         dm = DataMatrix(length=1000)
+         dm.col = range(1000)
+         dm.is_even = dm.col @ (lambda x: not x % 2)
+--%
+
+__Argument list:__
+
+- `*args`: No description.
+
+__Keyword dict:__
+
+- `**kwds`: No description.
 
 </div>
 

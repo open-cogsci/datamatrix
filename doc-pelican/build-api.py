@@ -38,7 +38,7 @@ def main():
 		target='functional.md', onlyContents=True,
 		types=['function', 'module'], cls=None, exclude=[
 			'_SeriesColumn', 'BaseColumn', 'Index', 'DataMatrix'])
-	createdoc('datamatrix/convert.py',
+	createdoc('datamatrix/convert/__init__.py',
 		target='convert.md', onlyContents=True,
 		types=['function', 'module'], cls=None, exclude=['DataMatrix'])
 	createdoc('datamatrix/series.py',

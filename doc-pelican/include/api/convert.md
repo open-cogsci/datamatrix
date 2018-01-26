@@ -2,6 +2,27 @@
 
  
 
+<div class="FunctionDoc YAMLDoc" id="from_json" markdown="1">
+
+## function __from\_json__\(s\)
+
+*Requires json_tricks*
+
+Creates a DataMatrix from a `json` string.
+
+__Arguments:__
+
+- `s` -- A json string.
+	- Type: str
+
+__Returns:__
+
+A DataMatrix.
+
+- Type: DataMatrix.
+
+</div>
+
 <div class="FunctionDoc YAMLDoc" id="from_pandas" markdown="1">
 
 ## function __from\_pandas__\(df\)
@@ -30,6 +51,27 @@ __Returns:__
 No description
 
 - Type: DataMatrix
+
+</div>
+
+<div class="FunctionDoc YAMLDoc" id="to_json" markdown="1">
+
+## function __to\_json__\(dm\)
+
+*Requires json_tricks*
+
+Creates (serializes) a `json` string from a DataMatrix.
+
+__Arguments:__
+
+- `dm` -- A DataMatrix to serialize.
+	- Type: DataMatrix
+
+__Returns:__
+
+A json string.
+
+- Type: str
 
 </div>
 

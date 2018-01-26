@@ -114,6 +114,32 @@ python: |
  print(prime_below(partial(prime_below, 1000)))
 --%
 
+You can also implement this behavior with the `>>` operator, in which the resulting of one function call is fed into the next function call, etc. The result is a `chain` object that needs to be explicitly called. The `>>` only works
+with lazy memoization.
+
+%--
+python: |
+ from itertools import dropwhile
+ from datamatrix import functional as fnc
+
+
+ @fnc.memoize(lazy=True)
+ def prime_below(x):
+
+ 	print('Calculating the highest prime number below %d' % x)
+ 	return next(
+ 		dropwhile(
+ 			lambda x: any(x//i == float(x)/i for i in range(x-1, 2, -1)),
+ 			range(x-1, 0, -1)
+ 			)
+ 		)
+
+ chain = 1000 >> prime_below >> prime_below
+ print(chain())
+ print(chain())
+--%
+
+
 
 ### Persistent memoization, memoization keys, and cache clearing
 
