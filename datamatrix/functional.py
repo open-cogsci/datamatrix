@@ -24,11 +24,55 @@ desc: |
 
 import inspect
 import functools
+from contextlib import contextmanager
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._index import Index
 from datamatrix._functional._memoize import memoize
+
+
+@contextmanager
+def profile(path=u'profile.txt', sortby=u'cumulative'):
+
+	"""
+	desc: |
+		A context manager (`with`) for easy profiling, using cProfile. The
+		results of the profile are written to the file specified in the `path`
+		keyword (default=`u'profile'`), and the sorting order, as accepted by
+		`pstats.Stats.sort_stats()`, is specified in the the `sortby` keyword
+		(default=`u'cumulative'`).
+
+		__Example:__
+
+		%--
+		python: |
+		 from datamatrix import functional as fnc
+
+		 with fnc.profile(path=u'profile.txt', sortby=u'cumulative'):
+			 dm = DataMatrix(length=1000)
+			 dm.col = range(1000)
+			 dm.is_even = dm.col @ (lambda x: not x % 2)
+		--%
+	"""
+
+	import cProfile
+	import pstats
+	try: # Python 3
+		import io
+	except ImportError: # Python 2
+		import StringIO as io
+
+	pr = cProfile.Profile()
+	pr.enable()
+	yield
+	pr.disable()
+	s = io.StringIO()
+	ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+	ps.print_stats()
+	with open(path, 'w') as fd:
+		fd.write(s.getvalue())
+
 
 
 def curry(fnc):
