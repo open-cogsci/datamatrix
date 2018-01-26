@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+from datamatrix.py3compat import *
+from datamatrix import DataMatrix, convert as cnv
+from functools import partial
 import os
 import hashlib
 import pickle
@@ -27,13 +30,15 @@ class memoize(object):
 
 	"""
 	desc: |
+		*Requires json_tricks*
+
 		A memoization decorator that stores the result of a function call, and
 		returns the stored value when the function is called again with the same
 		arguments. That is, memoization is a specific kind of caching that
 		improves performance for expensive function calls.
 
-		This decorator only works for arguments and return values
-		that can be serialized (i.e. arguments that you can pickle).
+		This decorator only works for return values that can be pickled, and
+		arguments that can be serialized to `json`.
 
 		The memoized function becomes a callable object. To clear the
 		memoization cache, call the `.clear()` function on the memoized
@@ -122,6 +127,10 @@ class memoize(object):
 		self._debug = debug
 		self._folder = folder
 		self._init_cache()
+		if fnc is None:
+			self.__name__ = 'memoize(nofnc)'
+		else:
+			self.__name__ = 'memoize(%s)' % fnc.__name__
 
 	def clear(self):
 
@@ -137,6 +146,14 @@ class memoize(object):
 			if self._fnc is None
 			else self._call_without_arguments
 		)
+
+	def __rshift__(self, other):
+
+		return partial(other, self)
+
+	def __rrshift__(self, other):
+
+		return partial(self, other)
 
 	def _call_with_arguments(self, fnc):
 
@@ -190,38 +207,46 @@ class memoize(object):
 
 	def _read_cache(self, memkey):
 
-		if memkey in self._cache:
-			self._latest_source = 'memory'
-			return True, pickle.loads(self._cache[memkey])
 		if self._persistent:
 			cache_path = os.path.join(self._folder, memkey)
 			if os.path.exists(cache_path):
 				self._latest_source = 'disk'
 				with open(cache_path, u'rb') as fd:
 					return True, pickle.load(fd)
+		elif memkey in self._cache:
+			self._latest_source = 'memory'
+			return True, pickle.loads(self._cache[memkey])
 		self._latest_source = 'function'
 		return False, None
 
 	def _write_cache(self, memkey, retval):
 
-		self._cache[memkey] = pickle.dumps(retval)
 		if self._persistent:
 			cache_path = os.path.join(self._folder, memkey)
 			if not os.path.exists(cache_path):
 				with open(cache_path, u'wb') as fd:
 					pickle.dump(retval, fd)
+		else:
+			self._cache[memkey] = pickle.dumps(retval)
 		return (
 			(retval, memkey, self._latest_source)
 			if self._debug
 			else retval
 		)
 
-	def _memkey(self, *args, **kwdict):
+	def _memkey(self, *args, **kwargs):
+
+		import json_tricks
 
 		args = [
-			(arg.__name__ if hasattr(arg, '__name') else '__nameless__')
-			if callable(arg) else arg for arg in args
+			(arg.__name__ if hasattr(arg, '__name__') else '__nameless__')
+			if callable(arg)
+			else cnv.to_json(arg) if isinstance(arg, DataMatrix)
+			else json_tricks.dumps(arg)
+			for arg in args
 		]
 		return hashlib.md5(
-			pickle.dumps([self._fnc.__name__, args, kwdict])
+			pickle.dumps(
+				[self._fnc.__name__, args, kwargs]
+			)
 		).hexdigest()
