@@ -464,6 +464,11 @@ class DataMatrix(OrderedState):
 
 	# Implemented syntax
 
+	def __hash__(self):
+
+		from datamatrix import convert as cnv
+		return hash(cnv.to_json(self))
+
 	def __getstate__(self):
 
 		# Is used by pickle.dump. To make sure that identical datamatrices with
