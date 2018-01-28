@@ -21,7 +21,7 @@ title: DataMatrix
 
 - [An intuitive syntax](%link:basic%) that makes your code easy to read.
 - Requires only the Python standard libraries (but you can use `numpy` to improve performance).
-- Great support for [functional programming](%link:functional%).
+- Great support for [functional programming](%link:functional%), including advanced [memoization (caching)](%link:memoization).
 - Mix [two-dimensional](%link:series%) (series) and one-dimensional data in a single data structure.
 - `DataMatrix` does what it does really well, but it cannot do everything that libraries such as `pandas` can. Therefore, you can [convert](%link:convert%) to and from `pandas.DataFrame`.
 
@@ -57,7 +57,7 @@ python: |
  # Four philosophers with their names, fields, and genders
  dm = DataMatrix(length=4)
  dm.name = 'Ibn al-Haytam', 'Hypatia', 'Popper', 'de Beauvoir'
- dm.field = 'Optics', 'Mathematics', 'Science', 'Existentialism'	
+ dm.field = 'Optics', 'Mathematics', 'Science', 'Existentialism'
  dm.gender = 'M', 'F', 'M', 'F'
  print('Philosophers:')
  print(dm)

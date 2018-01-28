@@ -17,6 +17,16 @@ Therefore, you should *not* memoize a function that returns random numbers, beca
 But you *could* memoize a function that performs some time consuming operation that is always done in exactly the same way, such as a function that performs time-consuming operations on a large dataset.
 
 
+## Limitations
+
+Memoization only works for functions with
+
+- Arguments and keywords that:
+  - Can be serialized by `json_tricks`, which includes simple data types, DataMatrix objects, and numpy array; or
+	- Are callable, which includes regular functions, `lambda` expressions, `partial` objects, and `memoize` objects.
+- Return arguments that can be pickled.
+
+
 ## Examples
 
 ### Basic memoization
@@ -143,7 +153,9 @@ python: |
 
 ### Persistent memoization, memoization keys, and cache clearing
 
-If you pass `persistent=True` to the `memoize` decorator, the cache will be written to disk, in a subfolder `.memoize` of the current working directory. The filename will correspond to the memoization key, which by default is derived from the function name and the arguments.
+If you pass `persistent=True` to the `memoize` decorator, the cache will be written to disk, by default to a subfolder `.memoize` of the current working directory. The filename will correspond to the memoization key, which by default is derived from the function name and the arguments.
+
+If you want to change the cache folder, you can either pass a `folder` keyword to the `memoize` decorator, or change the `memoize.folder` class property before applying the `memoize` decorator to any functions.
 
 You can also specify a custom memoization key through the `key` keyword. If you specify a custom key, `memoize` will no longer distinguish between different arguments (and thus no longer be real `memoization`).
 
