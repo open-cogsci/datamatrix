@@ -21,6 +21,7 @@ from datamatrix.py3compat import *
 from datamatrix import DataMatrix, convert as cnv
 from functools import partial
 import os
+import collections
 import hashlib
 import pickle
 import shutil
@@ -115,9 +116,11 @@ class memoize(object):
 		type:	callable
 	"""
 
+	folder = u'.memoize'
+
 	def __init__(
 		self, fnc=None, key=None, persistent=False, lazy=False, debug=False,
-		folder=u'.memoize'
+		folder=None
 	):
 
 		self._fnc = fnc
@@ -125,12 +128,12 @@ class memoize(object):
 		self._persistent = persistent
 		self._lazy = lazy
 		self._debug = debug
-		self._folder = folder
+		self._folder = self.folder if folder is None else folder
 		self._init_cache()
-		if fnc is None:
-			self.__name__ = 'memoize(nofnc)'
-		else:
-			self.__name__ = 'memoize(%s)' % fnc.__name__
+		self.__name__ = (
+			'memoize(nofnc)' if fnc is None
+			else 'memoize(%s)' % fnc.__name__
+		)
 
 	def clear(self):
 
@@ -182,30 +185,52 @@ class memoize(object):
 		)
 		is_cached, retval = self._read_cache(memkey)
 		if is_cached:
+			if self._debug:
+				print(
+					'%s: returning cached result for memkey %s'
+					% (self.__name__, memkey)
+				)
 			return (
 				(retval, memkey, self._latest_source)
 				if self._debug
 				else retval
 			)
 		if self._lazy:
-			args, kwargs = self._lazy_evaluation(args, kwargs)
+			args = self._lazy_evaluation_args(args)
+			kwargs = self._lazy_evaluation_kwargs(kwargs)
+		if self._debug:
+			print(
+				'%s: executing for memkey %s'
+				% (self.__name__, memkey)
+			)
 		return self._write_cache(
 			memkey,
 			self._fnc(*args, **kwargs)
 		)
 
-	def _lazy_evaluation(self, args, kwargs):
+	def _lazy_evaluation_obj(self, obj):
 
-		return (
-			[
-				arg() if callable(arg) else arg
-				for arg in args
-			],
-			{
-				key: val() if callable(val) else val
-				for key, val in kwargs.items()
-			}
-		)
+		if callable(obj):
+			return obj()
+		if isinstance(obj, dict):
+			return self._lazy_evaluation_kwargs(obj)
+		if (
+			isinstance(obj, collections.Sequence)
+			and not isinstance(obj, basestring)
+		):
+			return self._lazy_evaluation_args(obj)
+		return obj
+
+	def _lazy_evaluation_args(self, args):
+
+		return [self._lazy_evaluation_obj(arg) for arg in args]
+
+	def _lazy_evaluation_kwargs(self, kwargs):
+
+		return {
+			key: self._lazy_evaluation_obj(val)
+			for key, val in kwargs.items()
+		}
 
 	def _init_cache(self):
 
@@ -242,19 +267,39 @@ class memoize(object):
 			else retval
 		)
 
-	def _memkey(self, *args, **kwargs):
+	def _serialize_obj(self, obj):
 
 		import json_tricks
 
-		args = [
-			(arg.__name__ if hasattr(arg, '__name__') else '__nameless__')
-			if callable(arg)
-			else cnv.to_json(arg) if isinstance(arg, DataMatrix)
-			else json_tricks.dumps(arg)
-			for arg in args
-		]
+		if callable(obj):
+			return obj.__name__ if hasattr(obj, '__name__') else '__nameless__'
+		if isinstance(obj, dict):
+			return self._serialize_kwargs(obj)
+		if (
+			isinstance(obj, collections.Sequence)
+			and not isinstance(obj, basestring)
+		):
+			return self._serialize_args(obj)
+		if isinstance(obj, DataMatrix):
+			return cnv.to_json(obj)
+		return json_tricks.dumps(obj)
+
+	def _serialize_args(self, args):
+
+		return [self._serialize_obj(arg) for arg in args]
+
+	def _serialize_kwargs(self, kwargs):
+
+		return {key: self._serialize_obj(val) for key, val in kwargs.items()}
+
+	def _memkey(self, *args, **kwargs):
+
 		return hashlib.md5(
 			pickle.dumps(
-				[self._fnc.__name__, args, kwargs]
+				[
+					self._fnc.__name__,
+					self._serialize_args(args),
+					self._serialize_kwargs(kwargs),
+				]
 			)
 		).hexdigest()
