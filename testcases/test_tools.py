@@ -20,12 +20,18 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from nose.tools import eq_, ok_
 from datamatrix._datamatrix._index import Index
 import numpy as np
+import contextlib
+import sys
+try:
+	from StringIO import StringIO
+except ImportError:
+	from io import StringIO
 
 
 def all_nan(*l):
-	
+
 	return all([np.isnan(v) for v in l])
-	
+
 
 def check_dm(dm, ref):
 
@@ -84,3 +90,12 @@ def check_integrity(dm):
 				print('Integrity failure: %s != %s (col: %s)' \
 					% (dm._rowid, col._rowid, name))
 				ok_(False)
+
+@contextlib.contextmanager
+def capture_stdout():
+
+	oldout = sys.stdout
+	out = StringIO()
+	sys.stdout = out
+	yield out
+	sys.stdout = oldout

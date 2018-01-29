@@ -20,11 +20,16 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, convert as cnv
 from functools import partial
+import sys
 import os
+import warnings
 import collections
 import hashlib
 import pickle
 import shutil
+
+
+ONE_GIGABYTE = 1024**3
 
 
 class memoize(object):
@@ -43,14 +48,16 @@ class memoize(object):
 
 		The memoized function becomes a callable object. To clear the
 		memoization cache, call the `.clear()` function on the memoized
-		function.
+		function. The total size of all cached return values is available as the
+		`.cache_size` property.
+
 
 		For a more detailed description, see:
 
 		- %link:memoization%
 
 		*Changed in v0.8.0*: You can no longer pass the `memoclear` keyword to
-		the memoized function.
+		the memoized function. Use the `.clear()` function instead.
 
 		__Example:__
 
@@ -110,6 +117,11 @@ class memoize(object):
 					'function', indicating whether and how the return value was
 					cached. This is mostly for debugging and testing.
 			type:	bool
+		max_size:
+			desc:	The maximum total size (in bytes) of all cached return
+					values. If the cache exceeds this size, the oldest cached
+					return value is dropped.
+			type:	int
 
 	returns:
 		desc:	A memoized version of fnc.
@@ -120,7 +132,7 @@ class memoize(object):
 
 	def __init__(
 		self, fnc=None, key=None, persistent=False, lazy=False, debug=False,
-		folder=None
+		folder=None, max_size=ONE_GIGABYTE
 	):
 
 		self._fnc = fnc
@@ -128,6 +140,7 @@ class memoize(object):
 		self._persistent = persistent
 		self._lazy = lazy
 		self._debug = debug
+		self._max_size = max_size
 		self._folder = self.folder if folder is None else folder
 		self._init_cache()
 		self.__name__ = (
@@ -140,6 +153,11 @@ class memoize(object):
 		if self._persistent and os.path.exists(self._folder):
 			shutil.rmtree(self._folder)
 		self._init_cache()
+
+	@property
+	def cache_size(self):
+
+		return sum(sys.getsizeof(obj) for obj in self._cache.values())
 
 	@property
 	def __call__(self):
@@ -169,12 +187,13 @@ class memoize(object):
 	def _call_with_arguments(self, fnc):
 
 		return self.__class__(
-			fnc,
+			fnc=fnc,
 			key=self._key,
 			persistent=self._persistent,
 			lazy=self._lazy,
 			debug=self._debug,
-			folder=self._folder
+			folder=self._folder,
+			max_size=self._max_size
 		)
 
 	def _call_without_arguments(self, *args, **kwargs):
@@ -234,7 +253,7 @@ class memoize(object):
 
 	def _init_cache(self):
 
-		self._cache = {}
+		self._cache = collections.OrderedDict()
 		if self._persistent and not os.path.exists(self._folder):
 			os.mkdir(self._folder)
 
@@ -261,6 +280,12 @@ class memoize(object):
 					pickle.dump(retval, fd)
 		else:
 			self._cache[memkey] = pickle.dumps(retval)
+			while self.cache_size > self._max_size:
+				if self._debug:
+					print('%s: dropping oldest cached value' % self.__name__)
+				self._cache.popitem(last=False)
+			if not self._cache:
+				warnings.warn('Return value exceeds max_size')
 		return (
 			(retval, memkey, self._latest_source)
 			if self._debug

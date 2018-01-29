@@ -21,6 +21,7 @@ from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, IntColumn, FloatColumn
 from datamatrix import functional as fnc
 from nose.tools import eq_, ok_
+from testcases.test_tools import capture_stdout
 
 
 def test_map_():
@@ -107,3 +108,24 @@ def test_memoize():
 	eq_(add2(1,2), (retval, u'custom-key', u'function'))
 	eq_(add2(1,2), (retval, u'custom-key', u'memory'))
 	eq_(add3(1,2), add3(1,2))
+
+
+def test_memoize_chain():
+
+	@fnc.memoize(lazy=True, debug=True)
+	def add_one(i):
+
+		if isinstance(i, tuple):
+			i = i[0]
+		print(i)
+		return i + 1
+
+	chain = (0 >> add_one >> add_one >> add_one)
+	with capture_stdout() as out:
+		chain()
+	l = out.getvalue().strip().split('\n')
+	eq_(len(l), 6)
+	with capture_stdout() as out:
+		chain()
+	l = out.getvalue().strip().split('\n')
+	eq_(len(l), 1)
