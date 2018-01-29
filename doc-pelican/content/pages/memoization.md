@@ -5,33 +5,23 @@ title: Memoization (caching)
 
 ## What is memoization?
 
-[Memoization](https://en.wikipedia.org/wiki/Memoization) is a way to optimize code by storing the return values of functions called with a specific set of arguments. Memoization is often used in combination with [functional programming](%link:functional%). Memoization is a specific type of caching.
+[Memoization](https://en.wikipedia.org/wiki/Memoization) is a way to optimize code by storing the return values of functions called with a specific set of arguments. Memoization is a specific type of caching.
 
 
 ## When (not) to memoize?
 
-Memoization is only valid for functions that are referentially transparent, that is, functions that always return the same result for the same set of arguments, and that do not affect the state of the program.
+Memoization is only valid for functions that are *referentially transparent*: functions that always return the same result for the same set of arguments, and that do not affect the state of the program.
 
 Therefore, you should *not* memoize a function that returns random numbers, because it will end up returning the same set of random numbers over and over again. And you should also *not* memoize a function that depends on the state of the program, for example because it relies on the command-line arguments that were passed to a script.
 
 But you *could* memoize a function that performs some time consuming operation that is always done in exactly the same way, such as a function that performs time-consuming operations on a large dataset.
 
 
-## Limitations
-
-Memoization only works for functions with
-
-- Arguments and keywords that:
-  - Can be serialized by `json_tricks`, which includes simple data types, DataMatrix objects, and numpy array; or
-	- Are callable, which includes regular functions, `lambda` expressions, `partial` objects, and `memoize` objects.
-- Return arguments that can be pickled.
-
-
 ## Examples
 
 ### Basic memoization
 
-Memoization is done with the `memoize` decorator that is part of [`datamatrix.functional`](%link:functional%). Let's take a time-consuming function that determines the highest prime number below a certain value, and measure the performance improvement that memoization gives us when we call the function twice with same argument.
+Memoization is done with the `memoize` decorator, which is part of [`datamatrix.functional`](%link:functional%). Let's take a time-consuming function that determines the highest prime number below a certain value, and measure the performance improvement that memoization gives us when we call the function twice with same argument.
 
 %--
 python: |
@@ -48,7 +38,7 @@ python: |
  	print('Calculating the highest prime number below %d' % x)
  	return next(
  		dropwhile(
- 			lambda x: any(x//i == float(x)/i for i in range(x-1, 2, -1)),
+ 			lambda x: any(not x % i for i in range(x-1, 2, -1)),
  			range(x-1, 0, -1)
  			)
  		)
@@ -73,17 +63,13 @@ Ideally, evaluation of the arguments occurs only when the memoized function actu
 
 %--
 python: |
- from itertools import dropwhile
- from datamatrix import functional as fnc
-
-
  @fnc.memoize(lazy=True)
  def prime_below(x):
 
  	print('Calculating the highest prime number below %d' % x)
  	return next(
  		dropwhile(
- 			lambda x: any(x//i == float(x)/i for i in range(x-1, 2, -1)),
+ 			lambda x: any(not x % i for i in range(x-1, 2, -1)),
  			range(x-1, 0, -1)
  			)
  		)
@@ -105,20 +91,6 @@ A slightly more complicated situation arises when you want to pass arguments to 
 %--
 python: |
  from functools import partial
- from itertools import dropwhile
- from datamatrix import functional as fnc
-
-
- @fnc.memoize(lazy=True)
- def prime_below(x):
-
- 	print('Calculating the highest prime number below %d' % x)
- 	return next(
- 		dropwhile(
- 			lambda x: any(x//i == float(x)/i for i in range(x-1, 2, -1)),
- 			range(x-1, 0, -1)
- 			)
- 		)
 
  print(prime_below(partial(prime_below, 1000)))
  print(prime_below(partial(prime_below, 1000)))
@@ -129,26 +101,10 @@ with lazy memoization.
 
 %--
 python: |
- from itertools import dropwhile
- from datamatrix import functional as fnc
-
-
- @fnc.memoize(lazy=True)
- def prime_below(x):
-
- 	print('Calculating the highest prime number below %d' % x)
- 	return next(
- 		dropwhile(
- 			lambda x: any(x//i == float(x)/i for i in range(x-1, 2, -1)),
- 			range(x-1, 0, -1)
- 			)
- 		)
-
  chain = 1000 >> prime_below >> prime_below
  print(chain())
  print(chain())
 --%
-
 
 
 ### Persistent memoization, memoization keys, and cache clearing
@@ -164,17 +120,13 @@ To re-execute a memoized function, you can clear the memoization cache by callin
 
 %--
 python: |
- from itertools import dropwhile
- from datamatrix import functional as fnc
-
-
  @fnc.memoize(persistent=True, key='custom-key')
  def prime_below(x):
 
  	print('Calculating the highest prime number below %d' % x)
  	return next(
  		dropwhile(
- 			lambda x: any(x//i == float(x)/i for i in range(x-1, 2, -1)),
+ 			lambda x: any(not x % i for i in range(x-1, 2, -1)),
  			range(x-1, 0, -1)
  			)
  		)
@@ -185,3 +137,13 @@ python: |
  prime_below.clear() # Clear the cache
  print(prime_below(1000))
 --%
+
+
+## Limitations
+
+Memoization only works for functions with:
+
+- Arguments and keywords that:
+	- Can be serialized by `json_tricks`, which includes simple data types, DataMatrix objects, and numpy array; or
+	- Are callable, which includes regular functions, `lambda` expressions, `partial` objects, and `memoize` objects.
+- Return values that can be pickled.

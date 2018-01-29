@@ -161,14 +161,15 @@ arguments that can be serialized to `json`.
 
 The memoized function becomes a callable object. To clear the
 memoization cache, call the `.clear()` function on the memoized
-function.
+function. The total size of all cached return values is available as the
+`.cache_size` property.
 
 For a more detailed description, see:
 
 - %link:memoization%
 
 *Changed in v0.8.0*: You can no longer pass the `memoclear` keyword to
-the memoized function.
+the memoized function. Use the `.clear()` function instead.
 
 __Example:__
 
