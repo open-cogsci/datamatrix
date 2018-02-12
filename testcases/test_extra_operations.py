@@ -196,7 +196,7 @@ def test_shuffle_horiz():
 	for i in range(1000):
 		dm2 = ops.shuffle_horiz(dm.a, dm.b)
 		check_col(dm.c, ['-', '-'])
-
+	ops.shuffle_horiz(dm.a)
 
 def test_keep_only():
 

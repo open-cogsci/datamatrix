@@ -549,7 +549,7 @@ def shuffle_horiz(*obj):
 	if len(obj) == 1 and isinstance(obj[0], DataMatrix):
 		obj = [column for colname, column in obj[0].columns]
 	try:
-		assert(len(obj) > 1)
+		assert(len(obj) > 0)
 		for column in obj:
 			assert(isinstance(column, BaseColumn))
 		dm = obj[0]._datamatrix
