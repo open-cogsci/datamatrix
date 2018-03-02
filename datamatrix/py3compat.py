@@ -69,15 +69,17 @@ def safe_encode(s, enc='utf-8', errors='strict'):
 			return str(float(s)).encode()
 		except:
 			pass
-	return s.encode(enc, errors)
-	
+	if hasattr(s, u'encode'):
+		return s.encode(enc, errors)
+	return bytes(s)
+
 def safe_sorted(l):
-	
+
 	try:
 		return sorted(l)
 	except TypeError:
 		return sorted(l, key=lambda i: safe_decode(i))
-		
+
 if py3:
 	import functools
 	safe_str = safe_decode
@@ -85,7 +87,7 @@ if py3:
 else:
 	safe_str = safe_encode
 	safe_open = open
-	
+
 def warn(msg, *args):
 	import warnings
 	warnings.warn(safe_str(msg), *args)
