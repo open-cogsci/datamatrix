@@ -3,6 +3,7 @@ Tutorials:
     Basic use: basic
     Working with series: series-tutorial
     Memoization (caching): memoization
+    Analyzing eye-movement data: eyelinkparser
 Modules:
     datamatrix.convert: convert
     datamatrix.functional: functional
