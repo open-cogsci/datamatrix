@@ -10,12 +10,18 @@ In this experiment, the participant first hears a series of digits; we will refe
 
 We will analyze pupil size during the `sounds` and `retention` traces as a function of set size. As reported by [Kahneman and Beatty (1966)](#references), and as we will also see during this tutorial, the size of the pupil increases with set size.
 
-This tutorial makes use of the [`eyelinkparser` module](https://github.com/smathot/python-eyelinkparser), which can be installed with `pip install python-eyelinkparser`. The data has been collected with an EyeLink 1000 eye tracker.
+This tutorial makes use of the [`eyelinkparser` module](https://github.com/smathot/python-eyelinkparser), which can be installed with pip:
+
+~~~
+pip install python-eyelinkparser
+~~~
+
+The data has been collected with an EyeLink 1000 eye tracker.
 
 
 ## Designing an experiment for easy analysis
 
-EyeLink data files (and data files for most other eye trackers) correspond to an event log, in which each line corresponds to some event. These events can be gaze samples, saccade onsets, user messages, etc.
+EyeLink data files (and data files for most other eye trackers) correspond to an event log; that is, each line corresponds to some event. These events can be gaze samples, saccade onsets, user messages, etc.
 
 For example, a `start_trial` user message followed by four gaze samples might look like this:
 
@@ -29,7 +35,7 @@ MSG	451224 start_trial
 
 When designing your experiment, it's important to send user messages in such a way that your analysis software, in this case `eyelinkparser`, knows how to interpret them. If you do, then data analysis will be easy, because you will not have to write a custom script to parse the data file from the ground up.
 
-If you use [OpenSesame/ PyGaze](http://osdoc.cogsci.nl), most of these messages, with exception of trace messages, will by default be sent in the below format automatically.
+If you use [OpenSesame/ PyGaze](http://osdoc.cogsci.nl), most of these messages, with the exception of phase messages, will by default be sent in the below format automatically.
 
 
 ### Trials
@@ -45,14 +51,28 @@ The following message indicates a variable and a value. For example, `var respon
 
 	var [name] [value]
 
-### Traces
+### Phases
 
-Traces are named periods of continuous data. Defining traces during the experiment is the easiest way to segment your data into different epochs for analysis.
+Phases are named periods of continuous data. Defining phases during the experiment is the easiest way to segment your data into different epochs for analysis.
 
-The following messages indicate the start and end of a trace. A trace is automatically ended when a new trace is started.
+The following messages indicate the start and end of a phase. A phase is automatically ended when a new phase is started.
 
 	start_phase [name]
 	end_phase [name]
+
+For each phase, four columns of type `SeriesColumn` will be created with information about fixations:
+
+- `fixxlist_[phase name]` is a series of X coordinates
+- `fixylist_[phase name]` is a series of Y coordinates
+- `fixstlist_[phase name]` is a series of fixation start times
+- `fixetlist_[phase name]` is a series of fixation end times
+
+Additionally, four columns will be created with information about individual gaze samples:
+
+- `xtrace_[phase name]` is a series of X coordinates
+- `ytrace_[phase name]` is a series of Y coordinates
+- `ttrace_[phase name]` is a series of time stamps
+- `ptrace_[phase name]` is a series of pupil sizes
 
 
 ## Analyzing data
@@ -80,14 +100,15 @@ python: |
       dm = parse(
           folder='data', # Folder with .asc files
           traceprocessor=defaulttraceprocessor(
-            blinkreconstruct=True,
+            blinkreconstruct=True, # Interpolate pupil size during blinks
             downsample=10 # Reduce sampling rate to 100 Hz
           )
       )
       # To save memory, we keep only a subset of relevant columns.
       dm = ops.keep_only(
           dm,
-          dm.set_size, dm.correct, dm.ptrace_sounds, dm.ptrace_retention
+          dm.set_size, dm.correct, dm.ptrace_sounds, dm.ptrace_retention,
+          dm.fixxlist_retention, dm.fixylist_retention
       )
       return dm
 --%
@@ -167,7 +188,7 @@ python: |
 --%
 
 
-### Plotting
+### Analyzing pupil size
 
 And now we plot the pupil traces for each of the three set sizes!
 
@@ -208,6 +229,46 @@ figure:
  source: setsize.png
  id: FigSetSize
  caption: Pupil size as a function of set size.
+--%
+
+
+### Analyzing fixations
+
+Now let's look at fixations during the `retention` phase. To get an idea of how the data is structured, we print out the x, y coordinates of all fixations of the first two trials.
+
+%--
+python: |
+  for i, row in zip(range(2), dm):
+      print('Trial %d' % i)
+      for x, y in zip(
+          row.fixxlist_retention,
+          row.fixylist_retention
+      ):
+          print('\t', x, y)
+--%
+
+A common way to plot fixation distributions is as a heatmap. To do this, we need to create numpy arrays from the `fixxlist_retention` and `fixylist_retention` columns. This will result in two 2D arrays, whereas `plt.hexbin()` expects two 1D arrays. So we additionally flatten the arrays.
+
+The resulting heatmap clearly shows that fixations are clustered around the display center (512, 384), just as you would expect from an experiment in which the participant needs to maintain central fixation.
+
+%--
+python: |
+  import numpy as np
+
+  x = np.array(dm.fixxlist_retention)
+  y = np.array(dm.fixylist_retention)
+  x = x.flatten()
+  y = y.flatten()
+  plt.hexbin(x, y, gridsize=25)
+  plt.savefig('content/pages/img/eyelinkparser/heatmap.png')
+  plt.clf()
+--%
+
+%--
+figure:
+ source: heatmap.png
+ id: FigHeatmap
+ caption: Fixation distributions as a heatmap.
 --%
 
 
