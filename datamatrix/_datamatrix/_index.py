@@ -154,7 +154,10 @@ class Index(OrderedState):
 	def copy(self):
 
 		i = Index(0)
-		i._l = self._l.copy()
+		if np is None:
+			i._l = self._l[:]
+		else:
+			i._l = self._l.copy()
 		i._max = self._max
 		i._length = self._length
 		return i
