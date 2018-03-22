@@ -443,6 +443,8 @@ class DataMatrix(OrderedState):
 					u'This column does not belong to this DataMatrix')
 			self._cols[name] = value
 			return
+		if not isinstance(name, str):
+			raise TypeError(u'Column names should be str, not %s' % type(name))
 		if name not in self:
 			self._cols[name] = self._default_col_type(self)
 		self._cols[name][:] = value
