@@ -4,7 +4,7 @@
 This file is part of datamatrix.
 
 datamatrix is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
+it under the terms of the GNU General Public licensese as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
@@ -26,6 +26,6 @@ from datamatrix._datamatrix._seriescolumn import SeriesColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
 from datamatrix._cache import cached, iscached
 
-__version__ = '0.8.2'
+__version__ = '0.8.3'
 NAN = float('nan')
 INF = float('inf')
