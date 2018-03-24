@@ -438,11 +438,19 @@ class DataMatrix(OrderedState):
 				return
 		# Create new column by existing column
 		if isinstance(value, BaseColumn):
-			if value._datamatrix is not self:
-				raise Exception(
-					u'This column does not belong to this DataMatrix')
-			self._cols[name] = value
-			return
+			# If the column belongs to the same datamatrix we simply insert it
+			# under a new name.
+			if value._datamatrix is self:
+				self._cols[name] = value
+				return
+			# If the column belongs to another datamatrix, we create a new _empty_col
+			# column of the same type
+			if len(value) != len(self):
+				raise ValueError(
+					u'Column should have the same length as the DataMatrix'
+				)
+			warn(u'This column does not belong to this DataMatrix')
+			self._cols[name] = value._empty_col()
 		if not isinstance(name, str):
 			raise TypeError(u'Column names should be str, not %s' % type(name))
 		if name not in self:

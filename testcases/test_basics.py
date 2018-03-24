@@ -26,7 +26,7 @@ import numpy as np
 
 
 def _test_numericcolumn(cls):
-	
+
 	# Test init and change by single value
 	dm = DataMatrix(length=2)
 	dm.col = IntColumn
@@ -55,7 +55,7 @@ def _test_numericcolumn(cls):
 	dm.length = 4
 	# Check uniqueness
 	dm.col = 1, 2, 1, 2
-	ok_(sorted(dm.col.unique) == [1,2])	
+	ok_(sorted(dm.col.unique) == [1,2])
 	check_integrity(dm)
 
 
@@ -64,15 +64,19 @@ def _test_copying(cls):
 	dm = DataMatrix(length=5)
 	dm.d = cls
 	dm2 = dm[:]
+	dm2.e = dm.d
+	dm2.f = dm2.d
 	ok_(dm2 is not dm)
 	ok_(dm2.d is not dm.d)
+	ok_(dm2.e is not dm.d)
+	ok_(dm2.f is dm2.d)
 	ok_(dm2.d._seq is not dm.d._seq)
 	dm.c = dm.d
 	ok_(dm.c is dm.d)
 	ok_(dm.c._seq is dm.d._seq)
 	dm.e = dm.d[:]
 	ok_(dm.e is not dm.d)
-	ok_(dm.e._seq is not dm.d._seq)	
+	ok_(dm.e._seq is not dm.d._seq)
 	check_integrity(dm)
 	check_integrity(dm2)
 
@@ -94,7 +98,7 @@ def test_intcolumn():
 	dm = DataMatrix(length=2)
 	dm.col = IntColumn
 	dm.col = 1.9, '2.9'
-	check_col(dm.col, [1, 2])	
+	check_col(dm.col, [1, 2])
 	# Test setting invalid values
 	@raises(TypeError)
 	def _():
@@ -187,7 +191,7 @@ def test_seriescolumn():
 	dm.col.depth = 3
 	check_series(dm.col, [[1,NAN,NAN], [2,NAN,NAN], [3,NAN,NAN]])
 	check_integrity(dm)
-	# Test 
+	# Test
 	dm = DataMatrix(length=2)
 	dm.col = SeriesColumn(depth=3)
 	dm.col = 1, 2
@@ -202,7 +206,7 @@ def test_seriescolumn():
 
 
 def test_resize():
-	
+
 	dm = DataMatrix(length=0)
 	for l in range(1, 11):
 		print('growing to %d' % l)
