@@ -253,7 +253,9 @@ class _SeriesColumn(NumericColumn):
 
 	def _empty_col(self):
 
-		return self.__class__(self._datamatrix, depth=self._depth)
+		return self.__class__(
+			self._datamatrix, depth=self._depth, defaultnan=self.defaultnan
+		)
 
 	def _addrowid(self, _rowid):
 
