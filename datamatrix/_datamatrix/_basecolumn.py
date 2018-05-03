@@ -337,7 +337,7 @@ class BaseColumn(OrderedState):
 					value = float(value)
 				except:
 					pass
-		if isinstance(value, (int, float, str)):
+		if isinstance(value, (int, float, long, complex, str)):
 			return value
 		if isinstance(value, bytes):
 			return safe_decode(value)
