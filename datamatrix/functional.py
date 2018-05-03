@@ -58,9 +58,9 @@ def profile(path=u'profile.txt', sortby=u'cumulative'):
 
 	import cProfile
 	import pstats
-	try: # Python 3
+	if py3:
 		import io
-	except ImportError: # Python 2
+	else:
 		import StringIO as io
 
 	pr = cProfile.Profile()
