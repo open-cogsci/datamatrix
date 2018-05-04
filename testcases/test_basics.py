@@ -56,6 +56,8 @@ def _test_numericcolumn(cls):
 	# Check uniqueness
 	dm.col = 1, 2, 1, 2
 	ok_(sorted(dm.col.unique) == [1,2])
+	dm.col[dm.col == 2] = 0, 0
+	check_col(dm.col, [1, 0, 1, 0])
 	check_integrity(dm)
 
 
@@ -88,6 +90,8 @@ def test_mixedcolumn():
 	dm = DataMatrix(length=4)
 	dm.col = '1.1', '1', 'x', None
 	check_col(dm.col, [1.1, 1, 'x', None])
+	dm.col[dm.col == {1, None}] = 'a', 'b'
+	check_col(dm.col, [1.1, 'a', 'x', 'b'])
 
 
 def test_intcolumn():

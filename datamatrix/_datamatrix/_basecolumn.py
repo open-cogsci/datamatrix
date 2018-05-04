@@ -78,6 +78,10 @@ class BaseColumn(OrderedState):
 			datamatrix:	A DataMatrix object.
 		"""
 
+		# Global import like this avoid cyclical imports
+		global DataMatrix
+		from datamatrix import DataMatrix
+
 		self._datamatrix = datamatrix
 		self._typechecking = True
 		self._init_rowid()
@@ -558,6 +562,24 @@ class BaseColumn(OrderedState):
 				raise Exception('Outside of range')
 			self._seq[_key] = _val
 
+	def _setdatamatrixkey(self, key, val):
+
+		"""
+		visible: False
+
+		desc:
+			Sets a range of values by based on matching rows from a DataMatrix.
+
+		arguments:
+			key:	A DataMatrix
+			val:	The value to set. This can be an iterable that matches the
+					length of the key.
+		"""
+
+		if key != self._datamatrix:
+			raise ValueError('Cannot slice column with a different DataMatrix')
+		self[[self._rowid.index(_rowid) for _rowid in key._rowid]] = val
+
 	def _issequence(self, val):
 
 		if (
@@ -783,6 +805,8 @@ class BaseColumn(OrderedState):
 			self._setslicekey(key, value)
 		elif isinstance(key, collections.Sequence):
 			self._setsequencekey(key, value)
+		elif isinstance(key, DataMatrix):
+			self._setdatamatrixkey(key, value)
 		else:
 			raise Exception('Invalid assignment')
 		self._datamatrix._mutate()
