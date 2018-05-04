@@ -22,6 +22,7 @@ import sys
 if sys.version_info >= (3,0,0):
 	py3 = True
 	basestring = str
+	long = int
 	universal_newline_mode = u'r'
 else:
 	bytes = str
@@ -97,4 +98,4 @@ __all__ = ['py3', 'safe_decode', 'safe_encode', 'safe_str', 'safe_sorted',
 if not py3:
 	__all__ += ['str', 'bytes']
 else:
-	__all__ += ['basestring']
+	__all__ += ['basestring', 'long']
