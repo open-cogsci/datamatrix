@@ -24,7 +24,7 @@ desc:
 
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
-from datamatrix import FloatColumn, operations as ops
+from datamatrix import IntColumn, MixedColumn, FloatColumn, operations as ops
 import numpy as np
 from numpy import nanmean, nanmedian
 from scipy.interpolate import interp1d
@@ -890,11 +890,15 @@ def _map(series, fnc_, **kwdict):
 	"""
 
 	f = lambda a: fnc_(a, **kwdict)
-	if isinstance(series, np.ndarray):
-		return f(series)
 	if isinstance(series, _SeriesColumn):
 		return ops.map_(f, series)
-	raise TypeError(u'Expects a SeriesColumn or NumPy array')
+	if isinstance(series, np.ndarray):
+		return f(series)
+	try:
+		len(series)
+	except TypeError:
+		raise TypeError(u'Expects a SeriesColumn or an iterable object')
+	return f(np.array(series))
 
 
 def _blinkreconstruct(a, vt=5, maxdur=500, margin=10, smooth_winlen=21,
