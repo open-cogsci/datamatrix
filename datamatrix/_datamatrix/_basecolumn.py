@@ -229,8 +229,7 @@ class BaseColumn(OrderedState):
 
 		l = [name for name, col in self._datamatrix.columns if col is self]
 		if not l:
-			raise NameError(
-				u'Column not found in DataMatrix, and therefore nameless')
+			return None
 		if len(l) == 1:
 			return l[0]
 		return l
