@@ -623,6 +623,19 @@ class DataMatrix(OrderedState):
 
 		return u'DataMatrix[%d, 0x%x]\n%s' % (self._id, id(self), str(self))
 
+	def _repr_html_(self):
+
+		"""
+		visible: False
+
+		desc:
+			Used in a Jupyter notebook to give a pretty representation of the
+			object.
+		"""
+
+		from datamatrix.convert._html import to_html
+		return to_html(self)
+
 	def __lshift__(self, other):
 
 		if isinstance(other, dict):
