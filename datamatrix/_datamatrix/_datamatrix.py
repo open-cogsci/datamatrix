@@ -134,6 +134,20 @@ class DataMatrix(OrderedState):
 		object.__setattr__(self, u'_cols', _cols)
 		self._mutate()
 
+	def get(self, key, default=None):
+
+		"""
+		visible: False
+
+		desc:
+			Improves compatibility with pandas.DataFrame
+		"""
+
+		from datamatrix.convert._pandas import to_pandas
+		if key in self:
+			return to_pandas(self[key])
+		return default
+
 	# Private functions. These can also be called by the BaseColumn (and
 	# derived) classes.
 

@@ -25,6 +25,8 @@ desc:
 
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix
+from datamatrix._datamatrix._basecolumn import BaseColumn
+
 try:
 	import pandas as pd
 except (ImportError, AttributeError, RuntimeError):
@@ -67,11 +69,11 @@ def wrap_pandas(fnc):
 	return inner
 
 
-def to_pandas(dm):
+def to_pandas(obj):
 
 	"""
 	desc: |
-		Converts a DataMatrix to a pandas DataFrame.
+		Converts a DataMatrix to a pandas DataFrame, or a column to a Series.
 
 		__Example:__
 
@@ -86,15 +88,19 @@ def to_pandas(dm):
 		--%
 
 	arguments:
-		dm:
-			type:	DataMatrix
+		obj:
+			type:	[DataMatrix, BaseColumn]
 
 	returns:
-		type:	DataFrame
+		type:	[DataFrame, Series]
 	"""
 
+	if isinstance(obj, BaseColumn):
+		return pd.Series(list(obj), dtype=None)
+	if not isinstance(obj, DataMatrix):
+		raise TypeError('Expecting a column or DataMatrix')
 	d = {}
-	for colname, col in dm.columns:
+	for colname, col in obj.columns:
 		d[colname] = list(col)
 	return pd.DataFrame(d)
 
