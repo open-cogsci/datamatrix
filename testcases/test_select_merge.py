@@ -55,6 +55,24 @@ def check_select(col_type):
 	check_integrity(dm)
 
 
+def check_getrow(col_type):
+
+	dm = DataMatrix(length=2, default_col_type=col_type)
+	dm.col = 1, 2
+	row = dm[0]
+	assert(row.col == 1)
+	row = dm[-1]
+	assert(row.col == 2)
+	@raises(IndexError)
+	def _():
+		row = dm[2]
+	_()
+	@raises(IndexError)
+	def _():
+		row = dm[-3]
+	_()
+
+
 def check_concat(col_type, invalid):
 
 	dm1 = DataMatrix(length=2, default_col_type=col_type)
@@ -71,6 +89,7 @@ def check_concat(col_type, invalid):
 
 def test_mixedcolumn():
 
+	check_getrow(MixedColumn)
 	check_select(MixedColumn)
 	check_concat(MixedColumn, invalid=u'')
 	# Check type selectors
@@ -86,6 +105,7 @@ def test_mixedcolumn():
 
 def test_floatcolumn():
 
+	check_getrow(FloatColumn)
 	check_select(FloatColumn)
 	check_concat(FloatColumn, invalid=np.nan)
 	# Check selections with non-int types
@@ -122,6 +142,7 @@ def test_floatcolumn():
 
 def test_intcolumn():
 
+	check_getrow(IntColumn)
 	check_select(IntColumn)
 	check_concat(IntColumn, invalid=0)
 	# Check selections with non-int types

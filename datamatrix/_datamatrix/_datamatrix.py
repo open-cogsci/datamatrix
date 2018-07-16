@@ -406,6 +406,8 @@ class DataMatrix(OrderedState):
 			type:	Row
 		"""
 
+		if key >= len(self) or key < -len(self):
+			raise IndexError('row index out of range')
 		return Row(self, key)
 
 	def _check_name(self, name):
