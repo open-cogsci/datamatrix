@@ -20,6 +20,7 @@ title: DataMatrix
 ## Features
 
 - [An intuitive syntax](%link:basic%) that makes your code easy to read.
+- Integrates with Jupyter Notebook
 - Requires only the Python standard libraries (but you can use `numpy` to improve performance).
 - Great support for [functional programming](%link:functional%), including advanced [memoization (caching)](%link:memoization%).
 - Mix [two-dimensional](%link:series%) (series) and one-dimensional data in a single data structure.

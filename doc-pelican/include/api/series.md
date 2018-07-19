@@ -158,7 +158,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7f7b2af61158>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7f7946625950>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times shorter.
 The depth of the downsampled series is the highest multiple of the depth
@@ -209,7 +209,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7f7b2af61158>
+	- Default: <function nanmean at 0x7f7946625950>
 
 __Returns:__
 
@@ -276,6 +276,289 @@ __Arguments:__
 __Returns:__
 
 An end-locked signal.
+
+- Type: SeriesColumn
+
+</div>
+
+<div class="FunctionDoc YAMLDoc" id="fft" markdown="1">
+
+## function __fft__\(series, truncate=True\)
+
+Performs a fast-fourrier transform (FFT) for the signal. For more
+information, see [`numpy.fft`](https://docs.scipy.org/doc/numpy/reference/routines.fft.html#module-numpy.fft).
+
+__Example:__
+
+%--
+python: |
+ import numpy as np
+ from matplotlib import pyplot as plt
+ from datamatrix import DataMatrix, SeriesColumn, series
+
+ LENGTH = 3
+ DEPTH = 200
+
+ # Create one fast oscillation, and two combined fast and slow oscillations
+ dm = DataMatrix(length=LENGTH)
+ dm.s = SeriesColumn(depth=DEPTH)
+ dm.s[0] = np.sin(np.linspace(0, 150 * np.pi, DEPTH))
+ dm.s[1] = np.sin(np.linspace(0, 75 * np.pi, DEPTH))
+ dm.s[2] = np.sin(np.linspace(0, 10 * np.pi, DEPTH))
+ dm.f = series.fft(dm.s)
+
+ # Plot the original signal
+ plt.clf()
+ plt.subplot(121)
+ plt.title('Original')
+ plt.plot(dm.s[0])
+ plt.plot(dm.s[1])
+ plt.plot(dm.s[2])
+ plt.subplot(122)
+ # And the filtered signal!
+ plt.title('FFT')
+ plt.plot(dm.f[0])
+ plt.plot(dm.f[1])
+ plt.plot(dm.f[2])
+ plt.savefig('content/pages/img/series/fft.png')
+--%
+
+%--
+figure:
+ source: fft.png
+ id: FigFFT
+--%
+
+__Arguments:__
+
+- `series` -- A signal to determine the FFT for.
+	- Type: SeriesColumn
+
+__Keywords:__
+
+- `truncate` -- FFT series of real signals are symmetric. The `truncate` keyword indicates whether the last (symmetric) part of the FFT should be removed.
+	- Type: bool
+	- Default: True
+
+__Returns:__
+
+The FFT of the signal.
+
+- Type: SeriesColumn
+
+</div>
+
+<div class="FunctionDoc YAMLDoc" id="filter_bandpass" markdown="1">
+
+## function __filter\_bandpass__\(series, freq\_range, order=2\)
+
+Applies a Butterworth low-pass filter to the signal. The filter
+frequency is a number between 1 and depth/2 - 1 (i.e. one less than the
+Nyquist frequency).
+
+For more information, see [`scipy.signal`](https://docs.scipy.org/doc/scipy/reference/signal.html).
+
+__Example:__
+
+%--
+python: |
+ import numpy as np
+ from matplotlib import pyplot as plt
+ from datamatrix import DataMatrix, SeriesColumn, series
+
+ LENGTH = 3
+ DEPTH = 200
+
+ # Create a fast, a medium, and a slow oscillation
+ dm = DataMatrix(length=LENGTH)
+ dm.s = SeriesColumn(depth=DEPTH)
+ dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))
+ dm.s[1] = np.sin(np.linspace(0, 10 * np.pi, DEPTH))
+ dm.s[2] = np.cos(np.linspace(0, 1 * np.pi, DEPTH))
+ dm.f = series.filter_bandpass(dm.s, freq_range=(4, 6))
+
+ # Plot the original signal
+ plt.clf()
+ plt.subplot(121)
+ plt.title('Original')
+ plt.plot(dm.s[0])
+ plt.plot(dm.s[1])
+ plt.plot(dm.s[2])
+ plt.subplot(122)
+ # And the filtered signal!
+ plt.title('Bandpass')
+ plt.plot(dm.f[0])
+ plt.plot(dm.f[1])
+ plt.plot(dm.f[2])
+ plt.savefig('content/pages/img/series/bandpass.png')
+--%
+
+%--
+figure:
+ source: bandpass.png
+ id: FigBandpass
+--%
+
+__Arguments:__
+
+- `series` -- A signal to filter.
+	- Type: SeriesColumn
+- `freq_range` -- A `(min_freq, max_freq)` tuple.
+	- Type: tuple
+
+__Keywords:__
+
+- `order` -- The order of the filter.
+	- Type: int
+	- Default: 2
+
+__Returns:__
+
+The filtered signal.
+
+- Type: SeriesColumn
+
+</div>
+
+<div class="FunctionDoc YAMLDoc" id="filter_highpass" markdown="1">
+
+## function __filter\_highpass__\(series, freq\_min, order=2\)
+
+Applies a Butterworth low-pass filter to the signal. The filter
+frequency is a number between 1 and depth/2 - 1 (i.e. one less than the
+Nyquist frequency).
+
+For more information, see [`scipy.signal`](https://docs.scipy.org/doc/scipy/reference/signal.html).
+
+__Example:__
+
+%--
+python: |
+ import numpy as np
+ from matplotlib import pyplot as plt
+ from datamatrix import DataMatrix, SeriesColumn, series
+
+ LENGTH = 3
+ DEPTH = 200
+
+ # Create one fast oscillation, and two combined fast and slow oscillations
+ dm = DataMatrix(length=LENGTH)
+ dm.s = SeriesColumn(depth=DEPTH)
+ dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))
+ dm.s[1] = np.sin(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]
+ dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]
+ dm.f = series.filter_highpass(dm.s, freq_min=3)
+
+ # Plot the original signal
+ plt.clf()
+ plt.subplot(121)
+ plt.title('Original')
+ plt.plot(dm.s[0])
+ plt.plot(dm.s[1])
+ plt.plot(dm.s[2])
+ plt.subplot(122)
+ # And the filtered signal!
+ plt.title('Highpass')
+ plt.plot(dm.f[0])
+ plt.plot(dm.f[1])
+ plt.plot(dm.f[2])
+ plt.savefig('content/pages/img/series/highpass.png')
+--%
+
+%--
+figure:
+ source: highpass.png
+ id: FigHighpass
+--%
+
+__Arguments:__
+
+- `series` -- A signal to filter.
+	- Type: SeriesColumn
+- `freq_min` -- The minimum filter frequency.
+	- Type: int
+
+__Keywords:__
+
+- `order` -- The order of the filter.
+	- Type: int
+	- Default: 2
+
+__Returns:__
+
+The filtered signal.
+
+- Type: SeriesColumn
+
+</div>
+
+<div class="FunctionDoc YAMLDoc" id="filter_lowpass" markdown="1">
+
+## function __filter\_lowpass__\(series, freq\_max, order=2\)
+
+Applies a Butterworth low-pass filter to the signal. The filter
+frequency is a number between 1 and depth/2 - 1 (i.e. one less than the
+Nyquist frequency).
+
+For more information, see [`scipy.signal`](https://docs.scipy.org/doc/scipy/reference/signal.html).
+
+__Example:__
+
+%--
+python: |
+ import numpy as np
+ from matplotlib import pyplot as plt
+ from datamatrix import DataMatrix, SeriesColumn, series
+
+ LENGTH = 3
+ DEPTH = 200
+
+ # Create one fast oscillation, and two combined fast and slow oscillations
+ dm = DataMatrix(length=LENGTH)
+ dm.s = SeriesColumn(depth=DEPTH)
+ dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))
+ dm.s[1] = np.sin(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]
+ dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]
+ dm.f = series.filter_lowpass(dm.s, freq_max=3)
+
+ # Plot the original signal
+ plt.clf()
+ plt.subplot(121)
+ plt.title('Original')
+ plt.plot(dm.s[0])
+ plt.plot(dm.s[1])
+ plt.plot(dm.s[2])
+ plt.subplot(122)
+ # And the filtered signal!
+ plt.title('Lowpass')
+ plt.plot(dm.f[0])
+ plt.plot(dm.f[1])
+ plt.plot(dm.f[2])
+ plt.savefig('content/pages/img/series/lowpass.png')
+--%
+
+%--
+figure:
+ source: lowpass.png
+ id: FigLowpass
+--%
+
+__Arguments:__
+
+- `series` -- A signal to filter.
+	- Type: SeriesColumn
+- `freq_max` -- The maximum filter frequency.
+	- Type: int
+
+__Keywords:__
+
+- `order` -- The order of the filter.
+	- Type: int
+	- Default: 2
+
+__Returns:__
+
+The filtered signal.
 
 - Type: SeriesColumn
 
@@ -469,7 +752,7 @@ A new series in which the data points are spread according to the timestamps.
 
 <div class="FunctionDoc YAMLDoc" id="reduce_" markdown="1">
 
-## function __reduce\___\(series, operation=<function nanmean at 0x7f7b2af61158>\)
+## function __reduce\___\(series, operation=<function nanmean at 0x7f7946625950>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -500,7 +783,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7f7b2af61158>
+	- Default: <function nanmean at 0x7f7946625950>
 
 __Returns:__
 
@@ -710,6 +993,67 @@ __Keywords:__
 __Returns:__
 
 A window of the signal.
+
+- Type: SeriesColumn
+
+</div>
+
+<div class="FunctionDoc YAMLDoc" id="z" markdown="1">
+
+## function __z__\(series\)
+
+Applies a *z*-transform to the signal such that each trace has a mean
+value of 0 and a standard deviation of 1.
+
+__Example:__
+
+%--
+python: |
+ import numpy as np
+ from matplotlib import pyplot as plt
+ from datamatrix import DataMatrix, SeriesColumn, series
+
+ LENGTH = 3
+ DEPTH = 200
+
+ # Create one fast oscillation, and two combined fast and slow oscillations
+ dm = DataMatrix(length=LENGTH)
+ dm.s = SeriesColumn(depth=DEPTH)
+ dm.s[0] = 1 * np.sin(np.linspace(0, 4 * np.pi, DEPTH))
+ dm.s[1] = 2 * np.sin(np.linspace(.4, 4.4 * np.pi, DEPTH))
+ dm.s[2] = 3 * np.sin(np.linspace(.8, 4.8 * np.pi, DEPTH))
+ dm.z = series.z(dm.s)
+
+ # Plot the original signal
+ plt.clf()
+ plt.subplot(121)
+ plt.title('Original')
+ plt.plot(dm.s[0])
+ plt.plot(dm.s[1])
+ plt.plot(dm.s[2])
+ plt.subplot(122)
+ # And the filtered signal!
+ plt.title('Z transform')
+ plt.plot(dm.z[0])
+ plt.plot(dm.z[1])
+ plt.plot(dm.z[2])
+ plt.savefig('content/pages/img/series/z.png')
+--%
+
+%--
+figure:
+ source: z.png
+ id: FigZ
+--%
+
+__Arguments:__
+
+- `series` -- A signal to determine the z-transform for.
+	- Type: SeriesColumn
+
+__Returns:__
+
+The z-transform of the signal.
 
 - Type: SeriesColumn
 

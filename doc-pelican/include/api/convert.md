@@ -77,9 +77,9 @@ A json string.
 
 <div class="FunctionDoc YAMLDoc" id="to_pandas" markdown="1">
 
-## function __to\_pandas__\(dm\)
+## function __to\_pandas__\(obj\)
 
-Converts a DataMatrix to a pandas DataFrame.
+Converts a DataMatrix to a pandas DataFrame, or a column to a Series.
 
 __Example:__
 
@@ -95,14 +95,14 @@ python: |
 
 __Arguments:__
 
-- `dm` -- No description
-	- Type: DataMatrix
+- `obj` -- No description
+	- Type: DataMatrix, BaseColumn
 
 __Returns:__
 
 No description
 
-- Type: DataFrame
+- Type: DataFrame, Series
 
 </div>
 

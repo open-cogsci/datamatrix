@@ -103,6 +103,8 @@ class AcademicMarkdownReader(MarkdownReader):
 				text = text.replace(full, '<%s/%s>' % (SITEURL, link))
 			text = text.replace(root, u'')
 			text = HTMLFilter.DOI(text)
+			with open('test.md', 'w') as fe:
+				fe.write(text)
 			content = self._md.convert(text)
 			for var, val in const.items():
 				content = content.replace(u'$%s$' % var, str(val))

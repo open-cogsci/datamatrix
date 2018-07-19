@@ -16,6 +16,8 @@ dm = (dm.fibonacci > 0) & (dm.fibonacci < 3)
 dm = dm.fibonacci == {1, 2}
 # Select all odd numbers with a lambda expression
 dm = dm.fibonacci == (lambda x: x % 2)
+# Change all 1s to -1
+dm.fibonacci[dm.fibonacci == 1] = -1
 # The first two cells from the fibonacci column
 print(dm.fibonacci[:2])
 # Column mean
@@ -124,9 +126,9 @@ python: |
  print(dm)
 --%
 
-### Changing column cells (and slicing)
+### Slicing and assigning to column cells
 
-Change one cell:
+#### Assign to one cell
 
 %--
 python: |
@@ -134,7 +136,9 @@ python: |
  print(dm)
 --%
 
-Change multiple cells. (This changes row 0 and 2. It is not a slice!)
+#### Assign to multiple cells
+
+This changes row 0 and 2. It is not a slice!
 
 %--
 python: |
@@ -142,11 +146,21 @@ python: |
  print(dm)
 --%
 
-Change a slice of cells:
+#### Assign to a slice of cells
 
 %--
 python: |
  dm.col[1:] = ':D'
+ print(dm)
+--%
+
+#### Assign to cells that match a selection criterion
+
+%--
+python: |
+ dm.col[1:] = ':D'
+ dm.is_happy = 'no'
+ dm.is_happy[dm.col == ':D'] = 'yes'
  print(dm)
 --%
 
