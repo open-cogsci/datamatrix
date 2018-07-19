@@ -591,7 +591,7 @@ class DataMatrix(OrderedState):
 		# Delete row by index. The trick is to first get the slice that we want
 		# to delete, and then xor this with the current DataMatrix.
 		if isinstance(value, int):
-		 	value = value,
+			value = value,
 		_slice = self[value] ^ self
 		object.__setattr__(self, u'_cols', _slice._cols)
 		object.__setattr__(self, u'_rowid', _slice._rowid)
@@ -615,10 +615,10 @@ class DataMatrix(OrderedState):
 		if isinstance(key, basestring):
 			return self._getcolbyname(key)
 		if isinstance(key, int):
-		 	return self._getrow(key)
+			return self._getrow(key)
 		if isinstance(key, slice) or isinstance(key, collections.Sequence):
 			return self._slice(key)
-		raise Exception('Cannot get %s' % key)
+		raise KeyError('Invalid key, index, or slice: %s' % key)
 
 	def __str__(self):
 
