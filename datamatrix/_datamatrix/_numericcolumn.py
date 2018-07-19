@@ -165,12 +165,20 @@ class NumericColumn(BaseColumn):
 		i = np.where(op(self._seq, _other))
 		return self._datamatrix._selectrowid(Index(self._rowid[i]))
 
-	def _operate(self, other, number_op, str_op=None):
+	def _operate(self, other, number_op, str_op=None, flip=False):
 
 		col = self._empty_col()
 		col._rowid = self._rowid
-		col._seq = number_op(self._seq,
-			self._tosequence(other, len(self._datamatrix)))
+		if flip:
+			col._seq = number_op(
+				self._tosequence(other, len(self._datamatrix)),
+				self._seq
+			)
+		else:
+			col._seq = number_op(
+				self._seq,
+				self._tosequence(other, len(self._datamatrix))
+			)
 		return col
 
 	def _map(self, fnc):
@@ -296,9 +304,14 @@ class IntColumn(NumericColumn):
 			raise TypeError(u'IntColumn expects integers, not %s' \
 				% safe_decode(value))
 
-	def _operate(self, other, number_op, str_op=None):
+	def _operate(self, other, number_op, str_op=None, flip=False):
 
-		col = super(IntColumn, self)._operate(other, number_op, str_op=None)
+		col = super(IntColumn, self)._operate(
+			other,
+			number_op,
+			str_op=None,
+			flip=flip
+		)
 		col._seq = col._seq.astype(self.dtype)
 		return col
 

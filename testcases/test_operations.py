@@ -44,6 +44,31 @@ def check_operations(col_type):
 	check_col(dm.col, [1, 4])
 	dm.col /= 1, '2'
 	check_col(dm.col, [1, 2])
+	# Right-hand operations
+	dm.col = 1 + dm.col
+	check_col(dm.col, [2, 3])
+	dm.col = (1, 2) + dm.col
+	check_col(dm.col, [3, 5])
+	dm.col = 5 - dm.col
+	check_col(dm.col, [2, 0])
+	dm.col = (3, 1) - dm.col
+	check_col(dm.col, [1, 1])
+	dm.col = 2 * dm.col
+	check_col(dm.col, [2, 2])
+	dm.col = (1, 2) * dm.col
+	check_col(dm.col, [2, 4])
+	dm.col = 4 / dm.col
+	check_col(dm.col, [2, 1])
+	dm.col = (4, 2) / dm.col
+	check_col(dm.col, [2, 2])
+	dm.col = 2 ** dm.col
+	check_col(dm.col, [4, 4])
+	dm.col = (2, 4) ** dm.col
+	check_col(dm.col, [16, 256])
+	dm.col = 17 % dm.col
+	check_col(dm.col, [1, 17])
+	dm.col = (2, 16) % dm.col
+	check_col(dm.col, [0, 16])
 	check_integrity(dm)
 
 
@@ -59,8 +84,8 @@ def check_int_operations():
 		dm.col *= 'x'
 	_()
 	check_integrity(dm)
-	
-	
+
+
 def check_float_operations():
 
 	dm = DataMatrix(length=2, default_col_type=FloatColumn)

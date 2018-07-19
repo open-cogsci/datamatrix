@@ -691,7 +691,7 @@ class BaseColumn(OrderedState):
 				pass
 		return self._datamatrix._selectrowid(_rowid)
 
-	def _operate(self, other, number_op, str_op=None):
+	def _operate(self, other, number_op, str_op=None, flip=False):
 
 		"""
 		visible: False
@@ -707,6 +707,7 @@ class BaseColumn(OrderedState):
 		keywords:
 			str_op:		The operator to use for string values, or None to
 						leave strings untouched.
+			flip:		Indicates if self or other should come first.
 
 		returns:
 			A modified column.
@@ -718,6 +719,8 @@ class BaseColumn(OrderedState):
 		for i, (_other, val) in enumerate(
 			zip(self._tosequence(other, len(self)), self._seq)
 		):
+			if flip:
+				_other, val = val, _other
 			if (
 				isinstance(val, numbers.Number)
 				and isinstance(_other, numbers.Number)
@@ -837,19 +840,35 @@ class BaseColumn(OrderedState):
 		return self._compare(other, operator.ne)
 	def __add__(self, other):
 		return self._operate(other, operator.add, operator.concat)
+	def __radd__(self, other):
+		return self._operate(other, operator.add, operator.concat)
 	def __sub__(self, other):
 		return self._operate(other, operator.sub)
+	def __rsub__(self, other):
+		return self._operate(other, operator.sub, flip=True)
 	def __mul__(self, other):
+		return self._operate(other, operator.mul)
+	def __rmul__(self, other):
 		return self._operate(other, operator.mul)
 	def __div__(self, other):
 		return self._operate(other, operator.truediv)
+	def __rdiv__(self, other):
+		return self._operate(other, operator.truediv, flip=True)
 	def __truediv__(self, other):
 		return self._operate(other, operator.truediv)
+	def __rtruediv__(self, other):
+		return self._operate(other, operator.truediv, flip=True)
 	def __floordiv__(self, other):
 		return self._operate(other, operator.floordiv)
+	def __rfloordiv__(self, other):
+		return self._operate(other, operator.floordiv, flip=True)
 	def __mod__(self, other):
 		return self._operate(other, operator.mod)
+	def __rmod__(self, other):
+		return self._operate(other, operator.mod, flip=True)
 	def __pow__(self, other):
 		return self._operate(other, operator.pow)
+	def __rpow__(self, other):
+		return self._operate(other, operator.pow, flip=True)
 	def __matmul__(self, other):
 		return self._map(other)
