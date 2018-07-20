@@ -18,7 +18,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
-from datamatrix._datamatrix._basecolumn import BaseColumn
+from datamatrix._datamatrix._basecolumn import BaseColumn, NUMBER
 from datamatrix._datamatrix._index import Index
 import operator
 import warnings
@@ -113,16 +113,11 @@ class NumericColumn(BaseColumn):
 
 	def _checktype(self, value):
 
-		if value is None:
+		value = BaseColumn._checktype(self, value)
+		if not isinstance(value, NUMBER):
+			warn(u'Invalid type for FloatColumn: %s' % safe_decode(value))
 			return self.invalid
-		if fastnumbers is not None:
-			if not fastnumbers.isreal(value, allow_inf=True, allow_nan=True):
-				return self.invalid
-			return fastnumbers.fast_real(value, nan=np.nan, inf=np.inf)
-		try:
-			return float(value)
-		except:
-			return self.invalid
+		return value
 
 	def _tosequence(self, value, length=None):
 
@@ -294,15 +289,17 @@ class IntColumn(NumericColumn):
 			value = fastnumbers.fast_forceint(value)
 			if isinstance(value, int):
 				return value
-			raise TypeError(u'IntColumn expects integers, not %s' \
-				% safe_decode(value))
+			raise TypeError(
+				u'IntColumn expects integers, not %s' % safe_decode(value)
+			)
 		if isinstance(value, int):
 			return value
 		try:
 			return int(float(value))
 		except:
-			raise TypeError(u'IntColumn expects integers, not %s' \
-				% safe_decode(value))
+			raise TypeError(
+				u'IntColumn expects integers, not %s' % safe_decode(value)
+			)
 
 	def _operate(self, other, number_op, str_op=None, flip=False):
 

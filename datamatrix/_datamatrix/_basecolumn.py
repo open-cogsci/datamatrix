@@ -23,39 +23,17 @@ desc: pass
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._index import Index
 from datamatrix._ordered_state import OrderedState
+from datamatrix._datamatrix._sort import sortable, fastnumbers
 import collections
 import numbers
 import operator
 import math
-import warnings
 import inspect
 import types
 
 INF = float('inf')
 NAN = float('nan')
-
-try:
-	import fastnumbers
-
-	def _sortkey(val):
-		try:
-			return fastnumbers.fast_float(val[0], default=INF, nan=INF)
-		except TypeError:
-			return INF
-
-except ImportError:
-	warnings.warn('Install fastnumbers for better performance')
-	fastnumbers = None
-
-	def _sortkey(val):
-
-		try:
-			val = float(val[0])
-		except (ValueError, TypeError):
-			return INF
-		if math.isnan(val):
-			return INF
-		return val
+NUMBER = int, float, long, complex
 
 
 class BaseColumn(OrderedState):
@@ -308,6 +286,29 @@ class BaseColumn(OrderedState):
 		self._rowid += _rowid
 		self._seq += [self.default_value]*len(_rowid)
 
+	def _checktype_fastnumber(self, value):
+
+		if value is None:
+			return value
+		if not isinstance(value, basestring) and not isinstance(value, NUMBER):
+			raise TypeError('Invalid type: %s' % value)
+		value = fastnumbers.fast_real(value)
+		if isinstance(value, bytes):
+			return safe_decode(value)
+		return value
+
+	def _checktype_regular(self, value):
+
+		try:
+			value = float(value)
+		except (ValueError, TypeError):
+			if isinstance(value, bytes):
+				return safe_decode(value)
+			return value
+		if not math.isnan(value) and not math.isinf(value) and int(value) == value:
+			return int(value)
+		return value
+
 	def _checktype(self, value):
 
 		"""
@@ -326,25 +327,11 @@ class BaseColumn(OrderedState):
 
 		if value is None:
 			return value
-		if fastnumbers is not None:
-			value = fastnumbers.fast_real(value, nan=NAN, inf=INF)
-		else:
-			try:
-				assert(int(value) == value)
-				value = int(value)
-			except:
-				try:
-					# Make sure we don't convert 'inf' and 'nan' strings to float
-					assert(not math.isinf(float(value)))
-					assert(not math.isnan(float(value)))
-					value = float(value)
-				except:
-					pass
-		if isinstance(value, (int, float, long, complex, str)):
-			return value
-		if isinstance(value, bytes):
-			return safe_decode(value)
-		raise TypeError('Invalid type: %s' % value)
+		if not isinstance(value, basestring) and not isinstance(value, NUMBER):
+			raise TypeError('Invalid type: %s' % value)
+		if fastnumbers:
+			return self._checktype_fastnumber(value)
+		return self._checktype_regular(value)
 
 	def _merge(self, other, _rowid):
 
@@ -498,11 +485,7 @@ class BaseColumn(OrderedState):
 			An iterator.
 		"""
 
-		try:
-			s = sorted(zip(self._seq, self._rowid))
-		except:
-			warn('Cannot sorted incomparable types. Forcing all values to float.')
-			s = sorted(zip(self._seq, self._rowid), key=_sortkey)
+		s = sorted(zip(self._seq, self._rowid), key=lambda x: sortable(x[0]))
 		return Index([rowid for val, rowid in s])
 
 	def _setintkey(self, key, value):
@@ -607,6 +590,8 @@ class BaseColumn(OrderedState):
 			type:	DataMatrix
 		"""
 
+		if isinstance(other, float) and math.isnan(other):
+			return self._compare_nan(other, op)
 		if isinstance(other, type):
 			return self._compare_type(other, op)
 		if isinstance(other, set):
@@ -616,6 +601,21 @@ class BaseColumn(OrderedState):
 		if self._issequence(other):
 			return self._compare_sequence(other, op)
 		return self._compare_value(other, op)
+
+	def _compare_nan(self, other, op):
+
+		_rowid = Index(0)
+		if op is operator.eq:
+			for rowid, val in zip(self._rowid, self._seq):
+				if math.isnan(val):
+					_rowid.append(rowid)
+		elif op is operator.ne:
+			for rowid, val in zip(self._rowid, self._seq):
+				if not math.isnan(val):
+					_rowid.append(rowid)
+		else:
+			raise TypeError('nans can only be compared with == or !=')
+		return self._datamatrix._selectrowid(_rowid)
 
 	def _compare_type(self, type_, op):
 
