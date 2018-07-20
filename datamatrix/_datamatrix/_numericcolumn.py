@@ -223,6 +223,13 @@ class NumericColumn(BaseColumn):
 		self._rowid_argsort_cache = rowid_hash, self._rowid.argsort()
 		return self._rowid_argsort_cache[1]
 
+	def _setdatamatrixkey(self, key, val):
+
+		if key != self._datamatrix:
+			raise ValueError('Cannot slice column with a different DataMatrix')
+		orig_indices = self._rowid_argsort()
+		self._seq[orig_indices[key._rowid]] = val
+
 	def _getslicekey(self, key):
 
 		# We need to override the original get slice key so that we get a deep
