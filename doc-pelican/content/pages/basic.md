@@ -340,37 +340,48 @@ python: |
 
 When you create a `DataMatrix`, you can indicate a default column type. If you do not specify a default column type, a `MixedColumn` is used by default.
 
-%--
-python: |
- from datamatrix import DataMatrix, IntColumn
- dm = DataMatrix(length=2, default_col_type=IntColumn)
- dm.i = 1, 2 # This is an IntColumn
---%
+```python
+from datamatrix import DataMatrix, IntColumn
+dm = DataMatrix(length=2, default_col_type=IntColumn)
+dm.i = 1, 2 # This is an IntColumn
+```
 
 You can also explicitly indicate the column type when creating a new column:
 
-%--
-python: |
- from datamatrix import FloatColumn
- dm.f = FloatColumn
---%
+```python
+from datamatrix import FloatColumn
+dm.f = FloatColumn
+```
 
 ### MixedColumn (default)
 
-A `MixedColumn` contains text (`unicode` in Python 2, `str` in Python 3), `int`, `float`, or `None`. Values are automatically converted to the most appropriate type, and a `utf-8` encoding is assumed where applicable.
+A `MixedColumn` contains text (`unicode` in Python 2, `str` in Python 3), `int`, `float`, or `None`.
 
-%--
-python: |
- from datamatrix import DataMatrix
- dm = DataMatrix(length=4)
- dm.datatype = 'int', 'float', 'float (converted)', 'None'
- dm.value = 1, 1.2, '1.2', None
- print(dm)
---%
+Important notes:
+
+- `utf-8` encoding is assumed for byte strings
+- String with numeric values, including `NAN` and `INF`, are automatically converted to the most appropriate type
+- The string 'None' is *not* converted to the type `None`
+- Trying to assign a non-supported type results in a `TypeError`
+
+```python
+from datamatrix import DataMatrix, NAN, INF
+dm = DataMatrix(length=12)
+dm.datatype = 'int', 'float', 'float (converted)', 'None'
+dm.value = 1, '1', 1.2, '1.2', None, NAN, 'nan', INF, 'inf', -INF, '-inf', 'None'
+print(dm)
+```
+
 
 ### IntColumn (requires numpy)
 
-The `IntColumn` contains only `int` values. It does not support `nan` values.
+The `IntColumn` contains only `int` values.
+
+Important notes:
+
+- Trying to assign a value that cannot be converted to an `int` results in a `TypeError`
+- Float values will be rounded down (i.e. the decimals will be lost)
+- `NAN` or `INF` values are not supported because these are `float`
 
 %--
 python: |
@@ -403,6 +414,12 @@ python: |
 ### FloatColumn (requires numpy)
 
 The `FloatColumn` contains `float`, `nan`, and `inf` values.
+
+Important notes:
+
+- Values that are accepted by a `MixedColumn` but cannot be converted to a numeric value become `NAN`. Examples are non-numeric strings or `None`.
+- Trying to assign a non-supported type results in a `TypeError`
+
 
 %--
 python: |

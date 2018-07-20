@@ -80,6 +80,13 @@ class AcademicMarkdownReader(MarkdownReader):
 			text = fd.read()
 			if hasattr(text, 'decode'): # Python 2
 				text = text.decode('utf-8')
+			for m in re.finditer('```python(?P<code>.*?)```', text, re.DOTALL):
+				new_block = (
+					u'\n%--\npython: |\n'
+					+ u'\n'.join([u' '+ s for s in m.group('code').strip().split(u'\n')])
+					+ u'\n--%\n'
+				)
+				text = text.replace(m.group(0), new_block)				
 			text = build.MD(text)
 			# Process internal links
 			for m in re.finditer('%link:(?P<link>[\w/-]+)%', text):

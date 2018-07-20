@@ -287,13 +287,19 @@ Sorts a column or DataMatrix. In the case of a DataMatrix, a column must
 be specified to determine the sort order. In the case of a column, this
 needs to be specified if the column should be sorted by another column.
 
-The sort order depends on the version of Python. Python 2 is more
-flexible, and allows comparisons between types such as `str` and `int`.
-Python 3 does not allow such comparisons.
+The sort order is as follows:
 
-In general, whenever incomparable values are encountered, all values are
-forced to `float`. Values that cannot be converted to float are
-considered `inf`.
+- `-INF`
+- `int` and `float` values in increasing order
+- `INF`
+- `str` values in alphabetical order, where uppercase letters come first
+- `None`
+- `NAN`
+
+You can also sort columns (but not DataMatrix objects) using the
+built-in `sorted()` function. However, when sorting different mixed
+types, this may lead to Exceptions or (in the case of `NAN` values)
+unpredictable results.
 
 __Example:__
 
