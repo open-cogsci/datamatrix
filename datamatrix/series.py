@@ -389,6 +389,9 @@ def window(series, start=0, end=None):
 	desc: |
 		Extracts a window from a signal.
 
+		*Version note:* As of 0.9.4, the preferred way to get a window from a
+		series is with a slice: `dm.s[:, start:end]`.
+
 		__Example:__
 
 		%--
@@ -447,11 +450,7 @@ def window(series, start=0, end=None):
 
 	if end is None:
 		end = series.depth
-	a = series[:,start:end]
-	depth = a.shape[1]
-	window_series = _SeriesColumn(series._datamatrix, depth)
-	window_series[:] = a
-	return window_series
+	return series[:, start:end]
 
 
 def baseline(series, baseline, bl_start=-100, bl_end=None, reduce_fnc=None,
@@ -867,6 +866,8 @@ def filter_bandpass(series, freq_range, order=2):
 
 	"""
 	desc: |
+		*New in v0.9.2*
+
 		Applies a Butterworth low-pass filter to the signal. The filter
 		frequency is a number between 1 and depth/2 - 1 (i.e. one less than the
 		Nyquist frequency).
@@ -945,6 +946,8 @@ def filter_highpass(series, freq_min, order=2):
 
 	"""
 	desc: |
+		*New in v0.9.2*
+
 		Applies a Butterworth low-pass filter to the signal. The filter
 		frequency is a number between 1 and depth/2 - 1 (i.e. one less than the
 		Nyquist frequency).
@@ -1023,6 +1026,8 @@ def filter_lowpass(series, freq_max, order=2):
 
 	"""
 	desc: |
+		*New in v0.9.2*
+
 		Applies a Butterworth low-pass filter to the signal. The filter
 		frequency is a number between 1 and depth/2 - 1 (i.e. one less than the
 		Nyquist frequency).
@@ -1101,6 +1106,8 @@ def fft(series, truncate=True):
 
 	"""
 	desc: |
+		*New in v0.9.2*
+
 		Performs a fast-fourrier transform (FFT) for the signal. For more
 		information, see [`numpy.fft`](https://docs.scipy.org/doc/numpy/reference/routines.fft.html#module-numpy.fft).
 

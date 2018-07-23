@@ -118,7 +118,7 @@ def check_intcolumn_typing():
 
 	dm = DataMatrix(length=4, default_col_type=IntColumn)
 	dm.f = 1.1, '1.8', 2, '2'
-	ok_(all(isinstance(v, np.int64) for v in dm.f))
+	ok_(all(isinstance(v, int) for v in dm.f))
 	@raises(TypeError)
 	def _():
 		dm.inf = INF, -INF, 'inf', '-inf'

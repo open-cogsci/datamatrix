@@ -18,10 +18,13 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
-from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
+from datamatrix import (
+	DataMatrix, MixedColumn, FloatColumn, IntColumn,
 	SeriesColumn, NAN
+)
+from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from testcases.test_tools import check_col, check_series, check_integrity
-from nose.tools import ok_, raises
+from nose.tools import ok_, raises, eq_
 import numpy as np
 
 
@@ -29,21 +32,21 @@ def _test_numericcolumn(cls):
 
 	# Test init and change by single value
 	dm = DataMatrix(length=2)
-	dm.col = IntColumn
+	dm.col = cls
 	dm.col = 1
 	check_col(dm.col, [1, 1])
 	dm.col = 2
 	check_col(dm.col, [2, 2])
 	# Test init and change by sequence
 	dm = DataMatrix(length=2)
-	dm.col = IntColumn
+	dm.col = cls
 	dm.col = 1, 2
 	check_col(dm.col, [1, 2])
 	dm.col = 3, 4
 	check_col(dm.col, [3, 4])
 	# Test setting by slice
 	dm = DataMatrix(length=3)
-	dm.col = IntColumn
+	dm.col = cls
 	dm.col = 1
 	dm.col[1:] = 2
 	check_col(dm.col, [1, 2, 2])
@@ -59,6 +62,28 @@ def _test_numericcolumn(cls):
 	dm.col[dm.col == 2] = 0, 0
 	check_col(dm.col, [1, 0, 1, 0])
 	check_integrity(dm)
+	# Check if numericcolumns return right type
+	dm = DataMatrix(length=5)
+	dm.col = cls
+	dm.col = 1, 2, 3, 4, 5
+	# int -> float
+	val = dm.col[2]
+	ok_(isinstance(val, (int, float)))
+	eq_(val, 3)
+	# (int, int) -> FloatColumn
+	val = dm.col[1, 3]
+	ok_(isinstance(val, cls))
+	check_col(val, [2, 4])
+	# slice -> FloatColumn
+	val = dm.col[1:-1]
+	ok_(isinstance(val, cls))
+	check_col(val, [2, 3, 4])
+	# Check array setting and getting
+	if cls != MixedColumn:
+		a = dm.col.array
+		ok_(isinstance(a, np.ndarray))
+		eq_(a.shape, (5,))
+		ok_(all(a == [1, 2, 3, 4, 5]))
 
 
 def _test_copying(cls):
@@ -207,7 +232,66 @@ def test_seriescolumn():
 	check_series(dm.col, [[1,1], [2,2]])
 	dm.col[:,:] = 3,4
 	check_series(dm.col, [[3,4], [3,4]])
-
+	# Check if series return right type
+	dm = DataMatrix(length=4)
+	dm.col = SeriesColumn(depth=5)
+	dm.col = [
+		[1, 2, 3, 4, 5],
+		[6, 7, 8, 9, 10],
+		[11, 12, 13, 14, 15],
+		[16, 17, 18, 19, 20]
+	]
+	# (int, int) -> float
+	val = dm.col[2, 2]
+	eq_(val, 13)
+	eq_(type(val), float)
+	# (int) -> array
+	val = dm.col[2]
+	ok_(all(val == np.array([11,12,13,14,15])))
+	eq_(type(val), np.ndarray)
+	# (int, slice) -> array
+	val = dm.col[2, 1:-1]
+	ok_(all(val == np.array([12,13,14])))
+	eq_(type(val), np.ndarray)
+	# (int, (int, int)) -> array
+	val = dm.col[2, (1, 3)]
+	ok_(all(val == np.array([12,14])))
+	eq_(type(val), np.ndarray)
+	# (slice) -> SeriesColumn
+	val = dm.col[1:-1]
+	check_series(val, [
+		[6, 7, 8, 9, 10],
+		[11, 12, 13, 14, 15],
+	])
+	# (slice, int) -> FloatColumn
+	val = dm.col[1:-1, 2]
+	ok_(isinstance(val, FloatColumn))
+	check_col(val, [8, 13])
+	# ((int, int), int) -> FloatColumn
+	val = dm.col[(1, 3), 2]
+	ok_(isinstance(val, FloatColumn))
+	check_col(val, [8, 18])
+	# (slice, slice) -> SeriesColumn
+	val = dm.col[1:-1, 1:-1]
+	ok_(isinstance(val, _SeriesColumn))
+	check_series(val, [
+		[7, 8, 9],
+		[12, 13, 14],
+	])
+	# ((int, int), slice) -> SeriesColumn
+	val = dm.col[(1, 3), 1:-1]
+	ok_(isinstance(val, _SeriesColumn))
+	check_series(val, [
+		[7, 8, 9],
+		[17, 18, 19],
+	])
+	# ((int, int), (int int)) -> SeriesColumn
+	val = dm.col[(1, 3), (1, 3)]
+	ok_(isinstance(val, _SeriesColumn))
+	check_series(val, [
+		[7, 9],
+		[17, 19],
+	])
 
 def test_resize():
 

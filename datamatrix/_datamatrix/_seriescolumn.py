@@ -19,8 +19,8 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 # from datamatrix._datamatrix._basecolumn import BaseColumn
-from datamatrix._datamatrix._numericcolumn import NumericColumn
-
+from datamatrix._datamatrix._numericcolumn import NumericColumn, FloatColumn
+import collections
 try:
 	import numpy as np
 	from numpy import nanmean, nanmedian, nanstd
@@ -265,12 +265,52 @@ class _SeriesColumn(NumericColumn):
 		a[:old_length] = self._seq
 		self._seq = a
 
+	def _getintkey(self, key):
+
+		return self._seq[key]
+
 	# Implemented syntax
 
 	def __getitem__(self, key):
 
 		if isinstance(key, tuple) and len(key) == 2:
-			return self._seq[key].copy()
+			row, smp = key
+			if isinstance(row, collections.Sequence):
+				row = np.array(row)
+			if isinstance(smp, collections.Sequence):
+				smp = np.array(smp)
+			if isinstance(row, int):
+				# dm.s[0, 0] -> float
+				if isinstance(smp, int):
+					return float(self._seq[key])
+				# dm.s[0, :] -> array
+				# dm.s[0, (0, 1)] -> array
+				if isinstance(smp, (slice, np.ndarray)):
+					return self._seq[row, smp].copy()
+			if isinstance(row, (slice, np.ndarray)):
+				# dm.s[:, 0] -> FloatColumn
+				# dm.s[(0, 1), 0] -> FloatColumn
+				if isinstance(smp, int):
+					col = FloatColumn(self._datamatrix)
+					col._rowid = self._rowid[row]
+					col._seq = np.copy(self._seq[row, smp])
+					return col
+				# dm.s[:, :] -> SeriesColumn
+				# dm.s[:, (0, 1)] -> SeriesColumn
+				# dm.s[(0, 1), :] -> SeriesColumn
+				# dm.s[(0, 1), (0, 1)] -> SeriesColumn
+				if isinstance(smp, (slice, np.ndarray)):
+					if isinstance(smp, np.ndarray):
+						_seq = np.copy(self._seq[row][:,smp])
+					else:
+						_seq = np.copy(self._seq[row, smp])
+					col = _SeriesColumn(self._datamatrix, depth=_seq.shape[1])
+					col._rowid = self._rowid[row]
+					col._seq = _seq
+					return col
+			raise KeyError(u'Invalid key')
+		# dm[0] -> array
+		# dm[:] -> SeriesColumn
 		return super(_SeriesColumn, self).__getitem__(key)
 
 	def __setitem__(self, key, value):

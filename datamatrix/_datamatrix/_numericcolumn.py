@@ -97,6 +97,11 @@ class NumericColumn(BaseColumn):
 			return np.nan
 		return np.nansum(self._seq)
 
+	@property
+	def array(self):
+
+		return np.copy(self._seq)
+
 	def _printable_list(self):
 
 		return list(self._seq)
@@ -213,6 +218,10 @@ class NumericColumn(BaseColumn):
 		col._seq = self._seq[selected_indices]
 		return col
 
+	def _getintkey(self, key):
+
+		return self.dtype(self._seq[key])
+
 	def _rowid_argsort(self):
 
 		# In some cases, we need to argsort very often, which is time consuming.
@@ -238,6 +247,10 @@ class NumericColumn(BaseColumn):
 		col._rowid = self._rowid[key]
 		col._seq = np.copy(self._seq[key])
 		return col
+
+	def _getsequencekey(self, key):
+
+		return self._getslicekey(list(key))
 
 	def _sortedrowid(self):
 
