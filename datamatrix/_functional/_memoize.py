@@ -141,6 +141,7 @@ class memoize(object):
 		self._lazy = lazy
 		self._debug = debug
 		self._max_size = max_size
+		self._ignore_cache_once = False
 		self._folder = self.folder if folder is None else folder
 		self._init_cache()
 		self.__name__ = (
@@ -150,9 +151,7 @@ class memoize(object):
 
 	def clear(self):
 
-		if self._persistent and os.path.exists(self._folder):
-			shutil.rmtree(self._folder)
-		self._init_cache()
+		self._ignore_cache_once = True
 
 	@property
 	def cache_size(self):
@@ -259,6 +258,9 @@ class memoize(object):
 
 	def _read_cache(self, memkey):
 
+		if self._ignore_cache_once:
+			self._ignore_cache_once = False
+			return False, None
 		if self._persistent:
 			cache_path = os.path.join(self._folder, memkey)
 			if os.path.exists(cache_path):

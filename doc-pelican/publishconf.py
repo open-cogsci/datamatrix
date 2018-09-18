@@ -3,4 +3,4 @@
 from __future__ import unicode_literals
 from baseconf import *
 
-SITEURL = 'http://datamatrix.cogsci.nl/' + BRANCH
+SITEURL = 'https://datamatrix.cogsci.nl/' + BRANCH
