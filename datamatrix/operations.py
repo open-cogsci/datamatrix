@@ -710,15 +710,21 @@ def _fullfact(levels):
 	import numpy as np
 	n = len(levels)  # number of factors
 	nb_lines = np.prod(levels)  # number of trial conditions
-	H = np.zeros((nb_lines, n))
+	try:
+		H = np.zeros((nb_lines, n))
+	except (ValueError, MemoryError):
+		raise MemoryError(u'DataMatrix too large for fullfact')
 	level_repeat = 1
 	range_repeat = np.prod(levels)
 	for i in range(n):
 		range_repeat //= levels[i]
 		lvl = []
-		for j in range(levels[i]):
-			lvl += [j]*level_repeat
-		rng = lvl*range_repeat
+		try:
+			for j in range(levels[i]):
+				lvl += [j] * level_repeat
+			rng = lvl * range_repeat
+		except MemoryError:
+			raise MemoryError(u'DataMatrix too large for fullfact')
 		level_repeat *= levels[i]
 		H[:, i] = rng
 	return H
