@@ -24,10 +24,15 @@ desc:
 
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
-from datamatrix import FloatColumn, operations as ops
+from datamatrix import FloatColumn, operations as ops, functional as fnc
 import numpy as np
 from numpy import nanmean, nanmedian
 from scipy.interpolate import interp1d
+
+
+# Placeholders for imports that will occur in _butter()
+butter = None
+lfilter = None
 
 
 def concatenate(*series):
@@ -1261,8 +1266,10 @@ def _butter(signal, freq_range, order, btype):
 		Test.
 	"""
 
-	from scipy.signal import butter, lfilter
-
+	global butter, lfilter
+	if butter is None:
+		from scipy.signal import butter, lfilter
+		butter = fnc.memoize(butter)
 	nyq = .5 * len(signal)
 	if btype == 'bandpass':
 		freq_range = freq_range[0] / nyq, freq_range[1] / nyq
@@ -1298,7 +1305,7 @@ def _map(series, fnc_, **kwdict):
 
 	f = lambda a: fnc_(a, **kwdict)
 	if isinstance(series, _SeriesColumn):
-		return ops.map_(f, series)
+		return fnc.map_(f, series)
 	if isinstance(series, np.ndarray):
 		return f(series)
 	try:
