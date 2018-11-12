@@ -259,6 +259,7 @@ class memoize(object):
 	def _read_cache(self, memkey):
 
 		if self._ignore_cache_once:
+			self._latest_source = 'function'
 			self._ignore_cache_once = False
 			return False, None
 		if self._persistent:
