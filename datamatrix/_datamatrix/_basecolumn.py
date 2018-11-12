@@ -34,6 +34,7 @@ import types
 INF = float('inf')
 NAN = float('nan')
 NUMBER = int, float, long, complex
+BASESTRING_OR_NUMBER = int, float, long, complex, basestring
 
 
 class BaseColumn(OrderedState):
@@ -288,10 +289,6 @@ class BaseColumn(OrderedState):
 
 	def _checktype_fastnumber(self, value):
 
-		if value is None:
-			return value
-		if not isinstance(value, basestring) and not isinstance(value, NUMBER):
-			raise TypeError('Invalid type: %s' % value)
 		value = fastnumbers.fast_real(value)
 		if isinstance(value, bytes):
 			return safe_decode(value)
@@ -327,7 +324,7 @@ class BaseColumn(OrderedState):
 
 		if value is None:
 			return value
-		if not isinstance(value, basestring) and not isinstance(value, NUMBER):
+		if not isinstance(value, BASESTRING_OR_NUMBER):
 			raise TypeError('Invalid type: %s' % value)
 		if fastnumbers:
 			return self._checktype_fastnumber(value)
