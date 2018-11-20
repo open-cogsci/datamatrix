@@ -32,6 +32,9 @@ def _monkey_patch_matplotlib():
 		from matplotlib.axes import _base
 	except ImportError:
 		return
+	# matplotlib 3 doesn't need to be monkeypatched, apparently.
+	if not hasattr(_base, u'is_string_like'):
+		return
 
 	from datamatrix._datamatrix._basecolumn import BaseColumn
 
@@ -42,6 +45,5 @@ def _monkey_patch_matplotlib():
 			return fnc(obj)
 		return inner
 
-	_base.is_string_like = decorate(_base.is_string_like)
 
 _monkey_patch_matplotlib()
