@@ -158,7 +158,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7f89a3c17950>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7fc14dfcc950>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times shorter.
 The depth of the downsampled series is the highest multiple of the depth
@@ -209,7 +209,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7f89a3c17950>
+	- Default: <function nanmean at 0x7fc14dfcc950>
 
 __Returns:__
 
@@ -285,6 +285,8 @@ An end-locked signal.
 
 ## function __fft__\(series, truncate=True\)
 
+*New in v0.9.2*
+
 Performs a fast-fourrier transform (FFT) for the signal. For more
 information, see [`numpy.fft`](https://docs.scipy.org/doc/numpy/reference/routines.fft.html#module-numpy.fft).
 
@@ -351,6 +353,8 @@ The FFT of the signal.
 <div class="FunctionDoc YAMLDoc" id="filter_bandpass" markdown="1">
 
 ## function __filter\_bandpass__\(series, freq\_range, order=2\)
+
+*New in v0.9.2*
 
 Applies a Butterworth low-pass filter to the signal. The filter
 frequency is a number between 1 and depth/2 - 1 (i.e. one less than the
@@ -424,6 +428,8 @@ The filtered signal.
 
 ## function __filter\_highpass__\(series, freq\_min, order=2\)
 
+*New in v0.9.2*
+
 Applies a Butterworth low-pass filter to the signal. The filter
 frequency is a number between 1 and depth/2 - 1 (i.e. one less than the
 Nyquist frequency).
@@ -495,6 +501,8 @@ The filtered signal.
 <div class="FunctionDoc YAMLDoc" id="filter_lowpass" markdown="1">
 
 ## function __filter\_lowpass__\(series, freq\_max, order=2\)
+
+*New in v0.9.2*
 
 Applies a Butterworth low-pass filter to the signal. The filter
 frequency is a number between 1 and depth/2 - 1 (i.e. one less than the
@@ -752,7 +760,7 @@ A new series in which the data points are spread according to the timestamps.
 
 <div class="FunctionDoc YAMLDoc" id="reduce_" markdown="1">
 
-## function __reduce\___\(series, operation=<function nanmean at 0x7f89a3c17950>\)
+## function __reduce\___\(series, operation=<function nanmean at 0x7fc14dfcc950>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -783,7 +791,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7f89a3c17950>
+	- Default: <function nanmean at 0x7fc14dfcc950>
 
 __Returns:__
 
@@ -937,6 +945,9 @@ A series where 0 indicates below threshold, and 1 indicates above threshold.
 ## function __window__\(series, start=0, end=None\)
 
 Extracts a window from a signal.
+
+*Version note:* As of 0.9.4, the preferred way to get a window from a
+series is with a slice: `dm.s[:, start:end]`.
 
 __Example:__
 
