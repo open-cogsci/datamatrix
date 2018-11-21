@@ -387,7 +387,7 @@ class DataMatrix(OrderedState):
 			key = safe_decode(key)
 		col = self._cols.get(key, None)
 		if col is None:
-			raise Exception('Column not found: %s' % key)
+			raise AttributeError(u'No column named "%s"' % key)
 		return col
 
 	def _getrow(self, key):
@@ -604,9 +604,7 @@ class DataMatrix(OrderedState):
 
 		if name in ('__getstate__', '_cols'):
 			raise AttributeError()
-		if name in self._cols:
-			return self._cols[name]
-		raise AttributeError(u'No column named "%s"' % name)
+		return self._getcolbyname(name)
 
 	def __getitem__(self, key):
 
