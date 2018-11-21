@@ -459,7 +459,7 @@ class DataMatrix(OrderedState):
 			if value._datamatrix is self:
 				self._cols[name] = value
 				return
-			# If the column belongs to another datamatrix, we create a new _empty_col
+			# If the column belongs to another datamatrix, we create a new
 			# column of the same type
 			if len(value) != len(self):
 				raise ValueError(

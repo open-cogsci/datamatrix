@@ -750,6 +750,11 @@ class BaseColumn(OrderedState):
 			BaseColumn
 		"""
 
+		# If this column results from slicing from an original column, the
+		# rowids do not match with the DataMatrix. In that case, create a new
+		# DataMatrix for the empty column.
+		if len(self) != len(self._datamatrix):
+			return self.__class__(DataMatrix(length=len(self)))
 		return self.__class__(self._datamatrix)
 
 	def _nanorinf(self, val):
