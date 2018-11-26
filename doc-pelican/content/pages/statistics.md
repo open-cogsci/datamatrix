@@ -4,7 +4,7 @@ title: Statistics
 
 ## Compatibility with Pandas and StatsModels
 
-`statsmodels` is a Python library for statistics. It relies heavily on `pandas.DataFrame` objects. However, it is easy to use these two libraries in combination with `DatMatrix` objects.
+`statsmodels` is a Python library for statistics. It relies heavily on `pandas.DataFrame` objects. However, it is easy to use these two libraries in combination with `DataMatrix` objects.
 
 - <http://www.statsmodels.org/>
 - <https://pandas.pydata.org/>
@@ -12,14 +12,16 @@ title: Statistics
 
 ## Creating a pivot table
 
-A pivot table is a table that contains aggregate data that is grouped in a certain way. For example, the example data below[^data] is from a behavioral experiment in which participants, coded by `subject_nr`, pressed a key on each trial. The key-press response time is stored as `RT_search`. The experiment had different experimental conditions: `condition` and `load`. A common way to summarize this data is to put each participant in a different row, and each condition in a different column. The cells then contain the mean response time for a specific participant in a specific condition. That's a pivot table!
+A pivot table is a table that contains aggregate data that is grouped in a certain way. For example, the data used below[^data] is from a behavioral experiment in which participants, coded by `subject_nr`, pressed a key on each trial. The key-press response time is stored as `RT_search`. The experiment had different experimental conditions: `condition` and `load`.
+
+A common way to summarize this kind of data is to put each participant in a different row, and each condition in a different column. The cells then contain the mean response time for a specific participant in a specific condition. That's a pivot table!
 
 You can create a pivot table with `pandas.pivot_table()`. This function accepts a `pandas.DataFrame` as first argument, and also returns a `pandas.DataFrame`. By wrapping this function with the `datamatrix.convert.wrap_pandas()` decorator, you can modify the function so that it works with `DataMatrix` objects instead.
 
 - <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.pivot_table.html>
 - <%url:convert%>
 
-Let's see how this works:
+This sounds complicated, but it's actually really simple:
 
 ```python
 from datamatrix import io, convert as cnv
@@ -63,4 +65,4 @@ print(aov.fit())
 ```
 
 
-[^data]: The [example data]((/data/fratescu-replication-data-exp1.csv)) is adapted from [Frătescu et al. (2018)](https://doi.org/10.1101/474932), Experiment 1.
+[^data]: The [example data](/data/fratescu-replication-data-exp1.csv) is adapted from [Frătescu et al. (2018)](https://doi.org/10.1101/474932), Experiment 1.

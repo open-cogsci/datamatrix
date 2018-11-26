@@ -97,4 +97,4 @@ figure:
 --%
 
 
-[^data]: The [example data]((/data/fratescu-replication-data-exp1.csv)) is adapted from [Frătescu et al. (2018)](https://doi.org/10.1101/474932), Experiment 1.
+[^data]: The [example data](/data/fratescu-replication-data-exp1.csv) is adapted from [Frătescu et al. (2018)](https://doi.org/10.1101/474932), Experiment 1.
