@@ -61,9 +61,9 @@ def wrap_pandas(fnc):
 
 	def inner(dm, *arglist, **kwdict):
 
-		df_in = to_pandas(dm)
+		df_in = to_pandas(dm) if isinstance(dm, DataMatrix) else dm
 		df_out = fnc(df_in, *arglist, **kwdict)
-		return from_pandas(df_out)
+		return from_pandas(df_out) if isinstance(df_out, pd.DataFrame) else df_out
 
 	inner.__doc__ = u'desc: A simple wrapper around the corresponding pandas function'
 	return inner
