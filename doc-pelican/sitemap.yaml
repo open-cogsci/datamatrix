@@ -2,6 +2,7 @@ Install: install
 Tutorials:
     Basic use: basic
     Plotting: plotting
+    Statistics: statistics
     Working with series: series-tutorial
     Memoization (caching): memoization
     Analyzing eye-movement data: eyelinkparser

@@ -6,7 +6,7 @@ title: Plotting
 
 `DataMatrix` objects can be passed to most `seaborn` plotting functions as if they are `pandas.DataFrame` objects. Below are some examples of common plot types.
 
-The data used for these examples is taken from <https://osf.io/pwhkc/>. It is data from a behavioral experiment with a single dependent variable (`RT_search`) and two independent variables (`condition` and `load`).
+The example data[^data] below is from a behavioral experiment with a single dependent variable (`RT_search`) and two independent variables (`condition` and `load`).
 
 
 ```python
@@ -95,3 +95,6 @@ figure:
  source: distplot.png
  id: FigDistPlot
 --%
+
+
+[^data]: The [example data]((/data/fratescu-replication-data-exp1.csv)) is adapted from [Frătescu et al. (2018)](https://doi.org/10.1101/474932), Experiment 1.
