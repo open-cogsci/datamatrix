@@ -26,7 +26,6 @@ import warnings
 import collections
 import hashlib
 import pickle
-import shutil
 
 
 ONE_GIGABYTE = 1024**3
@@ -71,10 +70,10 @@ class memoize(object):
 		 	print('add(%d, %d)' % (a, b))
 		 	return a + b
 
-		 three = add(1, 2) # Storing result in memory
-		 three = add(1, 2) # Re-using previous result
-		 add.clear() # Clear cache!
-		 three = add(1, 2) # Calculate again
+		 three = add(1, 2)  # Storing result in memory
+		 three = add(1, 2)  # Re-using previous result
+		 add.clear()  # Clear cache, but only for the next call
+		 three = add(1, 2)  # Calculate again
 
 		 @fnc.memoize(persistent=True, key='persistent-add')
 		 def persistent_add(a, b):
@@ -82,8 +81,8 @@ class memoize(object):
 		 	print('persistent_add(%d, %d)' % (a, b))
 		 	return a + b
 
-		 three = persistent_add(1, 2) # Writing result to disk
-		 three = persistent_add(1, 2) # Re-using previous result
+		 three = persistent_add(1, 2)  # Writing result to disk
+		 three = persistent_add(1, 2)  # Re-using previous result
 		--%
 
 	keywords:
@@ -258,12 +257,16 @@ class memoize(object):
 
 	def _read_cache(self, memkey):
 
+		cache_path = os.path.join(self._folder, memkey)
 		if self._ignore_cache_once:
 			self._latest_source = 'function'
 			self._ignore_cache_once = False
+			if memkey in self._cache:
+				del self._cache[memkey]
+			if os.path.exists(cache_path):
+				os.remove(cache_path)
 			return False, None
 		if self._persistent:
-			cache_path = os.path.join(self._folder, memkey)
 			if os.path.exists(cache_path):
 				self._latest_source = 'disk'
 				with open(cache_path, u'rb') as fd:
