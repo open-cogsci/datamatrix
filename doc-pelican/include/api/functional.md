@@ -183,10 +183,10 @@ python: |
         print('add(%d, %d)' % (a, b))
         return a + b
 
- three = add(1, 2) # Storing result in memory
- three = add(1, 2) # Re-using previous result
- add.clear() # Clear cache!
- three = add(1, 2) # Calculate again
+ three = add(1, 2)  # Storing result in memory
+ three = add(1, 2)  # Re-using previous result
+ add.clear()  # Clear cache, but only for the next call
+ three = add(1, 2)  # Calculate again
 
  @fnc.memoize(persistent=True, key='persistent-add')
  def persistent_add(a, b):
@@ -194,8 +194,8 @@ python: |
         print('persistent_add(%d, %d)' % (a, b))
         return a + b
 
- three = persistent_add(1, 2) # Writing result to disk
- three = persistent_add(1, 2) # Re-using previous result
+ three = persistent_add(1, 2)  # Writing result to disk
+ three = persistent_add(1, 2)  # Re-using previous result
 --%
 
 </div>

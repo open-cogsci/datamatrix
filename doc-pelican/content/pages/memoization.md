@@ -115,7 +115,7 @@ If you want to change the cache folder, you can either pass a `folder` keyword t
 
 You can also specify a custom memoization key through the `key` keyword. If you specify a custom key, `memoize` will no longer distinguish between different arguments (and thus no longer be real `memoization`).
 
-To re-execute a memoized function, you can clear the memoization cache by calling the `.clear()` method on the memoized function, as shown below. If memoization is persistent, this will clear all files in the cache folder. Otherwise, this will only clear the in-memory cache.
+To re-execute a memoized function, you can clear the memoization cache by calling the `.clear()` method on the memoized function, as shown below. This will clear the cache only for the next function call.
 
 
 %--
