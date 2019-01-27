@@ -31,10 +31,11 @@ import math
 import inspect
 import types
 
+
 INF = float('inf')
 NAN = float('nan')
-NUMBER = int, float, long, complex
-BASESTRING_OR_NUMBER = int, float, long, complex, basestring
+NUMBER = numbers.Number
+BASESTRING_OR_NUMBER = NUMBER, basestring
 
 
 class BaseColumn(OrderedState):
