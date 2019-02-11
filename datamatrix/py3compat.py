@@ -84,7 +84,7 @@ def safe_sorted(l):
 if py3:
 	import functools
 	safe_str = safe_decode
-	safe_open = functools.partial(open, encoding='utf-8')
+	safe_open = functools.partial(open, encoding='utf-8', newline='\n')
 else:
 	safe_str = safe_encode
 	safe_open = open
