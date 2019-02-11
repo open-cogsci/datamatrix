@@ -303,6 +303,20 @@ class IntColumn(NumericColumn):
 		value = self._checktype(value)
 		return super(NumericColumn, self)._tosequence(value, length)
 
+	def _setslicekey(self, key, value):
+
+		try:
+			super(NumericColumn, self)._setslicekey(key, value)
+		except OverflowError:
+			# This happens when there are very large numbers. In that case
+			# we silently upgrade the dtype to in64 (long)
+			self.dtype = np.int64
+			seq = self._seq
+			self._init_seq()
+			self._seq[:] = seq
+			warnings.warn(u'Changing dtype to int64')
+			super(NumericColumn, self)._setslicekey(key, value)		
+
 	def _checktype(self, value):
 
 		if value is not None and fastnumbers is not None:
