@@ -137,6 +137,32 @@ def test_seriescolumn():
 		[10, 10]
 		])
 	check_series(dm.col, [[0,1], [11,11]])
+	# Right-side operations
+	dm.col[0] = 1, 2
+	dm.col[1] = 3, 4
+	dm.col = 1 + dm.col
+	check_series(dm.col, [[2,3], [4,5]])
+	dm.col = (1, 2) + dm.col
+	check_series(dm.col, [[3,4], [6,7]])
+	dm.col = 1 - dm.col
+	check_series(dm.col, [[-2,-3], [-5,-6]])
+	dm.col = (1, 2) - dm.col
+	check_series(dm.col, [[3, 4], [7, 8]])
+	dm.col = 2 * dm.col
+	check_series(dm.col, [[6, 8], [14, 16]])
+	dm.col = (1.5, 3) * dm.col
+	check_series(dm.col, [[9, 12], [42, 48]])
+	dm.col = 3 / dm.col
+	check_series(dm.col, [[1./3, 1./4], [3./42, 1./16]])
+	dm.col = (1, 2) / dm.col
+	check_series(dm.col, [[3, 4], [28, 32]])
+	dm.col = (1.5, 2.5) // dm.col
+	check_series(dm.col, [[0, 0], [0, 0]])
+	dm.col = np.array([
+		[0, 0],
+		[10, 10]
+		]) + dm.col
+	check_series(dm.col, [[0, 0], [10, 10]])
 
 
 def test_mixedcolumn():

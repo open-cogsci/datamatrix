@@ -180,7 +180,7 @@ class _SeriesColumn(NumericColumn):
 			return list(self._seq)
 		return [self._ellipsize(cell) for cell in self]
 
-	def _operate(self, a, number_op, str_op=None):
+	def _operate(self, a, number_op, str_op=None, flip=False):
 
 		# For a 1D array with the length of the datamatrix, we create an array
 		# in which the second dimension (i.e. the depth) is constant. This
@@ -196,7 +196,7 @@ class _SeriesColumn(NumericColumn):
 			a = a2
 		col = self._empty_col()
 		col._rowid = self._rowid.copy()
-		col._seq = number_op(self._seq, a)
+		col._seq = number_op(a, self._seq) if flip else number_op(self._seq, a)
 		return col
 
 	def _map(self, fnc):
