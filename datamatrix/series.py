@@ -140,11 +140,17 @@ def endlock(series):
 
 	endlock_series = _SeriesColumn(series._datamatrix, series.depth)
 	endlock_series[:] = np.nan
-	for i in range(len(series)):
-		for j in range(series.depth-1, -1, -1):
-			if not np.isnan(series[i,j]):
-				break
-		endlock_series[i,-j-1:] = series[i,:j+1]
+	src = series._seq
+	dst = endlock_series._seq
+	for rownr, row in enumerate(src):
+		nancols = np.where(np.isnan(row))[0]
+		for nancol in nancols:
+			if np.any(~np.isnan(row[nancol:])):
+				continue
+			dst[rownr, -nancol:] = row[:nancol]
+			break
+		else:
+			dst[rownr] = row
 	return endlock_series
 
 
