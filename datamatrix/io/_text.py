@@ -29,9 +29,9 @@ def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
 	"""
 	desc: |
 		Reads a DataMatrix from a csv file.
-		
+
 		__Example:__
-		
+
 		~~~ .python
 		dm = io.readtxt('data.csv')
 		~~~
@@ -49,7 +49,7 @@ def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
 	"""
 
 	d = collections.OrderedDict()
-	with safe_open(path, u'Ur') as csvfile:
+	with safe_open(path, u'r' if py3 else u'Ur') as csvfile:
 		reader = csv.reader(csvfile, delimiter=delimiter,
 			quotechar=quotechar)
 		for column in next(reader):
@@ -71,9 +71,9 @@ def writetxt(dm, path, delimiter=',', quotechar='"'):
 	"""
 	desc: |
 		Writes a DataMatrix to a csv file.
-		
+
 		__Example:__
-		
+
 		~~~ .python
 		io.writetxt(dm, 'data.csv')
 		~~~
