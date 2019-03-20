@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
+# coding=utf-8
 
 """
 This file is part of datamatrix.
 
 datamatrix is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public licensese as published by
+it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
@@ -18,15 +18,26 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
-import datamatrix.monkeypatch
-from datamatrix._datamatrix._row import Row
-from datamatrix._datamatrix._mixedcolumn import MixedColumn
-from datamatrix._datamatrix._numericcolumn import FloatColumn, IntColumn
-from datamatrix._datamatrix._seriescolumn import SeriesColumn
-from datamatrix._datamatrix._nifticolumn import NiftiColumn
-from datamatrix._datamatrix._datamatrix import DataMatrix
-from datamatrix._cache import cached, iscached
+from datamatrix import DataMatrix, NiftiColumn
+import nibabel as nib
+import numpy as np
+from nose.tools import ok_
 
-__version__ = '0.10.0'
-NAN = float('nan')
-INF = float('inf')
+
+def test_nifti():
+
+	dm = DataMatrix(length=2)
+	dm.n = NiftiColumn
+	dm.n[0] = nib.Nifti2Image(
+		np.array([[[0, 0], [1, 1]], [[-1, -1], [1, 1]]]),
+		None
+	)
+	dm.n[1] = nib.Nifti2Image(
+		np.array([[[1, 1], [0, 0]], [[np.nan, 1], [0, 0]]]),
+		None
+	)
+	m = dm.n.mean.get_data()
+	ok_(np.all(m == np.array([[[.5, .5], [.5, .5]], [[-1, 0], [.5, .5]]])))
+
+
+test_nifti()

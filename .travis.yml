@@ -5,7 +5,7 @@ sudo: false
 virtualenv:
   system_site_packages: true
 before_install:
-  - pip install openpyxl fastnumbers json_tricks
+  - pip install openpyxl fastnumbers json_tricks nilearn nibabel
 addons:
   apt:
     packages:
