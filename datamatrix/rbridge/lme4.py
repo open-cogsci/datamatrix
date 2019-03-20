@@ -28,7 +28,6 @@ from datamatrix.py3compat import *
 verbose = False
 
 
-@cached
 def lmer(dm, formula):
 
 	cmd = u'''
@@ -50,7 +49,6 @@ write.csv(s$coef, ".r-out.csv")
 	return rm
 
 
-@cached
 def glmer(dm, formula, family):
 
 	cmd = u'''
@@ -72,7 +70,6 @@ write.csv(s$coef, ".r-out.csv")
 	return rm
 
 
-@cached
 def lmer_series(dm, formula, winlen=1):
 
 	col = formula.split()[0]
@@ -99,7 +96,7 @@ def lmer_series(dm, formula, winlen=1):
 			rmrow.se[i:i+winlen] = lmrow.se
 	return rm
 
-@cached
+
 def glmer_series(dm, formula, family, winlen=1):
 
 	col = formula.split()[0]
@@ -125,6 +122,7 @@ def glmer_series(dm, formula, family, winlen=1):
 			rmrow.est[i:i+winlen] = lmrow.est
 			rmrow.se[i:i+winlen] = lmrow.se
 	return rm
+
 
 def _launchr(dm, cmd):
 
