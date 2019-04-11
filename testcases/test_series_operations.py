@@ -27,18 +27,20 @@ import numpy as np
 
 def test_endlock():
 
-	dm = DataMatrix(length=4)
+	dm = DataMatrix(length=5)
 	dm.series = SeriesColumn(depth=3)
 	dm.series[0] = 1, 2, 3
 	dm.series[1] = 1, np.nan, 3
 	dm.series[2] = 1, 2, np.nan
 	dm.series[3] = np.nan, 2, np.nan
+	dm.series[4] = np.nan, np.nan, np.nan
 	dm.series = series.endlock(dm.series)
 	check_series(dm.series, [
 		[1,2,3],
 		[1,np.nan,3],
 		[np.nan,1,2],
 		[np.nan,np.nan,2],
+		[np.nan,np.nan,np.nan],
 		])
 
 

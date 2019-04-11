@@ -143,6 +143,8 @@ def endlock(series):
 	src = series._seq
 	dst = endlock_series._seq
 	for rownr, row in enumerate(src):
+		if np.all(np.isnan(row)):
+			continue
 		nancols = np.where(np.isnan(row))[0]
 		for nancol in nancols:
 			if np.any(~np.isnan(row[nancol:])):
