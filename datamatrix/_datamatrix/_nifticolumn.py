@@ -50,6 +50,7 @@ class NiftiColumn(BaseColumn):
 	@property
 	def mean(self):
 
+		_set_globals()
 		s = self.shape
 		if s is None:
 			raise ValueError(u'Nifti images must have the same shape')
@@ -84,6 +85,7 @@ class NiftiColumn(BaseColumn):
 	@property
 	def affine(self):
 
+		_set_globals()
 		affine = None
 		for img in self._images:
 			if affine is not None and np.any(affine != img.affine):
@@ -98,6 +100,7 @@ class NiftiColumn(BaseColumn):
 
 	def _checktype(self, value):
 
+		_set_globals()
 		if value is None or isinstance(value, IMAGES):
 			return value
 		if isinstance(value, basestring) and os.path.isfile(value):
