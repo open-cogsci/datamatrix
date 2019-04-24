@@ -94,7 +94,12 @@ def writetxt(dm, path, delimiter=',', quotechar='"'):
 	except:
 		pass
 	with safe_open(path, 'w') as csvfile:
-		writer = csv.writer(csvfile, delimiter=delimiter, quotechar=quotechar)
+		writer = csv.writer(
+			csvfile,
+			delimiter=delimiter,
+			quotechar=quotechar,
+			lineterminator='\n'
+		)
 		writer.writerow([safe_str(colname) for colname in dm.column_names])
 		for row in dm:
 			writer.writerow([safe_str(value) for colname, value in row])
