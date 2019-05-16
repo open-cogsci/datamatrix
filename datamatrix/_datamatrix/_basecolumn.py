@@ -36,6 +36,11 @@ INF = float('inf')
 NAN = float('nan')
 NUMBER = numbers.Number
 BASESTRING_OR_NUMBER = NUMBER, basestring
+try:
+	import numpy as np
+	SEQUENCE = collections.Sequence, np.ndarray
+except ImportError:
+	SEQUENCE = collections.Sequence
 
 
 class BaseColumn(OrderedState):
@@ -101,7 +106,7 @@ class BaseColumn(OrderedState):
 
 		desc:
 			Arithmetic mean of all values. If there are non-numeric values,
-			these are ignored. If there are no numeric values, None or np.nan is
+			these are ignored. If there are no numeric values, NAN is
 			returned.
 		"""
 
@@ -118,7 +123,7 @@ class BaseColumn(OrderedState):
 
 		desc:
 			The median of all values. If there are non-numeric values,
-			these are ignored. If there are no numeric values, None or np.nan is
+			these are ignored. If there are no numeric values, NAN is
 			returned.
 		"""
 
@@ -138,8 +143,8 @@ class BaseColumn(OrderedState):
 
 		desc:
 			The standard deviation of all values. If there are non-numeric
-			values, these are ignored. If there are 0 or 1 numeric values, None
-			or np.nan is returned. The degrees of freedom are N-1.
+			values, these are ignored. If there are 0 or 1 numeric values, NAN
+			is returned. The degrees of freedom are N-1.
 		"""
 
 		m = self.mean
@@ -155,7 +160,7 @@ class BaseColumn(OrderedState):
 		name:	max
 
 		desc:
-			The highest numeric value in the column, or None or np.nan if there
+			The highest numeric value in the column, or NAN if there
 			are no numeric values.
 		"""
 
@@ -171,7 +176,7 @@ class BaseColumn(OrderedState):
 		name:	min
 
 		desc:
-			The lowest numeric value in the column, or None or np.nan if there
+			The lowest numeric value in the column, or NAN if there
 			are no numeric values.
 		"""
 
@@ -187,7 +192,7 @@ class BaseColumn(OrderedState):
 		name:	sum
 
 		desc:
-			The sum of all values in the column, or None or np.nan if there
+			The sum of all values in the column, or NAN if there
 			are no numeric values.
 		"""
 
@@ -827,11 +832,11 @@ class BaseColumn(OrderedState):
 			return self._getintkey(key)
 		if isinstance(key, slice):
 			return self._getslicekey(key)
-		if isinstance(key, collections.Sequence):
+		if isinstance(key, SEQUENCE):
 			return self._getsequencekey(key)
 		if isinstance(key, DataMatrix):
 			return self._getdatamatrixkey(key)
-		raise Exception(u'Invalid key')
+		raise Exception(u'Invalid key: {}'.format(key))
 
 	def __setitem__(self, key, value):
 
@@ -839,13 +844,18 @@ class BaseColumn(OrderedState):
 			self._setintkey(key, value)
 		elif isinstance(key, slice):
 			self._setslicekey(key, value)
-		elif isinstance(key, collections.Sequence):
+		elif isinstance(key, SEQUENCE):
 			self._setsequencekey(key, value)
 		elif isinstance(key, DataMatrix):
 			self._setdatamatrixkey(key, value)
 		else:
-			raise Exception('Invalid assignment')
+			raise Exception('Invalid assignment: {} to {}'.format(key, value))
 		self._datamatrix._mutate()
+
+	def __array__(self, *args):
+
+		import numpy as np
+		return np.array(self._seq)
 
 	def __gt__(self, other):
 		return self._compare(other, operator.gt)

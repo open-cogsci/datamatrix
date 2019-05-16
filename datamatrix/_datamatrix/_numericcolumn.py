@@ -267,6 +267,10 @@ class NumericColumn(BaseColumn):
 		col._seq = np.concatenate((self._seq[i_self], other._seq[i_other]))
 		return col._getrowidkey(_rowid)
 
+	def __array__(self, *args):
+
+		return self.array
+
 
 class FloatColumn(NumericColumn):
 
@@ -315,7 +319,7 @@ class IntColumn(NumericColumn):
 			self._init_seq()
 			self._seq[:] = seq
 			warnings.warn(u'Changing dtype to int64')
-			super(NumericColumn, self)._setslicekey(key, value)		
+			super(NumericColumn, self)._setslicekey(key, value)
 
 	def _checktype(self, value):
 
