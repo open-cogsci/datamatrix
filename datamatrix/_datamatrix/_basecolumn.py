@@ -450,6 +450,22 @@ class BaseColumn(OrderedState):
 			col._seq.append(self._seq[i])
 		return col
 
+	def _getdatamatrixkey(self, key):
+
+		"""
+		visible: False
+
+		desc:
+			Gets a slice of this column by a DataMatrix
+
+		arguments:
+			key:	A DataMatrix
+		"""
+
+		if key != self._datamatrix:
+			raise ValueError('Cannot slice column with a different DataMatrix')
+		return self[[self._rowid.index(_rowid) for _rowid in key._rowid]]
+
 	def _getrowidkey(self, key):
 
 		"""
@@ -813,6 +829,8 @@ class BaseColumn(OrderedState):
 			return self._getslicekey(key)
 		if isinstance(key, collections.Sequence):
 			return self._getsequencekey(key)
+		if isinstance(key, DataMatrix):
+			return self._getdatamatrixkey(key)
 		raise Exception(u'Invalid key')
 
 	def __setitem__(self, key, value):
