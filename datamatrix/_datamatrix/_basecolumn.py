@@ -385,14 +385,13 @@ class BaseColumn(OrderedState):
 
 		if length is None:
 			length = len(self._datamatrix)
-		if value is None or isinstance(value, (numbers.Number, basestring)):
-			return [self._checktype(value)]*length
+		if value is None or isinstance(value, BASESTRING_OR_NUMBER):
+			return [self._checktype(value)] * length
 		try:
-			value = list(value)
-		except:
-			raise Exception('Cannot convert to sequence: %s' % value)
-		if len(value) != length:
-			raise Exception('Sequence has incorrect length: %s' % len(value))
+			if len(value) != length:
+				raise Exception('Sequence has incorrect length: %s' % len(value))
+		except TypeError:
+			raise TypeError('Cannot convert to sequence: %s' % value)
 		return [self._checktype(cell) for cell in value]
 
 	def _getintkey(self, key):
@@ -734,23 +733,18 @@ class BaseColumn(OrderedState):
 
 		col = self._empty_col()
 		col._rowid = self._rowid.copy()
-		col._seq = []
 		for i, (_other, val) in enumerate(
+			zip(self._seq, self._tosequence(other, len(self)))
+			if flip else
 			zip(self._tosequence(other, len(self)), self._seq)
 		):
-			if flip:
-				_other, val = val, _other
-			if (
-				isinstance(val, numbers.Number)
-				and isinstance(_other, numbers.Number)
-			):
-				col._seq.append(number_op(val, _other))
-			elif str_op is not None:
-				col._seq.append(
-					str_op(safe_decode(val), safe_decode(_other))
-				)
-			else:
-				col._seq.append(val)
+			if (isinstance(val, NUMBER) and isinstance(_other, NUMBER)):
+				col._seq[i] = number_op(val, _other)
+				continue
+			if str_op is not None:
+				col._seq[i] = str_op(safe_decode(val), safe_decode(_other))
+				continue
+			col._seq[i] = _other if flip else val
 		return col
 
 	def _map(self, fnc):
