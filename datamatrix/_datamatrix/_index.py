@@ -19,10 +19,13 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 from datamatrix._ordered_state import OrderedState
+import array
 try:
 	import numpy as np
 except ImportError:
-	np = None
+	ITERABLES = list, set
+else:
+	ITERABLES = list, set, np.ndarray
 
 
 class Index(OrderedState):
@@ -35,64 +38,47 @@ class Index(OrderedState):
 	def __init__(self, start=0):
 
 		if isinstance(start, int):
-			if np is None:
-				self._l = list(range(start))
-			else:
-				self._l = np.arange(start)
+			self._a = array.array('I', range(start))
 			self._length = start
 			self._metaindex = None
-			self._max = start-1
-		elif isinstance(start, list):
-			if np is None:
-				self._l = start
-			else:
-				self._l = np.array(start)
+			self._max = start - 1
+		elif isinstance(start, ITERABLES):
+			self._a = array.array('I', start)
+			self._length = len(start)
+			self._metaindex = None
+			self._max = None
+		elif isinstance(start, array.array):
+			self._a = start[:]
 			self._length = len(start)
 			self._metaindex = None
 			self._max = None
 		elif isinstance(start, Index):
-			self._l = start._l.copy()
+			self._a = start._a[:]
 			self._length = start._length
 			self._max = start._max
 			self._metaindex = start._metaindex
-		elif (
-			isinstance(start, set)
-			or (np is not None and isinstance(start, np.ndarray))
-		):
-			if np is None:
-				self._l = list(start)
-			elif isinstance(start, set):
-				self._l = np.array(list(start))
-			else:
-				self._l = start.copy()
-			self._length = len(self._l)
-			self._metaindex = None
-			self._max = None
 		else:
 			raise Exception('Invalid Index start: %s' % type(start))
 
 	def __getitem__(self, item):
 
 		if isinstance(item, slice):
-			return Index(self._l[item])
+			return Index(self._a[item])
 		if isinstance(item, (tuple, list)):
 			i = Index(0)
 			for row in item:
-				i.append(self._l[row])
+				i.append(self._a[row])
 			return i
-		return self._l[item]
+		return self._a[item]
 
 	def __setitem__(self, index, item):
 
-		self._l[index] = item
+		self._a[index] = item
 
 	def __add__(self, other):
 
-		if np is None:
-			self._l += other
-		else:
-			self._l = np.concatenate([self._l, other])
-		self._length = len(self._l)
+		self._a.extend(other)
+		self._length = len(self._a)
 		self._metaindex = None
 		self._max = None
 		return self
@@ -103,12 +89,12 @@ class Index(OrderedState):
 
 	def __iter__(self):
 
-		for i in self._l:
+		for i in self._a:
 			yield i
 
 	def __unicode__(self):
 
-		return u'Index(%s)' % self._l
+		return u'Index(%s)' % self._a
 
 	def __str__(self):
 
@@ -134,18 +120,15 @@ class Index(OrderedState):
 
 		if self._metaindex is None:
 			self._metaindex = {
-				rowid : index
+				rowid: index
 				for index, rowid
-				in enumerate(self._l)
+				in enumerate(self._a)
 			}
 		return self._metaindex[i]
 
 	def append(self, i):
 
-		if np is None:
-			self._l.append(i)
-		else:
-			self._l = np.concatenate([self._l, [i]])
+		self._a.append(i)
 		self._length += 1
 		self._metaindex = None
 		if i > self._max:
@@ -153,21 +136,14 @@ class Index(OrderedState):
 
 	def copy(self):
 
-		i = Index(0)
-		if np is None:
-			i._l = self._l[:]
-		else:
-			i._l = self._l.copy()
-		i._max = self._max
-		i._length = self._length
-		return i
+		return Index(self)
 
 	@property
 	def max(self):
 
 		if self._max is not None:
 			return self._max
-		self._max = max(self._l)
+		self._max = max(self._a)
 		return self._max
 
 	@property
@@ -175,16 +151,11 @@ class Index(OrderedState):
 
 		if np is None:
 			raise Exception('numpy is not available')
-		#return np.array(self._l, dtype=int)
-		return self._l
+		return np.array(self._a)
 
 	def sorted(self):
 
-		i = Index(0)
-		if np is None:
-			i._l = sorted(self._l)
-		else:
-			i._l = np.sort(self._l)
+		i = Index(sorted(self._a))
 		i._max = self._max
 		i._length = self._length
 		return i
