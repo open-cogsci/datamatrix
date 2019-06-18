@@ -32,7 +32,7 @@ def test_io():
 	io.writetxt(testdm, 'tmp.csv')
 	testdm = io.readtxt('tmp.csv')
 	check_dm(refdm, testdm)
-	
+
 	refdm = io.readtxt('testcases/data/line-ending-cr.csv')
 	check_dm(refdm, testdm)
 	refdm = io.readtxt('testcases/data/line-ending-crlf.csv')
@@ -42,6 +42,9 @@ def test_io():
 	testdm = io.readpickle('tmp.pickle')
 	check_dm(refdm, testdm)
 
+	io.writexlsx(testdm, 'tmp.xlsx')
+	testdm = io.readxlsx('tmp.xlsx')
+	check_dm(refdm, testdm)
 	io.writexlsx(testdm, 'tmp.xlsx')
 	testdm = io.readxlsx('tmp.xlsx')
 	check_dm(refdm, testdm)

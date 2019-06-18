@@ -139,14 +139,9 @@ def from_pandas(df):
 		return dm
 	for colname in df.columns:
 		if isinstance(colname, tuple):
-			_colname = u'_'.join([str(i) for i in colname])
+			_colname = u'_'.join([i for i in colname])
 		else:
 			_colname = colname
-		try:
-			exec('%s = None' % _colname)
-		except SyntaxError:
-			dm[u'_%s' % _colname] = df[colname]
-		else:
-			dm[_colname] = df[colname]
+		dm[_colname] = df[colname]
 	ops.auto_type(dm)
 	return dm

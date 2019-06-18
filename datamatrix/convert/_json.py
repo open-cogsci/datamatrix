@@ -46,12 +46,16 @@ def to_json(dm):
 
 	return json_tricks.dumps(
 		collections.OrderedDict([
-			('rowid', dm._rowid._l),
-			('columns',
+			('rowid', list(dm._rowid._a)),
+			(
+				'columns',
 				collections.OrderedDict([
-					(name, (
-						type(column).__name__,
-						column._seq)
+					(
+						name,
+						(
+							type(column).__name__,
+							column._seq
+						)
 					)
 					for name, column in dm.columns
 				])
@@ -78,7 +82,6 @@ def from_json(s):
 		desc:	A DataMatrix.
 		type:	DataMatrix.
 	"""
-
 
 	import json_tricks
 
