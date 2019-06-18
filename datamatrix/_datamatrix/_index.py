@@ -87,6 +87,10 @@ class Index(OrderedState):
 
 		return self._length
 
+	def __contains__(self, other):
+
+		return other in self._a
+
 	def __iter__(self):
 
 		for i in self._a:

@@ -355,12 +355,14 @@ class BaseColumn(OrderedState):
 
 		col = self._empty_col()
 		col._rowid = Index(_rowid)
-		col._seq = []
-		for row in _rowid:
-			if row in self._rowid:
-				col._seq.append(self._seq[self._rowid.index(row)])
-			else:
-				col._seq.append(other._seq[other._rowid.index(row)])
+		col._seq = [None] * len(_rowid)
+		self_row_id = set(self._rowid)
+		for i, row in enumerate(_rowid):
+			col._seq[i] = (
+				self._seq[self._rowid.index(row)]
+				if row in self_row_id
+				else other._seq[other._rowid.index(row)]
+			)
 		return col
 
 	def _tosequence(self, value, length=None):
