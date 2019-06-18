@@ -35,9 +35,9 @@ for colname, col in dm.columns:
 print(dm.column_names)
 ~~~
 
-Because of a limitation (or feature, if you will) in the Python language, the behavior of `and`, `or`, and chained (`x < y < z`) comparisons cannot be modified. These therefore do not work with `DataMatrix` objects as you would expect them to:
+__Important note:__ Because of a limitation (or feature, if you will) of the Python language, the behavior of `and`, `or`, and chained (`x < y < z`) comparisons cannot be modified. These therefore do not work with `DataMatrix` objects as you would expect them to:
 
-~~~
+~~~ .python
 # INCORRECT: The following does *not* work as expected
 dm = dm.fibonacci > 0 and dm.fibonacci < 3
 # INCORRECT: The following does *not* work as expected
