@@ -30,6 +30,7 @@ import operator
 import math
 import inspect
 import types
+import itertools
 
 
 INF = float('inf')
@@ -390,11 +391,18 @@ class BaseColumn(OrderedState):
 		if value is None or isinstance(value, BASESTRING_OR_NUMBER):
 			return [self._checktype(value)] * length
 		try:
-			if len(value) != length:
-				raise Exception('Sequence has incorrect length: %s' % len(value))
+			iter(value)
 		except TypeError:
 			raise TypeError('Cannot convert to sequence: %s' % value)
-		return [self._checktype(cell) for cell in value]
+		seq = [
+			self._checktype(cell)
+			for cell in itertools.islice(value, 0, length + 1)
+		]
+		if len(seq) != length:
+			raise ValueError(
+				'Sequence length does not match DataMatrix'
+			)
+		return seq
 
 	def _getintkey(self, key):
 
