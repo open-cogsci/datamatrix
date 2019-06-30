@@ -18,12 +18,18 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
-from datamatrix import DataMatrix, MixedColumn, IntColumn, FloatColumn, \
+from datamatrix import (
+	DataMatrix,
+	MixedColumn,
+	IntColumn,
+	FloatColumn,
 	SeriesColumn
+)
 from datamatrix import operations as ops
 from testcases.test_tools import check_col, check_row, check_series
 from nose.tools import eq_, ok_, raises
 import numpy as np
+import itertools
 
 
 def test_replace():
@@ -131,7 +137,15 @@ def test_group():
 	dm.c = IntColumn
 	dm.c = 0, 1, 2, 3
 	dm = ops.group(dm, [dm.a, dm.b])
-	check_series(dm.c, [[3, np.nan], [2, np.nan], [0, 1]]) # Order guaranteed?
+	# Assert that at least one of the permutations passes
+	for ref in itertools.permutations([[3, np.nan], [2, np.nan], [0, 1]]):
+		try:
+			check_series(dm.c, ref)
+			break
+		except AssertionError:
+			pass
+	else:
+		assert(False)
 
 
 def test_sort():
