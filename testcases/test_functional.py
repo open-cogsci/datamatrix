@@ -100,8 +100,6 @@ def test_memoize():
 	add.clear()
 	eq_(add(1,2), (retval, memkey, u'function'))
 	eq_(add(1,2), (retval, memkey, u'memory'))
-	if py3:
-		eq_(add.__doc__, 'test')
 	eq_(add2(1,2), (retval, u'custom-key', u'function'))
 	eq_(add2(1,2), (retval, u'custom-key', u'memory'))
 	add2.clear()
