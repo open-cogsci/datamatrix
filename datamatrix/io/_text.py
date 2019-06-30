@@ -24,6 +24,10 @@ import csv
 import collections
 
 
+# Byte-order marks should be silently stripped
+BOM = u'\ufeff'
+
+
 def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
 
 	"""
@@ -35,6 +39,9 @@ def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
 		~~~ .python
 		dm = io.readtxt('data.csv')
 		~~~
+
+		*Version note:* As of 0.10.7, byte-order marks (BOMs) are silently
+		stripped from column names.
 
 	arguments:
 		path:	The path to the pickle file.
@@ -50,9 +57,16 @@ def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
 
 	d = collections.OrderedDict()
 	with safe_open(path, u'r' if py3 else u'Ur') as csvfile:
-		reader = csv.reader(csvfile, delimiter=delimiter,
-			quotechar=quotechar)
+		reader = csv.reader(
+			csvfile,
+			delimiter=delimiter,
+			quotechar=quotechar
+		)
+		# Register columns while silently stripping BOMs
 		for column in next(reader):
+			column = safe_decode(column)
+			if column.startswith(BOM):
+				column = column[1:]
 			d[column] = []
 		for row in reader:
 			all_columns = list(d.keys())

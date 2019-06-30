@@ -20,6 +20,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix import DataMatrix, io
 from testcases.test_tools import check_dm
 
+
 def test_io():
 
 	refdm = DataMatrix(length=3)
@@ -36,6 +37,8 @@ def test_io():
 	refdm = io.readtxt('testcases/data/line-ending-cr.csv')
 	check_dm(refdm, testdm)
 	refdm = io.readtxt('testcases/data/line-ending-crlf.csv')
+	check_dm(refdm, testdm)
+	refdm = io.readtxt('testcases/data/data-with-bom.csv')
 	check_dm(refdm, testdm)
 
 	io.writepickle(testdm, 'tmp.pickle')
