@@ -36,6 +36,9 @@ __Example:__
 dm = io.readtxt('data.csv')
 ~~~
 
+*Version note:* As of 0.10.7, byte-order marks (BOMs) are silently
+stripped from column names.
+
 __Arguments:__
 
 - `path` -- The path to the pickle file.
