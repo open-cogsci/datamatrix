@@ -27,6 +27,6 @@ from datamatrix._datamatrix._nifticolumn import NiftiColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
 from datamatrix._cache import cached, iscached
 
-__version__ = '0.10.7'
+__version__ = '0.10.8'
 NAN = float('nan')
 INF = float('inf')

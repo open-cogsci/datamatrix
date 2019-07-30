@@ -139,7 +139,7 @@ def from_pandas(df):
 		return dm
 	for colname in df.columns:
 		if isinstance(colname, tuple):
-			_colname = u'_'.join([i for i in colname])
+			_colname = u'_'.join([safe_decode(i) for i in colname])
 		else:
 			_colname = colname
 		dm[_colname] = df[colname]
