@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import sys
 from datamatrix import __version__
 from setuptools import setup, find_packages
 
@@ -25,7 +26,7 @@ from setuptools import setup, find_packages
 DUMMY=1
 
 setup(
-	name=u'python-datamatrix',
+	name=u'datamatrix' if u'bdist_deb' in sys.argv else u'python-datamatrix',
 	version=__version__,
 	description= u'An intuitive, Pythonic way to work with tabular data',
 	author=u'Sebastiaan Mathot',
