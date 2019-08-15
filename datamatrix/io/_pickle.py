@@ -27,10 +27,10 @@ def readpickle(path):
 	"""
 	desc: |
 		Reads a DataMatrix from a pickle file.
-		
+
 		__Example:__
-		
-		~~~.python 
+
+		~~~.python
 		dm = io.readpickle('data.pkl')
 		~~~
 
@@ -42,7 +42,10 @@ def readpickle(path):
 	"""
 
 	with open(path, 'rb') as picklefile:
-		return pickle.load(picklefile)
+		dm = pickle.load(picklefile)
+	if not hasattr(dm._rowid, '_a'):
+		dm = _upgrade_datamatrix_index(dm)
+	return dm
 
 
 def writepickle(dm, path, protocol=-1):
@@ -50,13 +53,13 @@ def writepickle(dm, path, protocol=-1):
 	"""
 	desc: |
 		Writes a DataMatrix to a pickle file.
-		
+
 		__Example:__
-		
-		~~~ .python				
+
+		~~~ .python
 		io.writepickle(dm, 'data.pkl')
 		~~~
-		
+
 
 	arguments:
 		dm:		The DataMatrix to write.
@@ -72,3 +75,17 @@ def writepickle(dm, path, protocol=-1):
 		pass
 	with open(path, 'wb') as picklefile:
 		pickle.dump(dm, picklefile, protocol)
+
+
+def _upgrade_datamatrix_index(dm):
+
+	"""Fixes the Index object of deprecated versions of DataMatrix."""
+
+	from datamatrix._datamatrix._index import Index
+	object.__setattr__(dm, '_rowid', Index(dm._rowid._l))
+	for colname, col in dm.columns:
+		if hasattr(col._rowid, '_l'):
+			object.__setattr__(col, '_rowid', Index(col._rowid._l))
+		else:
+			object.__setattr__(col, '_rowid', Index(col._rowid))
+	return dm
