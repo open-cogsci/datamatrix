@@ -52,6 +52,14 @@ def _test_numericcolumn(cls):
 	check_col(dm.col, [1, 2, 2])
 	dm.col[:-1] = 4, 3
 	check_col(dm.col, [4, 3, 2])
+	# Test setting by DataMatrix
+	dm = DataMatrix(length=10)
+	dm.x = range(10)
+	dm.y = FloatColumn
+	dm = dm.x != {3, 6}
+	dm.y[dm.x > 3] = 10
+	dm.y[dm.x >= 8] = 11
+	check_col(dm.y, [np.nan] * 3 + [10] * 3 + [11] * 2)
 	# Test shortening and lengthening
 	dm = DataMatrix(length=4)
 	dm.length = 0

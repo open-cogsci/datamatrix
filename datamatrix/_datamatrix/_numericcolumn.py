@@ -236,8 +236,7 @@ class NumericColumn(BaseColumn):
 
 		if key != self._datamatrix:
 			raise ValueError('Cannot slice column with a different DataMatrix')
-		orig_indices = self._rowid_argsort()
-		self._seq[orig_indices[key._rowid]] = val
+		self._seq[np.searchsorted(self._rowid, key._rowid)] = val
 
 	def _getslicekey(self, key):
 
