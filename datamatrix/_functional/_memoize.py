@@ -270,7 +270,16 @@ class memoize(object):
 			if os.path.exists(cache_path):
 				self._latest_source = 'disk'
 				with open(cache_path, u'rb') as fd:
-					return True, pickle.load(fd)
+					obj = pickle.load(fd)
+				# Old-style datamatrix objects need to be upgraded so that
+				# memoization keeps working for previously executed functions.
+				if (
+					obj.__class__.__name__ == u'DataMatrix'
+					and not hasattr(obj._rowid, '_a')
+				):
+					from datamatrix.io._pickle import _upgrade_datamatrix_index
+					obj = _upgrade_datamatrix_index(obj)
+				return True, obj
 		elif memkey in self._cache:
 			self._latest_source = 'memory'
 			return True, pickle.loads(self._cache[memkey])
