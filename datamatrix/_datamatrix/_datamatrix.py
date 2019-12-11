@@ -67,6 +67,11 @@ class DataMatrix(OrderedState):
 			self[column_name] = val
 
 	@property
+	def shape(self):
+
+		return len(self), len(self._cols)
+
+	@property
 	def columns(self):
 
 		return self._to_list(self._cols.items(), key=lambda col: col[0])
