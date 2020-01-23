@@ -20,6 +20,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, convert as cnv
 from functools import partial
+import tarfile
 import sys
 import os
 import warnings
@@ -255,6 +256,14 @@ class memoize(object):
 		if self._persistent and not os.path.exists(self._folder):
 			os.mkdir(self._folder)
 
+	def _uncompress_cache(self, cachepath):
+
+		tarxzpath = cachepath + u'.tar.xz'
+		if os.path.exists(cachepath) or not os.path.exists(tarxzpath):
+			return
+		with tarfile.open(tarxzpath) as fd:
+			fd.extractall(os.path.dirname(tarxzpath))
+
 	def _read_cache(self, memkey):
 
 		cache_path = os.path.join(self._folder, memkey)
@@ -267,6 +276,7 @@ class memoize(object):
 				os.remove(cache_path)
 			return False, None
 		if self._persistent:
+			self._uncompress_cache(cache_path)
 			if os.path.exists(cache_path):
 				self._latest_source = 'disk'
 				with open(cache_path, u'rb') as fd:
