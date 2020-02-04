@@ -385,6 +385,8 @@ def reduce_(series, operation=nanmean):
 		type:	FloatColumn
 	"""
 
+	if not isinstance(series, _SeriesColumn):
+		raise TypeError(u'Expecting a SeriesColumn object')
 	col = FloatColumn(series._datamatrix)
 	try:
 		a = operation(series, axis=1)
