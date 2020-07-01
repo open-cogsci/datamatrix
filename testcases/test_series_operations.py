@@ -21,7 +21,6 @@ from datamatrix.py3compat import *
 from datamatrix import DataMatrix, SeriesColumn
 from datamatrix import series
 from testcases.test_tools import check_col, check_series, check_integrity
-from nose.tools import eq_, ok_
 import numpy as np
 
 
@@ -51,7 +50,7 @@ def test_lock():
 	dm.s[0] = 1, 2, 3
 	dm.s[1] = -1, -2, -3
 	dm.l, zero_point = series.lock(dm.s, [-1, 1])
-	eq_(zero_point, 1)
+	assert zero_point == 1
 	check_series(dm.l, [
 		[np.nan, np.nan, 1, 2, 3],
 		[-1, -2, -3, np.nan, np.nan]

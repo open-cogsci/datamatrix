@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from nose.tools import eq_, ok_
 from datamatrix._datamatrix._index import Index
 import numpy as np
 import contextlib
@@ -35,36 +34,36 @@ def all_nan(*l):
 
 def check_dm(dm, ref):
 
-	ok_(dm.column_names == ref.column_names)
+	assert dm.column_names == ref.column_names
 	for column_name in dm.column_names:
-		ok_(not isinstance(column_name, bytes))
+		assert not isinstance(column_name, bytes)
 	for colname in dm.column_names:
 		check_col(dm[colname], ref[colname])
-	ok_(isinstance(dm._rowid, Index))
+	assert isinstance(dm._rowid, Index)
 
 
 def check_col(col, ref):
 
 	check_integrity(col._datamatrix)
-	ok_(len(col) == len(ref))
+	assert len(col) == len(ref)
 	for x, y in zip(col, ref):
 		if x != y:
 			if not (x is None or y is None) and np.isnan(x) and np.isnan(y):
 				continue
 			print(u'Column error: %s != %s' % (col, ref))
-			ok_(False)
+			assert False
 
 
 def check_row(row, ref):
 
 	check_integrity(row._datamatrix)
-	ok_(len(row) == len(ref))
+	assert len(row) == len(ref)
 	for (colname, x), y in zip(row, ref):
 		if x != y:
 			if not (x is None or y is None) and np.isnan(x) and np.isnan(y):
 				continue
 			print(u'Row error: %s != %s' % (row, ref))
-			ok_(False)
+			assert False
 
 
 def check_series(col, ref):
@@ -76,7 +75,7 @@ def check_series(col, ref):
 				continue
 			if not np.isclose(x, y):
 				print(u'Column error: %s != %s' % (col, ref))
-				ok_(False)
+				assert False
 
 
 def check_integrity(dm):
@@ -84,12 +83,12 @@ def check_integrity(dm):
 	for name, col in dm.columns:
 		if len(dm._rowid) != len(col._rowid):
 			print('Integrity failure: %s != %s' % (dm._rowid, col._rowid))
-			ok_(False)
+			assert False
 		for i, j in zip(dm._rowid, col._rowid):
 			if i != j:
 				print('Integrity failure: %s != %s (col: %s)' \
 					% (dm._rowid, col._rowid, name))
-				ok_(False)
+				assert False
 
 @contextlib.contextmanager
 def capture_stdout():

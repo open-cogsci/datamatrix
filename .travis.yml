@@ -6,5 +6,5 @@ virtualenv:
   system_site_packages: true
 before_install:
   - pip install openpyxl fastnumbers json_tricks nilearn nibabel scipy numpy pandas scikit-learn
-script: nosetests testcases/*.py
+script: pytest
 

@@ -20,7 +20,6 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, IntColumn, FloatColumn
 from datamatrix import functional as fnc
-from nose.tools import eq_, ok_
 from testcases.test_tools import capture_stdout
 
 
@@ -30,11 +29,11 @@ def test_map_():
 		dm = DataMatrix(length=2, default_col_type=coltype)
 		dm.a = 1, 2
 		dm.a = fnc.map_(lambda x: x*2, dm.a)
-		eq_(dm.a, [2, 4])
-		ok_(isinstance(dm.a, coltype))
+		assert dm.a == [2, 4]
+		assert isinstance(dm.a, coltype)
 		dm = fnc.map_(lambda **d: {'a' : 0}, dm)
-		eq_(dm.a, [0, 0])
-		ok_(isinstance(dm.a, coltype))
+		assert dm.a == [0, 0]
+		assert isinstance(dm.a, coltype)
 
 
 def test_filter_():
@@ -42,19 +41,19 @@ def test_filter_():
 	dm = DataMatrix(length=4)
 	dm.a = range(4)
 	odd = fnc.filter_(lambda x: x%2, dm.a)
-	ok_(all([x%2 for x in odd]))
+	assert all([x%2 for x in odd])
 	print(type(dm._rowid))
 	dm = fnc.filter_(lambda **d: d['a']%2, dm)
 	print(type(dm._rowid))
-	eq_(dm.a, [1, 3])
+	assert dm.a == [1, 3]
 
 
 def test_setcol():
 
 	dm1 = DataMatrix(length=2)
 	dm2 = fnc.setcol(dm1, 'y', range(2))
-	eq_(dm2.y, [0, 1])
-	ok_('y' not in dm1)
+	assert dm2.y == [0, 1]
+	assert 'y' not in dm1
 
 
 def test_curry():
@@ -66,12 +65,12 @@ def test_curry():
 
 		return a+b+c
 
-	eq_(add(1,2,3), 6)
-	eq_(add(1,2)(3), 6)
-	eq_(add(1)(2,3), 6)
-	eq_(add(1)(2)(3), 6)
+	assert add(1,2,3) == 6
+	assert add(1,2)(3) == 6
+	assert add(1)(2,3) == 6
+	assert add(1)(2)(3) == 6
 	if py3:
-		eq_(add.__doc__, 'test')
+		assert add.__doc__ == 'test'
 
 
 def test_memoize():
@@ -94,18 +93,18 @@ def test_memoize():
 		return a+b
 
 	retval, memkey, src = add(1,2)
-	eq_(retval, 3)
-	eq_(src, u'function')
-	eq_(add(1,2), (retval, memkey, u'memory'))
+	assert retval == 3
+	assert src == u'function'
+	assert add(1,2) == (retval, memkey, u'memory')
 	add.clear()
-	eq_(add(1,2), (retval, memkey, u'function'))
-	eq_(add(1,2), (retval, memkey, u'memory'))
-	eq_(add2(1,2), (retval, u'custom-key', u'function'))
-	eq_(add2(1,2), (retval, u'custom-key', u'memory'))
+	assert add(1,2) == (retval, memkey, u'function')
+	assert add(1,2) == (retval, memkey, u'memory')
+	assert add2(1,2) == (retval, u'custom-key', u'function')
+	assert add2(1,2) == (retval, u'custom-key', u'memory')
 	add2.clear()
-	eq_(add2(1,2), (retval, u'custom-key', u'function'))
-	eq_(add2(1,2), (retval, u'custom-key', u'memory'))
-	eq_(add3(1,2), add3(1,2))
+	assert add2(1,2), (retval, u'custom-key', u'function')
+	assert add2(1,2), (retval, u'custom-key', u'memory')
+	assert add3(1,2), add3(1,2)
 
 
 def test_memoize_chain():
@@ -122,8 +121,8 @@ def test_memoize_chain():
 	with capture_stdout() as out:
 		chain()
 	l = out.getvalue().strip().split('\n')
-	eq_(len(l), 6)
+	assert len(l) == 6
 	with capture_stdout() as out:
 		chain()
 	l = out.getvalue().strip().split('\n')
-	eq_(len(l), 1)
+	assert len(l) == 1

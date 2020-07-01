@@ -21,27 +21,26 @@ from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
 	SeriesColumn
 import numpy as np
-from nose.tools import eq_, ok_
-from nose.tools import assert_almost_equal as aeq
+import pytest
 
 def check_odd(dm):
 
-	aeq(dm.col.mean, 13./3)
-	eq_(dm.col.median, 2)
-	aeq(dm.col.std, np.std( [1,2,10], ddof=1 ))
-	eq_(dm.col.min, 1)
-	eq_(dm.col.max, 10)
-	eq_(dm.col.sum, 13)
+	assert dm.col.mean == pytest.approx(13./3)
+	assert dm.col.median == 2
+	assert dm.col.std  == pytest.approx(np.std( [1,2,10], ddof=1))
+	assert dm.col.min == 1
+	assert dm.col.max == 10
+	assert dm.col.sum == 13
 
 
 def check_even(dm):
 
-	aeq(dm.col.mean, 4)
-	eq_(dm.col.median, 2.5)
-	aeq(dm.col.std, np.std( [1,2,3,10], ddof=1 ))
-	eq_(dm.col.min, 1)
-	eq_(dm.col.max, 10)
-	eq_(dm.col.sum, 16)
+	assert dm.col.mean == pytest.approx(4)
+	assert dm.col.median == 2.5
+	assert dm.col.std == pytest.approx(np.std( [1,2,3,10], ddof=1))
+	assert dm.col.min == 1
+	assert dm.col.max == 10
+	assert dm.col.sum == 16
 
 
 def check_desc_stats(col_type, invalid, assert_invalid):
@@ -65,12 +64,12 @@ def check_desc_stats(col_type, invalid, assert_invalid):
 	# One lengths
 	dm.length = 1
 	dm.col = 1
-	eq_(dm.col.mean, 1)
-	eq_(dm.col.median, 1)
+	assert dm.col.mean == 1
+	assert dm.col.median == 1
 	assert_invalid(dm.col.std)
-	eq_(dm.col.min, 1)
-	eq_(dm.col.max, 1)
-	eq_(dm.col.sum, 1)
+	assert dm.col.min == 1
+	assert dm.col.max == 1
+	assert dm.col.sum == 1
 	# Zero lengths
 	dm.length = 0
 	assert_invalid(dm.col.mean)
@@ -82,12 +81,12 @@ def check_desc_stats(col_type, invalid, assert_invalid):
 
 def assert_None(val):
 
-	ok_(val is None)
+	assert val is None
 
 
 def assert_nan(val):
 
-	ok_(np.isnan(val))
+	assert np.isnan(val)
 
 
 def test_seriescolumn():
@@ -97,15 +96,15 @@ def test_seriescolumn():
 	dm.col[0] = [1,2,3]
 	dm.col[1] = [3,3,3]
 	dm.col[2] = [4,4,4]
-	ok_(all(dm.col.mean == [8./3, 9./3, 10/3.]))
-	ok_(all(dm.col.median == [3,3,3]))
-	ok_(all(dm.col.max == [4,4,4]))
-	ok_(all(dm.col.min == [1,2,3]))
-	ok_(all(dm.col.std == [
+	assert all(dm.col.mean == [8./3, 9./3, 10/3.])
+	assert all(dm.col.median == [3,3,3])
+	assert all(dm.col.max == [4,4,4])
+	assert all(dm.col.min == [1,2,3])
+	assert all(dm.col.std == [
 		np.std([4,3,1], ddof=1),
 		np.std([4,3,2], ddof=1),
 		np.std([4,3,3], ddof=1)
-		]))
+		])
 
 
 def test_mixedcolumn():

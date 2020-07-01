@@ -24,7 +24,7 @@ from datamatrix import (
 )
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from testcases.test_tools import check_col, check_series, check_integrity
-from nose.tools import ok_, raises, eq_
+import pytest
 import numpy as np
 
 
@@ -66,7 +66,7 @@ def _test_numericcolumn(cls):
 	dm.length = 4
 	# Check uniqueness
 	dm.col = 1, 2, 1, 2
-	ok_(sorted(dm.col.unique) == [1,2])
+	assert sorted(dm.col.unique) == [1,2]
 	dm.col[dm.col == 2] = 0, 0
 	check_col(dm.col, [1, 0, 1, 0])
 	check_integrity(dm)
@@ -76,22 +76,22 @@ def _test_numericcolumn(cls):
 	dm.col = 1, 2, 3, 4, 5
 	# int -> float
 	val = dm.col[2]
-	ok_(isinstance(val, (int, float)))
-	eq_(val, 3)
+	assert isinstance(val, (int, float))
+	assert val == 3
 	# (int, int) -> FloatColumn
 	val = dm.col[1, 3]
-	ok_(isinstance(val, cls))
+	assert isinstance(val, cls)
 	check_col(val, [2, 4])
 	# slice -> FloatColumn
 	val = dm.col[1:-1]
-	ok_(isinstance(val, cls))
+	assert isinstance(val, cls)
 	check_col(val, [2, 3, 4])
 	# Check array setting and getting
 	if cls != MixedColumn:
 		a = dm.col.array
-		ok_(isinstance(a, np.ndarray))
-		eq_(a.shape, (5,))
-		ok_(all(a == [1, 2, 3, 4, 5]))
+		assert isinstance(a, np.ndarray)
+		assert a.shape == (5,)
+		assert all(a == [1, 2, 3, 4, 5])
 
 
 def _test_copying(cls):
@@ -101,17 +101,17 @@ def _test_copying(cls):
 	dm2 = dm[:]
 	dm2.e = dm.d
 	dm2.f = dm2.d
-	ok_(dm2 is not dm)
-	ok_(dm2.d is not dm.d)
-	ok_(dm2.e is not dm.d)
-	ok_(dm2.f is dm2.d)
-	ok_(dm2.d._seq is not dm.d._seq)
+	assert dm2 is not dm
+	assert dm2.d is not dm.d
+	assert dm2.e is not dm.d
+	assert dm2.f is dm2.d
+	assert dm2.d._seq is not dm.d._seq
 	dm.c = dm.d
-	ok_(dm.c is dm.d)
-	ok_(dm.c._seq is dm.d._seq)
+	assert dm.c is dm.d
+	assert dm.c._seq is dm.d._seq
 	dm.e = dm.d[:]
-	ok_(dm.e is not dm.d)
-	ok_(dm.e._seq is not dm.d._seq)
+	assert dm.e is not dm.d
+	assert dm.e._seq is not dm.d._seq
 	check_integrity(dm)
 	check_integrity(dm2)
 
@@ -137,20 +137,20 @@ def test_intcolumn():
 	dm.col = 1.9, '2.9'
 	check_col(dm.col, [1, 2])
 	# Test setting invalid values
-	@raises(TypeError)
 	def _():
-		dm.col[0] = 'x'
+		with pytest.raises(TypeError):
+			dm.col[0] = 'x'
 	_()
-	@raises(TypeError)
 	def _():
-		dm.col = 'x'
+		with pytest.raises(TypeError):
+			dm.col = 'x'
 	_()
-	@raises(TypeError)
 	def _():
-		dm.col[:-1] = 'x'
+		with pytest.raises(TypeError):
+			dm.col[:-1] = 'x'
 	_()
 	# Check dtype
-	ok_(dm.col._seq.dtype == np.int64)
+	assert dm.col._seq.dtype == np.int64
 	check_integrity(dm)
 
 
@@ -185,7 +185,7 @@ def test_floatcolumn():
 	dm.col = 'x', None
 	check_col(dm.col, [np.nan, np.nan])
 	# Check dtype
-	ok_(dm.col._seq.dtype == np.float64)
+	assert dm.col._seq.dtype == np.float64
 	check_integrity(dm)
 
 
@@ -251,20 +251,20 @@ def test_seriescolumn():
 	]
 	# (int, int) -> float
 	val = dm.col[2, 2]
-	eq_(val, 13)
-	eq_(type(val), float)
+	assert val == 13
+	assert type(val) == float
 	# (int) -> array
 	val = dm.col[2]
-	ok_(all(val == np.array([11,12,13,14,15])))
-	eq_(type(val), np.ndarray)
+	assert all(val == np.array([11,12,13,14,15]))
+	assert type(val) == np.ndarray
 	# (int, slice) -> array
 	val = dm.col[2, 1:-1]
-	ok_(all(val == np.array([12,13,14])))
-	eq_(type(val), np.ndarray)
+	assert all(val == np.array([12,13,14]))
+	assert type(val) == np.ndarray
 	# (int, (int, int)) -> array
 	val = dm.col[2, (1, 3)]
-	ok_(all(val == np.array([12,14])))
-	eq_(type(val), np.ndarray)
+	assert all(val == np.array([12,14]))
+	assert type(val) == np.ndarray
 	# (slice) -> SeriesColumn
 	val = dm.col[1:-1]
 	check_series(val, [
@@ -273,29 +273,29 @@ def test_seriescolumn():
 	])
 	# (slice, int) -> FloatColumn
 	val = dm.col[1:-1, 2]
-	ok_(isinstance(val, FloatColumn))
+	assert isinstance(val, FloatColumn)
 	check_col(val, [8, 13])
 	# ((int, int), int) -> FloatColumn
 	val = dm.col[(1, 3), 2]
-	ok_(isinstance(val, FloatColumn))
+	assert isinstance(val, FloatColumn)
 	check_col(val, [8, 18])
 	# (slice, slice) -> SeriesColumn
 	val = dm.col[1:-1, 1:-1]
-	ok_(isinstance(val, _SeriesColumn))
+	assert isinstance(val, _SeriesColumn)
 	check_series(val, [
 		[7, 8, 9],
 		[12, 13, 14],
 	])
 	# ((int, int), slice) -> SeriesColumn
 	val = dm.col[(1, 3), 1:-1]
-	ok_(isinstance(val, _SeriesColumn))
+	assert isinstance(val, _SeriesColumn)
 	check_series(val, [
 		[7, 8, 9],
 		[17, 18, 19],
 	])
 	# ((int, int), (int int)) -> SeriesColumn
 	val = dm.col[(1, 3), (1, 3)]
-	ok_(isinstance(val, _SeriesColumn))
+	assert isinstance(val, _SeriesColumn)
 	check_series(val, [
 		[7, 9],
 		[17, 19],
@@ -309,10 +309,10 @@ def test_resize():
 		dm.length += 1
 		for x, y in zip(dm._rowid, range(l)):
 			print(x, y)
-			ok_(x == y)
+			assert x == y
 	for l in range(10, 0, -1):
 		print('shrinking to %d' % l)
 		dm.length -= 1
 		for x, y in zip(dm._rowid, range(l)):
 			print(x, y)
-			ok_(x == y)
+			assert x == y

@@ -21,7 +21,6 @@ from datamatrix.py3compat import *
 from datamatrix import DataMatrix, NiftiColumn
 import nibabel as nib
 import numpy as np
-from nose.tools import ok_
 
 
 def test_nifti():
@@ -37,7 +36,7 @@ def test_nifti():
 		None
 	)
 	m = dm.n.mean.get_data()
-	ok_(np.all(m == np.array([[[.5, .5], [.5, .5]], [[-1, 0], [.5, .5]]])))
+	assert np.all(m == np.array([[[.5, .5], [.5, .5]], [[-1, 0], [.5, .5]]]))
 
 
 test_nifti()

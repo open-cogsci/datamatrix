@@ -19,9 +19,9 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, SeriesColumn
-from nose.tools import raises
 from testcases.test_tools import check_col, check_series, check_integrity
 import numpy as np
+import pytest
 
 
 def check_operations(col_type):
@@ -79,9 +79,9 @@ def check_int_operations():
 	check_col(dm.col, [1, 2])
 	dm.col *= 2.5
 	check_col(dm.col, [2, 4])
-	@raises(TypeError)
 	def _():
-		dm.col *= 'x'
+		with pytest.raises(TypeError):
+			dm.col *= 'x'
 	_()
 	check_integrity(dm)
 

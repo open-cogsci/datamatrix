@@ -20,7 +20,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 import math
 import numpy as np
-from nose.tools import ok_, raises
+import pytest
 from testcases.test_tools import check_col
 from datamatrix import (
 	DataMatrix,
@@ -36,20 +36,20 @@ def check_mixedcolumn_typing():
 
 	dm = DataMatrix(length=4)
 	dm.i = 1, '1', 2, '2'
-	ok_(all(isinstance(v, int) for v in dm.i))
+	assert all(isinstance(v, int) for v in dm.i)
 	dm.f = 1.1, '1.1', 2.1, '2.2'
-	ok_(all(isinstance(v, float) for v in dm.f))
+	assert all(isinstance(v, float) for v in dm.f)
 	dm.inf = INF, -INF, 'inf', '-inf'
-	ok_(all(math.isinf(v) for v in dm.inf))
+	assert all(math.isinf(v) for v in dm.inf)
 	dm.nan = NAN, NAN, 'nan', 'nan'
-	ok_(all(math.isnan(v) for v in dm.nan))
+	assert all(math.isnan(v) for v in dm.nan)
 	dm.none = None, None, None, None
-	ok_(all(v is None for v in dm.none))
+	assert all(v is None for v in dm.none)
 	dm.s = 'alpha', 'beta', 'None', ''
-	ok_(all(isinstance(v, str) for v in dm.s))
-	@raises(TypeError)
+	assert all(isinstance(v, str) for v in dm.s)
 	def _():
-		dm.err = Exception, tuple, str, map
+		with pytest.raises(TypeError):
+			dm.err = Exception, tuple, str, map
 	_()
 
 
@@ -78,18 +78,18 @@ def check_floatcolumn_typing():
 
 	dm = DataMatrix(length=4, default_col_type=FloatColumn)
 	dm.f = 1.1, '1.1', 1, '2'
-	ok_(all(isinstance(v, float) for v in dm.f))
+	assert all(isinstance(v, float) for v in dm.f)
 	dm.inf = INF, -INF, 'inf', '-inf'
-	ok_(all(math.isinf(v) for v in dm.inf))
+	assert all(math.isinf(v) for v in dm.inf)
 	dm.nan = NAN, NAN, 'nan', 'nan'
-	ok_(all(math.isnan(v) for v in dm.nan))
+	assert all(math.isnan(v) for v in dm.nan)
 	dm.none = None, None, None, None
-	ok_(all(math.isnan(v) for v in dm.none))
+	assert all(math.isnan(v) for v in dm.none)
 	dm.s = 'alpha', 'beta', 'None', ' '
-	ok_(all(math.isnan(v) for v in dm.s))
-	@raises(TypeError)
+	assert all(math.isnan(v) for v in dm.s)
 	def _():
-		dm.err = Exception, tuple, str, map
+		with pytest.raises(TypeError):
+			dm.err = Exception, tuple, str, map
 	_()
 
 
@@ -118,26 +118,26 @@ def check_intcolumn_typing():
 
 	dm = DataMatrix(length=4, default_col_type=IntColumn)
 	dm.f = 1.1, '1.8', 2, '2'
-	ok_(all(isinstance(v, int) for v in dm.f))
-	@raises(TypeError)
+	assert all(isinstance(v, int) for v in dm.f)
 	def _():
-		dm.inf = INF, -INF, 'inf', '-inf'
+		with pytest.raises(TypeError):
+			dm.inf = INF, -INF, 'inf', '-inf'
 	_()
-	@raises(TypeError)
 	def _():
-		dm.nan = NAN, NAN, 'nan', 'nan'
+		with pytest.raises(TypeError):
+			dm.nan = NAN, NAN, 'nan', 'nan'
 	_()
-	@raises(TypeError)
 	def _():
-		dm.none = None, None, None, None
+		with pytest.raises(TypeError):
+			dm.none = None, None, None, None
 	_()
-	@raises(TypeError)
 	def _():
-		dm.s = 'alpha', 'beta', 'None', ' '
+		with pytest.raises(TypeError):
+			dm.s = 'alpha', 'beta', 'None', ' '
 	_()
-	@raises(TypeError)
 	def _():
-		dm.err = Exception, tuple, str, map
+		with pytest.raises(TypeError):
+			dm.err = Exception, tuple, str, map
 	_()
 
 
