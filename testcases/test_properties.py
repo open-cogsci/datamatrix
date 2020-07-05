@@ -20,7 +20,6 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn	
 from testcases.test_tools import all_nan
-from nose.tools import eq_
 import numpy as np
 
 
@@ -29,12 +28,12 @@ def _test_numeric_properties(coltype, nan):
 	dm = DataMatrix(length=4, default_col_type=coltype)
 	dm.c = 1, 1, nan, 4
 	dm.d = [nan]*4
-	eq_(dm.c.mean, 2)
-	eq_(dm.c.median, 1)
-	eq_(dm.c.std, np.std([1,1,4], ddof=1))
-	eq_(dm.c.max, 4)
-	eq_(dm.c.min, 1)
-	eq_(dm.c.sum, 6)
+	assert dm.c.mean == 2
+	assert dm.c.median == 1
+	assert dm.c.std == np.std([1,1,4], ddof=1)
+	assert dm.c.max == 4
+	assert dm.c.min == 1
+	assert dm.c.sum == 6
 	all_nan(dm.d.mean, nan)
 	all_nan(dm.d.median, nan)
 	all_nan(dm.d.std, nan)
@@ -49,11 +48,11 @@ def _test_basic_properties(coltype):
 	dm.c = 3,1,2,3
 	dm.d = dm.c
 	dm.e = 3,1,2,3
-	eq_(dm.c.name, ['c', 'd'])
-	eq_(dm.d.name, ['c', 'd'])
-	eq_(dm.e.name, 'e')
-	eq_(list(dm.c.unique), [1,2,3])
-	eq_(dm.c.count, 3)
+	assert dm.c.name == ['c', 'd']
+	assert dm.d.name == ['c', 'd']
+	assert dm.e.name == 'e'
+	assert list(dm.c.unique) == [1,2,3]
+	assert dm.c.count == 3
 	
 	
 def test_intcolumn():

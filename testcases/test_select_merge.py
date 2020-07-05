@@ -20,10 +20,9 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
 	SeriesColumn
-from nose.tools import raises, eq_
 from testcases.test_tools import check_col, check_series, check_integrity
 import numpy as np
-
+import pytest
 
 def check_select(col_type):
 
@@ -63,13 +62,13 @@ def check_getrow(col_type):
 	assert(row.col == 1)
 	row = dm[-1]
 	assert(row.col == 2)
-	@raises(IndexError)
 	def _():
-		row = dm[2]
+		with pytest.raises(IndexError):
+			row = dm[2]
 	_()
-	@raises(IndexError)
 	def _():
-		row = dm[-3]
+		with pytest.raises(IndexError):
+			row = dm[-3]
 	_()
 
 
@@ -95,12 +94,12 @@ def test_mixedcolumn():
 	# Check type selectors
 	dm = DataMatrix(length=6)
 	dm.col = 1, 2, 3, 1.1, 2.1, 'a'
-	eq_(len(dm.col == float), 2)
-	eq_(len(dm.col != float), 4)
-	eq_(len(dm.col == str), 1)
-	eq_(len(dm.col != str), 5)
-	eq_(len(dm.col == int), 3)
-	eq_(len(dm.col != int), 3)
+	assert len(dm.col == float) ==  2
+	assert len(dm.col != float) ==  4
+	assert len(dm.col == str) ==  1
+	assert len(dm.col != str) ==  5
+	assert len(dm.col == int) ==  3
+	assert len(dm.col != int) ==  3
 
 
 def test_floatcolumn():
@@ -125,19 +124,19 @@ def test_floatcolumn():
 	check_col(dm2.col, [np.inf])
 	dm2 = dm.col != np.inf
 	check_col(dm2.col, [1, 2, np.nan])
-	@raises(TypeError)
 	def _():
-		dm.col > ''
+		with pytest.raises(TypeError):
+			dm.col > ''
 	_()
 	# Check type selectors
 	dm = DataMatrix(length=2, default_col_type=FloatColumn)
 	dm.col = 1, 2
-	eq_(len(dm.col == float), 2)
-	eq_(len(dm.col != float), 0)
-	eq_(len(dm.col == str), 0)
-	eq_(len(dm.col != str), 2)
-	eq_(len(dm.col == int), 0)
-	eq_(len(dm.col != int), 2)
+	assert len(dm.col == float) ==  2
+	assert len(dm.col != float) ==  0
+	assert len(dm.col == str) ==  0
+	assert len(dm.col != str) ==  2
+	assert len(dm.col == int) ==  0
+	assert len(dm.col != int) ==  2
 
 
 def test_intcolumn():
@@ -154,19 +153,19 @@ def test_intcolumn():
 	check_col(dm2.col, [])
 	dm2 = dm.col != ''
 	check_col(dm2.col, [1, 2])
-	@raises(TypeError)
 	def _():
-		dm.col > ''
+		with pytest.raises(TypeError):
+			dm.col > ''
 	_()
 	# Check type selectors
 	dm = DataMatrix(length=2, default_col_type=IntColumn)
 	dm.col = 1, 2
-	eq_(len(dm.col == int), 2)
-	eq_(len(dm.col != int), 0)
-	eq_(len(dm.col == float), 0)
-	eq_(len(dm.col != float), 2)
-	eq_(len(dm.col == str), 0)
-	eq_(len(dm.col != str), 2)
+	assert len(dm.col == int) ==  2
+	assert len(dm.col != int) ==  0
+	assert len(dm.col == float) ==  0
+	assert len(dm.col != float) ==  2
+	assert len(dm.col == str) ==  0
+	assert len(dm.col != str) ==  2
 
 def test_seriescolumn():
 

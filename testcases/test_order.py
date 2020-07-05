@@ -21,7 +21,6 @@ from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
 	operations, SeriesColumn
 from testcases.test_tools import check_col, check_integrity
-from nose.tools import eq_, ok_
 import numpy as np
 
 
@@ -69,7 +68,7 @@ def check_shuffle(col_type):
 	dm.col2 = 1,2,3
 	dm = operations.shuffle(dm)
 	for row in dm:
-		ok_(row.col1 == row.col2+10)
+		assert row.col1 == row.col2+10
 	dm.col1 = operations.shuffle(dm.col1)
 	dm.col2 = operations.shuffle(dm.col2)
 	check_integrity(dm)

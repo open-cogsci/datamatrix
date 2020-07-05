@@ -27,9 +27,9 @@ from datamatrix import (
 )
 from datamatrix import operations as ops
 from testcases.test_tools import check_col, check_row, check_series
-from nose.tools import eq_, ok_, raises
 import numpy as np
 import itertools
+import pytest
 
 
 def test_replace():
@@ -81,11 +81,11 @@ def test_split():
 	# Without values
 	g = ops.split(dm.a)
 	val, dm = next(g)
-	eq_(val, 'a')
+	assert val == 'a'
 	check_col(dm.a, ['a', 'a'])
 	check_col(dm.b, [0, 1])
 	val, dm = next(g)
-	eq_(val, 'b')
+	assert val == 'b'
 	check_col(dm.a, ['b', 'b'])
 	check_col(dm.b, [2, 3])
 	# With values
@@ -113,9 +113,9 @@ def test_bin_split():
 	check_col(dm3.a, [2,3])
 	dm1, = ops.bin_split(dm.a, 1)
 	check_col(dm1.a, [0,1,2,3])
-	@raises(ValueError)
 	def _():
-		x, = ops.bin_split(dm.a, 5)
+		with pytest.raises(ValueError):
+			x, = ops.bin_split(dm.a, 5)
 	_()
 
 
@@ -220,9 +220,9 @@ def test_keep_only():
 	dm.c = 'y', 'z'
 	for cols in (['b', 'c'], [dm.b, dm.c]):
 		dm = ops.keep_only(dm, *cols)
-		ok_('a' not in dm.column_names)
-		ok_('b' in dm.column_names)
-		ok_('c' in dm.column_names)
+		assert 'a' not in dm.column_names
+		assert 'b' in dm.column_names
+		assert 'c' in dm.column_names
 
 
 def test_auto_type():
@@ -232,6 +232,6 @@ def test_auto_type():
 	dm.b = 0.1, 1
 	dm.c = 0, 1
 	dm = ops.auto_type(dm)
-	ok_(isinstance(dm.a, MixedColumn))
-	ok_(isinstance(dm.b, FloatColumn))
-	ok_(isinstance(dm.c, IntColumn))
+	assert isinstance(dm.a, MixedColumn)
+	assert isinstance(dm.b, FloatColumn)
+	assert isinstance(dm.c, IntColumn)
