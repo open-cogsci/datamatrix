@@ -3,7 +3,7 @@
 *An intuitive, Pythonic way to work with tabular data.*
 
 Sebastiaan Mathôt  <br />
-Copyright 2015-2019  <br />
+Copyright 2015-2020  <br />
 http://www.cogsci.nl/smathot
 
 [![Build Status](https://travis-ci.org/smathot/python-datamatrix.svg?branch=master)](https://travis-ci.org/smathot/python-datamatrix)
@@ -32,14 +32,33 @@ Optional:
 
 ## Installation
 
+
+### PyPi
+
 ~~~
 pip install python-datamatrix
 ~~~
 
 
+### Anaconda
+
+~~~
+conda install python-datamatrix -c cogsci -c conda-forge
+~~~
+
+
+### Ubuntu
+
+~~~
+sudo add-apt-repository ppa:smathot/cogscinl
+sudo apt-get update
+sudo apt install python3-datamatrix
+~~~
+
+
 ## Documentation
 
-See <http://datamatrix.cogsci.nl/>
+See <https://datamatrix.cogsci.nl/>
 
 
 ## License
