@@ -4,7 +4,7 @@
 This file is part of datamatrix.
 
 datamatrix is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public licensese as published by
+it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
@@ -18,15 +18,15 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
-import datamatrix.monkeypatch
-from datamatrix._datamatrix._row import Row
-from datamatrix._datamatrix._mixedcolumn import MixedColumn
-from datamatrix._datamatrix._numericcolumn import FloatColumn, IntColumn
-from datamatrix._datamatrix._seriescolumn import SeriesColumn
-from datamatrix._datamatrix._nifticolumn import NiftiColumn
-from datamatrix._datamatrix._datamatrix import DataMatrix
-from datamatrix._cache import cached, iscached
 
-__version__ = '0.10.18'
-NAN = float('nan')
-INF = float('inf')
+
+class CallableValue(object):
+        
+    def __call__(self, *args, **kwargs):
+        
+        return self
+
+
+class CallableFloat(float, CallableValue):
+    
+    pass

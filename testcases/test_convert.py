@@ -4,7 +4,7 @@
 This file is part of datamatrix.
 
 datamatrix is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public licensese as published by
+it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
@@ -17,16 +17,19 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
-import datamatrix.monkeypatch
-from datamatrix._datamatrix._row import Row
-from datamatrix._datamatrix._mixedcolumn import MixedColumn
-from datamatrix._datamatrix._numericcolumn import FloatColumn, IntColumn
-from datamatrix._datamatrix._seriescolumn import SeriesColumn
-from datamatrix._datamatrix._nifticolumn import NiftiColumn
-from datamatrix._datamatrix._datamatrix import DataMatrix
-from datamatrix._cache import cached, iscached
+from datamatrix import DataMatrix, convert as cnv, io
+from testcases.test_tools import check_dm
 
-__version__ = '0.10.18'
-NAN = float('nan')
-INF = float('inf')
+
+def test_convert():
+
+	refdm = DataMatrix(length=3)
+	refdm[u'tést'] = 1, 2, u''
+	refdm.B = u'mathôt', u'b', u'x'
+	refdm.C = u'a,\\b"\'c', 8, u''
+	testdm = io.readtxt('testcases/data/data.csv')
+	check_dm(refdm, testdm)
+	testdm = cnv.from_json(cnv.to_json(testdm))
+	check_dm(refdm, testdm)
+	testdm = cnv.from_pandas(cnv.to_pandas(testdm))
+	check_dm(refdm, testdm)

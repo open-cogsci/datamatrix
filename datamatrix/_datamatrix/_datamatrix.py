@@ -27,6 +27,23 @@ import collections
 _id = 0
 
 
+def mimic_DataFrame(function_name):
+	
+	def inner(fnc):
+	
+		def innermost(self, *args, **kwargs):
+			
+			from datamatrix import convert as cnv
+			df_in = cnv.to_pandas(self)
+			fnc = getattr(df_in, function_name)
+			df_out = fnc(*args, **kwargs)
+			return df_out
+			
+		return innermost
+		
+	return inner
+
+
 class DataMatrix(OrderedState):
 
 	"""
@@ -109,6 +126,38 @@ class DataMatrix(OrderedState):
 				return False
 		return True
 
+	def equals(self, other):
+		
+		"""
+		visible: False
+
+		desc:
+			Mimics pandas.DataFrame API
+		"""
+		
+		if (
+			not isinstance(other, DataMatrix) or
+			len(self.columns) != len(other.columns)
+		):
+			return False
+		for colname in self.column_names:
+			if (
+				colname not in other or
+				not other[colname].equals(self[colname])
+			):
+				return False
+		return True
+
+	@mimic_DataFrame('drop_duplicates')
+	def drop_duplicates(self, *args, **kwargs):
+
+		pass
+		
+	@mimic_DataFrame('groupby')
+	def groupby(self, *args, **kwargs):
+		
+		pass
+		
 	def rename(self, old, new):
 
 		"""
@@ -619,7 +668,12 @@ class DataMatrix(OrderedState):
 			return self._getcolbyname(key)
 		if isinstance(key, int):
 			return self._getrow(key)
-		if isinstance(key, slice) or isinstance(key, collections.Sequence):
+		if isinstance(key, slice):
+			return self._slice(key)
+		if isinstance(key, collections.Sequence):
+			if all(isinstance(v, basestring) for v in key):
+				from datamatrix import operations as ops
+				return ops.keep_only(self, *key)
 			return self._slice(key)
 		raise KeyError('Invalid key, index, or slice: %s' % key)
 

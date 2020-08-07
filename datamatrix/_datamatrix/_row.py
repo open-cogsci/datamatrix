@@ -43,6 +43,22 @@ class Row(object):
 	@property
 	def column_names(self):
 		return self._datamatrix.column_names
+
+	def equals(self, other):
+		
+		"""
+		visible: False
+
+		desc:
+			Mimics pandas.DataFrame API
+		"""
+		
+		if not isinstance(other, Row) or len(self) != len(other):
+			return False
+		for val1, val2 in zip(self, other):
+			if val1 != val2 and (val1 == val1 or val2 == val2):
+				return False
+		return True
 		
 	def __dir__(self):
 		

@@ -23,6 +23,7 @@ desc: pass
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._index import Index
 from datamatrix._ordered_state import OrderedState
+from datamatrix._datamatrix._callable_values import CallableFloat
 from datamatrix._datamatrix._sort import sortable, fastnumbers
 import collections
 import numbers
@@ -73,6 +74,22 @@ class BaseColumn(OrderedState):
 		self._init_rowid()
 		self._init_seq()
 
+	def equals(self, other):
+		
+		"""
+		visible: False
+
+		desc:
+			Mimics pandas.DataFrame API
+		"""
+		
+		if not isinstance(other, BaseColumn) or len(self) != len(other):
+			return False
+		for val1, val2 in zip(self, other):
+			if val1 != val2 and (val1 == val1 or val2 == val2):
+				return False
+		return True
+
 	@property
 	def unique(self):
 
@@ -114,7 +131,7 @@ class BaseColumn(OrderedState):
 		n = self._numbers
 		if len(n) == 0:
 			return NAN
-		return sum(n) / len(n)
+		return CallableFloat(sum(n) / len(n))
 
 	@property
 	def median(self):
@@ -134,7 +151,7 @@ class BaseColumn(OrderedState):
 		i = int(len(n)/2)
 		if len(n) % 2 == 1:
 			return n[i]
-		return .5*n[i]+.5*n[i-1]
+		return CallableFloat(.5*n[i]+.5*n[i-1])
 
 	@property
 	def std(self):
@@ -152,7 +169,7 @@ class BaseColumn(OrderedState):
 		n = self._numbers
 		if len(n) <= 1:
 			return NAN
-		return math.sqrt(sum((i-m)**2 for i in n)/(len(n)-1))
+		return CallableFloat(math.sqrt(sum((i-m)**2 for i in n)/(len(n)-1)))
 
 	@property
 	def max(self):
@@ -168,7 +185,7 @@ class BaseColumn(OrderedState):
 		n = self._numbers
 		if not len(n):
 			return NAN
-		return max(n)
+		return CallableFloat(max(n))
 
 	@property
 	def min(self):
@@ -183,8 +200,8 @@ class BaseColumn(OrderedState):
 
 		n = self._numbers
 		if not len(n):
-			return NAN
-		return min(n)
+			return CallableFloat(NAN)
+		return CallableFloat(min(n))
 
 	@property
 	def sum(self):
@@ -200,7 +217,7 @@ class BaseColumn(OrderedState):
 		n = self._numbers
 		if not len(n):
 			return NAN
-		return sum(n)
+		return CallableFloat(sum(n))
 
 	@property
 	def name(self):

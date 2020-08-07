@@ -19,6 +19,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._basecolumn import BaseColumn, NUMBER
+from datamatrix._datamatrix._callable_values import CallableFloat
 from datamatrix._datamatrix._index import Index
 import operator
 import warnings
@@ -61,12 +62,12 @@ class NumericColumn(BaseColumn):
 	@property
 	def mean(self):
 
-		return nanmean(self._seq)
+		return CallableFloat(nanmean(self._seq))
 
 	@property
 	def median(self):
 
-		return nanmedian(self._seq)
+		return CallableFloat(nanmedian(self._seq))
 
 	@property
 	def std(self):
@@ -74,28 +75,28 @@ class NumericColumn(BaseColumn):
 		# By default, ddof=0. The more normal calculation is to use ddof=1, so
 		# we change that here. See also:
 		# - http://stackoverflow.com/questions/27600207
-		return nanstd(self._seq, ddof=1)
+		return CallableFloat(nanstd(self._seq, ddof=1))
 
 	@property
 	def max(self):
 
 		if not len(self._seq):
-			return np.nan
-		return np.nanmax(self._seq)
+			return CallableFloat(np.nan)
+		return CallableFloat(np.nanmax(self._seq))
 
 	@property
 	def min(self):
 
 		if not len(self._seq):
-			return np.nan
-		return np.nanmin(self._seq)
+			return CallableFloat(np.nan)
+		return CallableFloat(np.nanmin(self._seq))
 
 	@property
 	def sum(self):
 
 		if not len(self._seq):
-			return np.nan
-		return np.nansum(self._seq)
+			return CallableFloat(np.nan)
+		return CallableFloat(np.nansum(self._seq))
 
 	@property
 	def array(self):
