@@ -109,7 +109,7 @@ python: |
  print(dm)
 --%
 
-If you do not know the name of a column, for example becaues it is defined by a variable, you can also refer to columns as though they are items of a `dict`. However, this is *not* recommended, because it makes it less clear whether you are referring to column or a row.
+If you do not know the name of a column, for example because it is defined by a variable, you can also refer to columns as though they are items of a `dict`. However, this is *not* recommended, because it makes it less clear whether you are referring to column or a row.
 
 %--
 python: |
@@ -336,7 +336,7 @@ python: |
 The <code>@</code> operator is only available in Python 3.5 and later.
 </div>
 
-You can apply a function or `lambda` expression to all cells in a column simulataneously with the `@` operator.
+You can apply a function or `lambda` expression to all cells in a column simultaneously with the `@` operator.
 
 %--
 python: |
@@ -530,3 +530,21 @@ figure:
  source: sinewave-series.png
  id: FigSineWaveSeries
 --%
+
+
+## Reading and writing files
+
+You can read and write files with functions from the `datamatrix.io` module. The main supported file types are `csv` and `xlsx`.
+
+```python
+from datamatrix import io
+
+dm = DataMatrix(length=3)
+dm.col = 1, 2, 3
+# Write to disk
+io.writetxt(dm, 'my_datamatrix.csv')
+io.writexlsx(dm, 'my_datamatrix.xlsx')
+# And read it back from disk!
+dm = io.readtxt('my_datamatrix.csv')
+dm = io.readxlsx('my_datamatrix.xlsx')
+```

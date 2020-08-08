@@ -14,6 +14,7 @@ from pelican.readers import MarkdownReader
 from markdown import Markdown
 from markdown.extensions.toc import TocExtension
 from markdown.extensions.tables import TableExtension
+from markdown.extensions import codehilite
 from academicmarkdown import build, HTMLFilter, _FigureParser
 if 'publishconf.py' in sys.argv:
 	from publishconf import *
@@ -64,9 +65,8 @@ class AcademicMarkdownReader(MarkdownReader):
 				'markdown.extensions.toc',
 				'markdown.extensions.tables',
 				'markdown.extensions.meta',
-				'markdown.extensions.headerid',
 				'markdown.extensions.extra',
-				'markdown.extensions.codehilite(css_class=highlight)',
+				codehilite.CodeHiliteExtension(css_class='highlight'),
 				],
 			)
 		img_path = os.path.dirname(source_path) + '/img/' \

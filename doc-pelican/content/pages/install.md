@@ -15,7 +15,7 @@ The following packages are required for extra functionality:
 
 ## Installation
 
-The easiest way to install `DataMatrix` is through PyPi (`pip install`):
+### PyPi (pip install)
 
 ~~~
 pip install python-datamatrix
@@ -26,6 +26,30 @@ Optional dependencies:
 ~~~
 pip install fastnumbers numpy scipy prettytable openpyxl pandas json_tricks
 ~~~
+
+
+### Anaconda
+
+~~~
+conda install -c conda-forge datamatrix
+~~~
+
+Optional dependencies:
+
+
+~~~
+conda install -c conda-forge scipy pandas json_tricks
+~~~
+
+
+### Ubuntu
+
+~~~
+sudo add-apt-repository ppa:smathot/cogscinl
+sudo apt-get update
+sudo apt install python3-datamatrix
+~~~
+
 
 ## Source code
 

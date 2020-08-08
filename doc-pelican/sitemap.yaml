@@ -1,8 +1,8 @@
 Install: install
 Tutorials:
     Basic use: basic
-    Plotting: plotting
-    Statistics: statistics
+    Plotting: https://python.cogsci.nl/numerical/plotting
+    Statistics: https://python.cogsci.nl/numerical/statistics
     Working with series: series-tutorial
     Memoization (caching): memoization
     Analyzing eye-movement data: eyelinkparser
