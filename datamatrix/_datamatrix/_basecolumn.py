@@ -115,6 +115,17 @@ class BaseColumn(OrderedState):
 
 		return len(self.unique)
 
+	@property
+	def shape(self):
+		
+		"""
+		name:	shape
+
+		desc:
+			A tuple containing the length of the column.
+		"""		
+
+		return (len(self),)
 
 	@property
 	def mean(self):

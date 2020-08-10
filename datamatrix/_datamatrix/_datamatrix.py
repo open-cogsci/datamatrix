@@ -89,6 +89,11 @@ class DataMatrix(OrderedState):
 		return len(self), len(self._cols)
 
 	@property
+	def empty(self):
+		
+		return not len(self) or not len(self._cols)
+
+	@property
 	def columns(self):
 
 		return self._to_list(self._cols.items(), key=lambda col: col[0])
@@ -149,14 +154,9 @@ class DataMatrix(OrderedState):
 		return True
 
 	@mimic_DataFrame('drop_duplicates')
-	def drop_duplicates(self, *args, **kwargs):
-
-		pass
-		
+	def drop_duplicates(self, *args, **kwargs): pass
 	@mimic_DataFrame('groupby')
-	def groupby(self, *args, **kwargs):
-		
-		pass
+	def groupby(self, *args, **kwargs): pass
 		
 	def rename(self, old, new):
 

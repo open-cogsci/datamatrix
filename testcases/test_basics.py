@@ -316,3 +316,19 @@ def test_resize():
 		for x, y in zip(dm._rowid, range(l)):
 			print(x, y)
 			assert x == y
+
+
+def test_properties():
+	
+	dm = DataMatrix(length=0)
+	dm.c = -1
+	assert dm.empty
+	dm = DataMatrix(length=1)
+	assert dm.empty
+	dm = DataMatrix(length=1)
+	dm.c = -1
+	assert not dm.empty
+	dm = DataMatrix(length=3)
+	dm.c = -1
+	dm.d = -1
+	assert len(dm) == 3

@@ -53,6 +53,7 @@ def _test_basic_properties(coltype):
 	assert dm.e.name == 'e'
 	assert list(dm.c.unique) == [1,2,3]
 	assert dm.c.count == 3
+	assert dm.c.shape == (4,)
 	
 	
 def test_intcolumn():
