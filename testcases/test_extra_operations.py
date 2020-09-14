@@ -159,6 +159,30 @@ def test_sort():
 	dm = ops.sort(dm, by=dm.b)
 	check_col(dm.a, ['b', 'a'])
 	check_col(dm.b, [0, 1])
+	
+	
+def test_random_sample():
+	
+	dm = DataMatrix(length=3)
+	dm.a = 0, 1, 2
+	options = [
+		[0, 1],
+		[0, 2],
+		[1, 2],
+		[1, 0],
+		[2, 0],
+		[2, 1]
+	]
+	o = options[:]
+	while o:
+		col = ops.random_sample(dm.a, k=2)
+		if list(col) in o:
+			o.remove(list(col))
+	o = options[:]
+	while o:
+		dm2 = ops.random_sample(dm, k=2)
+		if list(dm2.a) in o:
+			o.remove(list(dm2.a))
 
 
 def test_shuffle():
@@ -220,6 +244,10 @@ def test_keep_only():
 	dm.c = 'y', 'z'
 	for cols in (['b', 'c'], [dm.b, dm.c]):
 		dm = ops.keep_only(dm, *cols)
+		assert 'a' not in dm.column_names
+		assert 'b' in dm.column_names
+		assert 'c' in dm.column_names
+		dm = dm[cols]
 		assert 'a' not in dm.column_names
 		assert 'b' in dm.column_names
 		assert 'c' in dm.column_names
