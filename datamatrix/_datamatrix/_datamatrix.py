@@ -671,7 +671,7 @@ class DataMatrix(OrderedState):
 		if isinstance(key, slice):
 			return self._slice(key)
 		if isinstance(key, collections.Sequence):
-			if all(isinstance(v, basestring) for v in key):
+			if all(isinstance(v, (basestring, BaseColumn)) for v in key):
 				from datamatrix import operations as ops
 				return ops.keep_only(self, *key)
 			return self._slice(key)
