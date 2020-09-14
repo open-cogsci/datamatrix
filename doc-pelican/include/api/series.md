@@ -14,7 +14,7 @@ __Example:__
 python: |
  import numpy as np
  from matplotlib import pyplot as plt
- from datamatrix import DataMatrix, SeriesColumn, series
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
 
  LENGTH = 5 # Number of rows
  DEPTH = 10 # Depth (or length) of SeriesColumns
@@ -31,7 +31,7 @@ python: |
  dm.y += .2*np.random.random( (LENGTH, DEPTH) )
  # Baseline-correct the traces, This will remove the vertical
  # offset
- dm.y2 = series.baseline(dm.y, dm.y, bl_start=0, bl_end=10)
+ dm.y2 = srs.baseline(dm.y, dm.y, bl_start=0, bl_end=10)
 
  plt.clf()
  plt.subplot(121)
@@ -158,7 +158,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7fa5b3da9f28>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7feaf3363bf8>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times shorter.
 The depth of the downsampled series is the highest multiple of the depth
@@ -171,7 +171,7 @@ __Example:__
 python: |
  import numpy as np
  from matplotlib import pyplot as plt
- from datamatrix import DataMatrix, SeriesColumn, series
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
 
  LENGTH = 1 # Number of rows
  DEPTH = 100 # Depth (or length) of SeriesColumns
@@ -181,7 +181,7 @@ python: |
  dm = DataMatrix(length=LENGTH)
  dm.y = SeriesColumn(depth=DEPTH)
  dm.y.setallrows(sinewave)
- dm.y2 = series.downsample(dm.y, by=10)
+ dm.y2 = srs.downsample(dm.y, by=10)
 
  plt.clf()
  plt.subplot(121)
@@ -209,7 +209,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7fa5b3da9f28>
+	- Default: <function nanmean at 0x7feaf3363bf8>
 
 __Returns:__
 
@@ -232,7 +232,7 @@ __Example:__
 python: |
  import numpy as np
  from matplotlib import pyplot as plt
- from datamatrix import DataMatrix, SeriesColumn, series
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
 
  LENGTH = 5 # Number of rows
  DEPTH = 10 # Depth (or length) of SeriesColumns
@@ -250,7 +250,7 @@ python: |
         row.y[-i:] = np.nan
  # Lock the degraded traces to the end, so that all nans
  # now come at the start of the trace
- dm.y2 = series.endlock(dm.y)
+ dm.y2 = srs.endlock(dm.y)
 
  plt.clf()
  plt.subplot(121)
@@ -296,7 +296,7 @@ __Example:__
 python: |
  import numpy as np
  from matplotlib import pyplot as plt
- from datamatrix import DataMatrix, SeriesColumn, series
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
 
  LENGTH = 3
  DEPTH = 200
@@ -307,7 +307,7 @@ python: |
  dm.s[0] = np.sin(np.linspace(0, 150 * np.pi, DEPTH))
  dm.s[1] = np.sin(np.linspace(0, 75 * np.pi, DEPTH))
  dm.s[2] = np.sin(np.linspace(0, 10 * np.pi, DEPTH))
- dm.f = series.fft(dm.s)
+ dm.f = srs.fft(dm.s)
 
  # Plot the original signal
  plt.clf()
@@ -352,13 +352,13 @@ The FFT of the signal.
 
 <div class="FunctionDoc YAMLDoc" id="filter_bandpass" markdown="1">
 
-## function __filter\_bandpass__\(series, freq\_range, order=2\)
+## function __filter\_bandpass__\(series, freq\_range, order=2, sampling\_freq=None\)
 
 *New in v0.9.2*
 
-Applies a Butterworth low-pass filter to the signal. The filter
-frequency is a number between 1 and depth/2 - 1 (i.e. one less than the
-Nyquist frequency).
+*Changed in v0.11.0: added `sampling_freq` argument* 
+
+Applies a Butterworth bandpass-pass filter to the signal.
 
 For more information, see [`scipy.signal`](https://docs.scipy.org/doc/scipy/reference/signal.html).
 
@@ -366,35 +366,36 @@ __Example:__
 
 %--
 python: |
- import numpy as np
- from matplotlib import pyplot as plt
- from datamatrix import DataMatrix, SeriesColumn, series
-
- LENGTH = 3
- DEPTH = 200
-
- # Create a fast, a medium, and a slow oscillation
- dm = DataMatrix(length=LENGTH)
- dm.s = SeriesColumn(depth=DEPTH)
- dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))
- dm.s[1] = np.sin(np.linspace(0, 10 * np.pi, DEPTH))
- dm.s[2] = np.cos(np.linspace(0, 1 * np.pi, DEPTH))
- dm.f = series.filter_bandpass(dm.s, freq_range=(4, 6))
-
- # Plot the original signal
- plt.clf()
- plt.subplot(121)
- plt.title('Original')
- plt.plot(dm.s[0])
- plt.plot(dm.s[1])
- plt.plot(dm.s[2])
- plt.subplot(122)
- # And the filtered signal!
- plt.title('Bandpass')
- plt.plot(dm.f[0])
- plt.plot(dm.f[1])
- plt.plot(dm.f[2])
- plt.savefig('content/pages/img/series/bandpass.png')
+        import numpy as np
+        from matplotlib import pyplot as plt
+        from datamatrix import DataMatrix, SeriesColumn, series as srs
+        
+        LENGTH = 3
+        DEPTH = 100
+        SAMPLING_FREQ = 100
+        
+        # Create one fast oscillation, and two combined fast and slow oscillations
+        dm = DataMatrix(length=LENGTH)
+        dm.s = SeriesColumn(depth=DEPTH)
+        dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))  # 10 Hz
+        dm.s[1] = np.sin(np.linspace(0, 10 * np.pi, DEPTH)) + dm.s[0]  # 5 Hz
+        dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
+        dm.f = srs.filter_bandpass(dm.s, freq_range=(4, 6), sampling_freq=SAMPLING_FREQ)
+        
+        # Plot the original signal
+        plt.clf()
+        plt.subplot(121)
+        plt.title('Original')
+        plt.plot(dm.s[0])
+        plt.plot(dm.s[1])
+        plt.plot(dm.s[2])
+        plt.subplot(122)
+        # And the filtered signal!
+        plt.title('Bandpass')
+        plt.plot(dm.f[0])
+        plt.plot(dm.f[1])
+        plt.plot(dm.f[2])
+        plt.savefig('content/pages/img/series/bandpass.png')
 --%
 
 %--
@@ -415,6 +416,9 @@ __Keywords:__
 - `order` -- The order of the filter.
 	- Type: int
 	- Default: 2
+- `sampling_freq` -- The sampling frequence of the signal, or `None` to use the scipy default of 2 half-cycles per sample.
+	- Type: int, None
+	- Default: None
 
 __Returns:__
 
@@ -426,13 +430,13 @@ The filtered signal.
 
 <div class="FunctionDoc YAMLDoc" id="filter_highpass" markdown="1">
 
-## function __filter\_highpass__\(series, freq\_min, order=2\)
+## function __filter\_highpass__\(series, freq\_min, order=2, sampling\_freq=None\)
 
 *New in v0.9.2*
 
-Applies a Butterworth low-pass filter to the signal. The filter
-frequency is a number between 1 and depth/2 - 1 (i.e. one less than the
-Nyquist frequency).
+*Changed in v0.11.0: added `sampling_freq` argument* 
+
+Applies a Butterworth highpass-pass filter to the signal.
 
 For more information, see [`scipy.signal`](https://docs.scipy.org/doc/scipy/reference/signal.html).
 
@@ -440,35 +444,36 @@ __Example:__
 
 %--
 python: |
- import numpy as np
- from matplotlib import pyplot as plt
- from datamatrix import DataMatrix, SeriesColumn, series
-
- LENGTH = 3
- DEPTH = 200
-
- # Create one fast oscillation, and two combined fast and slow oscillations
- dm = DataMatrix(length=LENGTH)
- dm.s = SeriesColumn(depth=DEPTH)
- dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))
- dm.s[1] = np.sin(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]
- dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]
- dm.f = series.filter_highpass(dm.s, freq_min=3)
-
- # Plot the original signal
- plt.clf()
- plt.subplot(121)
- plt.title('Original')
- plt.plot(dm.s[0])
- plt.plot(dm.s[1])
- plt.plot(dm.s[2])
- plt.subplot(122)
- # And the filtered signal!
- plt.title('Highpass')
- plt.plot(dm.f[0])
- plt.plot(dm.f[1])
- plt.plot(dm.f[2])
- plt.savefig('content/pages/img/series/highpass.png')
+        import numpy as np
+        from matplotlib import pyplot as plt
+        from datamatrix import DataMatrix, SeriesColumn, series as srs
+        
+        LENGTH = 3
+        DEPTH = 100
+        SAMPLING_FREQ = 100
+        
+        # Create one fast oscillation, and two combined fast and slow oscillations
+        dm = DataMatrix(length=LENGTH)
+        dm.s = SeriesColumn(depth=DEPTH)
+        dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))  # 10 Hz
+        dm.s[1] = np.sin(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
+        dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
+        dm.f = srs.filter_highpass(dm.s, freq_min=3, sampling_freq=SAMPLING_FREQ)
+        
+        # Plot the original signal
+        plt.clf()
+        plt.subplot(121)
+        plt.title('Original')
+        plt.plot(dm.s[0])
+        plt.plot(dm.s[1])
+        plt.plot(dm.s[2])
+        plt.subplot(122)
+        # And the filtered signal!
+        plt.title('Highpass')
+        plt.plot(dm.f[0])
+        plt.plot(dm.f[1])
+        plt.plot(dm.f[2])
+        plt.savefig('content/pages/img/series/highpass.png')
 --%
 
 %--
@@ -489,6 +494,9 @@ __Keywords:__
 - `order` -- The order of the filter.
 	- Type: int
 	- Default: 2
+- `sampling_freq` -- The sampling frequence of the signal, or `None` to use the scipy default of 2 half-cycles per sample.
+	- Type: int, None
+	- Default: None
 
 __Returns:__
 
@@ -500,13 +508,13 @@ The filtered signal.
 
 <div class="FunctionDoc YAMLDoc" id="filter_lowpass" markdown="1">
 
-## function __filter\_lowpass__\(series, freq\_max, order=2\)
+## function __filter\_lowpass__\(series, freq\_max, order=2, sampling\_freq=None\)
 
 *New in v0.9.2*
 
-Applies a Butterworth low-pass filter to the signal. The filter
-frequency is a number between 1 and depth/2 - 1 (i.e. one less than the
-Nyquist frequency).
+*Changed in v0.11.0: added `sampling_freq` argument* 
+
+Applies a Butterworth low-pass filter to the signal.
 
 For more information, see [`scipy.signal`](https://docs.scipy.org/doc/scipy/reference/signal.html).
 
@@ -514,35 +522,36 @@ __Example:__
 
 %--
 python: |
- import numpy as np
- from matplotlib import pyplot as plt
- from datamatrix import DataMatrix, SeriesColumn, series
-
- LENGTH = 3
- DEPTH = 200
-
- # Create one fast oscillation, and two combined fast and slow oscillations
- dm = DataMatrix(length=LENGTH)
- dm.s = SeriesColumn(depth=DEPTH)
- dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))
- dm.s[1] = np.sin(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]
- dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]
- dm.f = series.filter_lowpass(dm.s, freq_max=3)
-
- # Plot the original signal
- plt.clf()
- plt.subplot(121)
- plt.title('Original')
- plt.plot(dm.s[0])
- plt.plot(dm.s[1])
- plt.plot(dm.s[2])
- plt.subplot(122)
- # And the filtered signal!
- plt.title('Lowpass')
- plt.plot(dm.f[0])
- plt.plot(dm.f[1])
- plt.plot(dm.f[2])
- plt.savefig('content/pages/img/series/lowpass.png')
+        import numpy as np
+        from matplotlib import pyplot as plt
+        from datamatrix import DataMatrix, SeriesColumn, series as srs
+        
+        LENGTH = 3
+        DEPTH = 100
+        SAMPLING_FREQ = 100
+        
+        # Create one fast oscillation, and two combined fast and slow oscillations
+        dm = DataMatrix(length=LENGTH)
+        dm.s = SeriesColumn(depth=DEPTH)
+        dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))  # 10 Hz
+        dm.s[1] = np.sin(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
+        dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
+        dm.f = srs.filter_lowpass(dm.s, freq_max=3, sampling_freq=SAMPLING_FREQ)
+        
+        # Plot the original signal
+        plt.clf()
+        plt.subplot(121)
+        plt.title('Original')
+        plt.plot(dm.s[0])
+        plt.plot(dm.s[1])
+        plt.plot(dm.s[2])
+        plt.subplot(122)
+        # And the filtered signal!
+        plt.title('Lowpass')
+        plt.plot(dm.f[0])
+        plt.plot(dm.f[1])
+        plt.plot(dm.f[2])
+        plt.savefig('content/pages/img/series/lowpass.png')
 --%
 
 %--
@@ -563,6 +572,9 @@ __Keywords:__
 - `order` -- The order of the filter.
 	- Type: int
 	- Default: 2
+- `sampling_freq` -- The sampling frequence of the signal, or `None` to use the scipy default of 2 half-cycles per sample.
+	- Type: int, None
+	- Default: None
 
 __Returns:__
 
@@ -584,7 +596,7 @@ __Example:__
 python: |
  import numpy as np
  from matplotlib import pyplot as plt
- from datamatrix import DataMatrix, SeriesColumn, series
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
 
  LENGTH = 1 # Number of rows
  DEPTH = 100 # Depth (or length) of SeriesColumns
@@ -758,19 +770,22 @@ A new series in which the data points are spread according to the timestamps.
 
 </div>
 
-<div class="FunctionDoc YAMLDoc" id="reduce_" markdown="1">
+<div class="FunctionDoc YAMLDoc" id="reduce" markdown="1">
 
-## function __reduce\___\(series, operation=<function nanmean at 0x7fa5b3da9f28>\)
+## function __reduce__\(series, operation=<function nanmean at 0x7feaf3363bf8>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
+
+*Version note:* As of 0.11.0, the function has been renamed to
+`reduce()`. The original `reduce_()` is deprecated.
 
 __Example:__
 
 %--
 python: |
  import numpy as np
- from datamatrix import DataMatrix, SeriesColumn, series
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
 
  LENGTH = 5 # Number of rows
  DEPTH = 10 # Depth (or length) of SeriesColumns
@@ -778,7 +793,7 @@ python: |
  dm = DataMatrix(length=LENGTH)
  dm.y = SeriesColumn(depth=DEPTH)
  dm.y = np.random.random( (LENGTH, DEPTH) )
- dm.mean_y = series.reduce_(dm.y)
+ dm.mean_y = srs.reduce(dm.y)
 
  print(dm)
 --%
@@ -791,7 +806,53 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7fa5b3da9f28>
+	- Default: <function nanmean at 0x7feaf3363bf8>
+
+__Returns:__
+
+A reduction of the signal.
+
+- Type: FloatColumn
+
+</div>
+
+<div class="FunctionDoc YAMLDoc" id="reduce" markdown="1">
+
+## function __reduce__\(series, operation=<function nanmean at 0x7feaf3363bf8>\)
+
+Transforms series to single values by applying an operation (typically
+a mean) to each series.
+
+*Version note:* As of 0.11.0, the function has been renamed to
+`reduce()`. The original `reduce_()` is deprecated.
+
+__Example:__
+
+%--
+python: |
+ import numpy as np
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
+
+ LENGTH = 5 # Number of rows
+ DEPTH = 10 # Depth (or length) of SeriesColumns
+
+ dm = DataMatrix(length=LENGTH)
+ dm.y = SeriesColumn(depth=DEPTH)
+ dm.y = np.random.random( (LENGTH, DEPTH) )
+ dm.mean_y = srs.reduce(dm.y)
+
+ print(dm)
+--%
+
+__Arguments:__
+
+- `series` -- The signal to reduce.
+	- Type: SeriesColumn
+
+__Keywords:__
+
+- `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
+	- Default: <function nanmean at 0x7feaf3363bf8>
 
 __Returns:__
 
@@ -822,7 +883,7 @@ __Example:__
 python: |
  import numpy as np
  from matplotlib import pyplot as plt
- from datamatrix import DataMatrix, SeriesColumn, series
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
 
  LENGTH = 5 # Number of rows
  DEPTH = 100 # Depth (or length) of SeriesColumns
@@ -836,7 +897,7 @@ python: |
  # And add a bit of random jitter
  dm.y += np.random.random( (LENGTH, DEPTH) )
  # Smooth the traces to reduce the jitter
- dm.y2 = series.smooth(dm.y)
+ dm.y2 = srs.smooth(dm.y)
 
  plt.clf()
  plt.subplot(121)
@@ -888,7 +949,7 @@ __Example:__
 python: |
  import numpy as np
  from matplotlib import pyplot as plt
- from datamatrix import DataMatrix, SeriesColumn, series
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
 
  LENGTH = 1 # Number of rows
  DEPTH = 100 # Depth (or length) of SeriesColumns
@@ -902,7 +963,7 @@ python: |
  # And also a bit of random jitter
  dm.y += np.random.random( (LENGTH, DEPTH) )
  # Threshold the signal by > 0 for at least 10 samples
- dm.t = series.threshold(dm.y, fnc=lambda y: y > 0, min_length=10)
+ dm.t = srs.threshold(dm.y, fnc=lambda y: y > 0, min_length=10)
 
  plt.clf()
  # Mark the thresholded signal
@@ -955,7 +1016,7 @@ __Example:__
 python: |
  import numpy as np
  from matplotlib import pyplot as plt
- from datamatrix import DataMatrix, SeriesColumn, series
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
 
  LENGTH = 5 # Number of rows
  DEPTH = 10 # Depth (or length) of SeriesColumnsplt.show()
@@ -969,7 +1030,7 @@ python: |
  # Add a random offset to the Y values
  dm.y += np.random.random(LENGTH)
  # Look only the middle half of the signal
- dm.y2 = series.window(dm.y, start=DEPTH//4, end=-DEPTH//4)
+ dm.y2 = srs.window(dm.y, start=DEPTH//4, end=-DEPTH//4)
 
  plt.clf()
  plt.subplot(121)
@@ -1022,7 +1083,7 @@ __Example:__
 python: |
  import numpy as np
  from matplotlib import pyplot as plt
- from datamatrix import DataMatrix, SeriesColumn, series
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
 
  LENGTH = 3
  DEPTH = 200
@@ -1033,7 +1094,7 @@ python: |
  dm.s[0] = 1 * np.sin(np.linspace(0, 4 * np.pi, DEPTH))
  dm.s[1] = 2 * np.sin(np.linspace(.4, 4.4 * np.pi, DEPTH))
  dm.s[2] = 3 * np.sin(np.linspace(.8, 4.8 * np.pi, DEPTH))
- dm.z = series.z(dm.s)
+ dm.z = srs.z(dm.s)
 
  # Plot the original signal
  plt.clf()

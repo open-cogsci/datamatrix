@@ -10,7 +10,7 @@ Reads a DataMatrix from a pickle file.
 
 __Example:__
 
-~~~.python 
+~~~.python
 dm = io.readpickle('data.pkl')
 ~~~
 
@@ -95,7 +95,7 @@ Writes a DataMatrix to a pickle file.
 
 __Example:__
 
-~~~ .python                             
+~~~ .python
 io.writepickle(dm, 'data.pkl')
 ~~~
 
