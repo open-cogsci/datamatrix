@@ -52,11 +52,11 @@ def z(col):
 
 		%--
 		python: |
-		 from datamatrix import DataMatrix, operations
+		 from datamatrix import DataMatrix, operations as ops
 
 		 dm = DataMatrix(length=5)
 		 dm.col = range(5)
-		 dm.z = operations.z(dm.col)
+		 dm.z = ops.z(dm.col)
 		 print(dm)
 		--%
 
@@ -83,14 +83,14 @@ def weight(col):
 
 		%--
 		python: |
-		 from datamatrix import DataMatrix, operations
+		 from datamatrix import DataMatrix, operations as ops
 
 		 dm = DataMatrix(length=3)
 		 dm.A = 1, 2, 0
 		 dm.B = 'x', 'y', 'z'
 		 print('Original:')
 		 print(dm)
-		 dm = operations.weight(dm.A)
+		 dm = ops.weight(dm.A)
 		 print('Weighted by A:')
 		 print(dm)
 		--%
@@ -247,12 +247,12 @@ def bin_split(col, bins):
 
 		%--
 		python: |
-		 from datamatrix import DataMatrix, operations
+		 from datamatrix import DataMatrix, operations as ops
 
 		 dm = DataMatrix(length=5)
 		 dm.A = 1, 0, 3, 2, 4
 		 dm.B = 'a', 'b', 'c', 'd', 'e'
-		 for bin, dm in enumerate(operations.bin_split(dm.A, bins=3)):
+		 for bin, dm in enumerate(ops.bin_split(dm.A, bins=3)):
 		 	print('bin %d' % bin)
 		 	print(dm)
 		--%
@@ -292,12 +292,12 @@ def fullfactorial(dm, ignore=u''):
 
 		%--
 		python: |
-		 from datamatrix import DataMatrix, operations
+		 from datamatrix import DataMatrix, operations as ops
 
 		 dm = DataMatrix(length=2)
 		 dm.A = 'x', 'y'
 		 dm.B = 3, 4
-		 dm = operations.fullfactorial(dm)
+		 dm = ops.fullfactorial(dm)
 		 print(dm)
 		--%
 
@@ -355,14 +355,14 @@ def group(dm, by):
 
 		%--
 		python: |
-		 from datamatrix import DataMatrix, operations
+		 from datamatrix import DataMatrix, operations as ops
 
 		 dm = DataMatrix(length=4)
 		 dm.A = 'x', 'x', 'y', 'y'
 		 dm.B = 0, 1, 2, 3
 		 print('Original:')
 		 print(dm)
-		 dm = operations.group(dm, by=dm.A)
+		 dm = ops.group(dm, by=dm.A)
 		 print('Grouped by A:')
 		 print(dm)
 		--%
@@ -449,12 +449,12 @@ def sort(obj, by=None):
 
 		%--
 		python: |
-		 from datamatrix import DataMatrix, operations
+		 from datamatrix import DataMatrix, operations as ops
 
 		 dm = DataMatrix(length=3)
 		 dm.A = 2, 0, 1
 		 dm.B = 'a', 'b', 'c'
-		 dm = operations.sort(dm, by=dm.A)
+		 dm = ops.sort(dm, by=dm.A)
 		 print(dm)
 		--%
 
@@ -485,6 +485,46 @@ def sort(obj, by=None):
 	return col
 
 
+def random_sample(obj, k):
+	
+	"""
+	desc: |
+		*New in v0.11.0*
+	
+		Takes a random sample of `k` rows from a DataMatrix or column. The
+		order of the rows in the returned DataMatrix is random.
+		
+		__Example:__
+		
+		```python
+		from datamatrix import DataMatrix, operations as ops
+
+		dm = DataMatrix(length=5)
+		dm.A = 'a', 'b', 'c', 'd', 'e'
+		dm = ops.random_sample(dm, k=3)
+		print(dm)
+		```
+
+	arguments:
+		obj:
+			type:	[DataMatrix, BaseColumn]
+		k:
+			type:	int
+
+	returns:
+		desc:	A random sample from a DataMatrix or column.
+		type:	[DataMatrix, BaseColumn]	
+	"""
+	
+	_rowid = Index(obj._rowid)
+	_rowid = random.sample(list(_rowid), k)
+	if isinstance(obj, DataMatrix):
+		return obj._selectrowid(_rowid)
+	col = obj._getrowidkey(_rowid)
+	col._rowid = obj._rowid
+	return col
+
+
 def shuffle(obj):
 
 	"""
@@ -497,11 +537,11 @@ def shuffle(obj):
 
 		%--
 		python: |
-		 from datamatrix import DataMatrix, operations
+		 from datamatrix import DataMatrix, operations as ops
 
 		 dm = DataMatrix(length=5)
 		 dm.A = 'a', 'b', 'c', 'd', 'e'
-		 dm.B = operations.shuffle(dm.A)
+		 dm.B = ops.shuffle(dm.A)
 		 print(dm)
 		--%
 
@@ -535,12 +575,12 @@ def shuffle_horiz(*obj):
 
 		%--
 		python: |
-		 from datamatrix import DataMatrix, operations
+		 from datamatrix import DataMatrix, operations as ops
 
 		 dm = DataMatrix(length=5)
 		 dm.A = 'a', 'b', 'c', 'd', 'e'
 		 dm.B = range(5)
-		 dm = operations.shuffle_horiz(dm.A, dm.B)
+		 dm = ops.shuffle_horiz(dm.A, dm.B)
 		 print(dm)
 		--%
 
@@ -579,7 +619,10 @@ def keep_only(dm, *cols):
 	"""
 	desc: |
 		Removes all columns from the DataMatrix, except those listed in `cols`.
-
+		
+		*Version note:* As of 0.11.0, the preferred way to select a subset of
+		columns is using the `dm = dm[('col1', 'col2')]` notation.
+		
 		__Example:__
 
 		%--
@@ -626,17 +669,17 @@ def auto_type(dm):
 		*Requires fastnumbers*
 
 		Converts all columns of type MixedColumn to IntColumn if all values are
-		integer numbers, or FloatColumn if all values are non-integer numbes.
+		integer numbers, or FloatColumn if all values are non-integer numbers.
 
 		%--
 		python: |
-		 from datamatrix import DataMatrix, operations
+		 from datamatrix import DataMatrix, operations as ops
 
 		 dm = DataMatrix(length=5)
 		 dm.A = 'a'
 		 dm.B = 1
 		 dm.C = 1.1
-		 dm_new = operations.auto_type(dm)
+		 dm_new = ops.auto_type(dm)
 		 print('dm_new.A: %s' % type(dm_new.A))
 		 print('dm_new.B: %s' % type(dm_new.B))
 		 print('dm_new.C: %s' % type(dm_new.C))
