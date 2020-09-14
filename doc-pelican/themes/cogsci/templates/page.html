@@ -23,11 +23,12 @@
 <section id="content" class="body">
 <div class="entry-content">
 
-{% if page.uptodate == "false" %}
-<div class="alert alert-warning" role="alert">
-This page has been written for an older version of DataMatrix.
+<div class="alert alert-warning" role="alert" style='position:fixed;top:0px;left:0px;width:100%;border:none;text-align:center;'>
+Visit
+<a href='{{ page.url | replace("pages", "http://datamatrix.cogsci.nl") }}'>
+{{ page.url | replace("pages", "http://datamatrix.cogsci.nl") }}
+</a> for the latest documentation
 </div>
-{% endif %}
 
 {% if page.reviewed == "false" %}
 <div class="alert alert-info" role="alert">
