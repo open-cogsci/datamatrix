@@ -406,7 +406,7 @@ def group(dm, by):
 		cm[name] = col.__class__
 
 	for i, key in enumerate(keys):
-		dm_ = bycol_hashed == key
+		dm_ = bycol_hashed == int(key)
 		for name, col in groupcols:
 			if isinstance(col, _SeriesColumn):
 				continue
