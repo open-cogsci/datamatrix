@@ -17,34 +17,34 @@ The following packages are required for extra functionality:
 
 ### PyPi (pip install)
 
-~~~
+~~~bash
 pip install python-datamatrix
 ~~~
 
 Optional dependencies:
 
-~~~
+~~~bash
 pip install fastnumbers numpy scipy prettytable openpyxl pandas json_tricks
 ~~~
 
 
 ### Anaconda
 
-~~~
+~~~bash
 conda install -c conda-forge datamatrix
 ~~~
 
 Optional dependencies:
 
 
-~~~
+~~~bash
 conda install -c conda-forge scipy pandas json_tricks
 ~~~
 
 
 ### Ubuntu
 
-~~~
+~~~bash
 sudo add-apt-repository ppa:smathot/cogscinl
 sudo apt-get update
 sudo apt install python3-datamatrix

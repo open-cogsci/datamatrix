@@ -12,7 +12,7 @@ We will analyze pupil size during the `sounds` and `retention` traces as a funct
 
 This tutorial makes use of the [`eyelinkparser` module](https://github.com/smathot/python-eyelinkparser), which can be installed with pip:
 
-~~~
+~~~bash
 pip install python-eyelinkparser
 ~~~
 
@@ -25,7 +25,7 @@ EyeLink data files (and data files for most other eye trackers) correspond to an
 
 For example, a `start_trial` user message followed by four gaze samples might look like this:
 
-~~~
+~~~bash
 MSG	451224 start_trial
 451224	  517.6	  388.9	 1691.0	...
 451225	  517.5	  389.1	 1690.0	...
@@ -134,7 +134,7 @@ To get some idea of what this means, let's plot pupil size during the `sounds` t
 
 %--
 python: |
-  from matplotlib import pyplot
+  from matplotlib import pyplot as plt
   from datamatrix import series as srs
 
   plt.figure()

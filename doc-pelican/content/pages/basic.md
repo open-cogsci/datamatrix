@@ -378,9 +378,55 @@ Important notes:
 ```python
 from datamatrix import DataMatrix, NAN, INF
 dm = DataMatrix(length=12)
-dm.datatype = 'int', 'float', 'float (converted)', 'None'
-dm.value = 1, '1', 1.2, '1.2', None, NAN, 'nan', INF, 'inf', -INF, '-inf', 'None'
+dm.datatype = (
+	'int',
+	'int (converted)',
+	'float',
+	'float (converted)',
+	'None',
+	'str',
+	'float',
+	'float (converted)',
+	'float',
+	'float (converted)',
+	'float',
+	'float (converted)',
+)
+dm.value = (
+	1,
+	'1',
+	1.2,
+	'1.2',
+	None,
+	'None',
+	NAN,
+	'nan',
+	INF,
+	'inf',
+	-INF,
+	'-inf'
+)
 print(dm)
+
+# % output
+# +----+-------------------+-------+
+# | #  |      datatype     | value |
+# +----+-------------------+-------+
+# | 0  |        int        |   1   |
+# | 1  |  int (converted)  |   1   |
+# | 2  |       float       |  1.2  |
+# | 3  | float (converted) |  1.2  |
+# | 4  |        None       |  None |
+# | 5  |        str        |  None |
+# | 6  |       float       |  nan  |
+# | 7  | float (converted) |  nan  |
+# | 8  |       float       |  INF  |
+# | 9  | float (converted) |  INF  |
+# | 10 |       float       |  -inf |
+# | 11 | float (converted) |  -inf |
+# +----+-------------------+-------+
+# 
+
 ```
 
 
