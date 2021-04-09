@@ -22,103 +22,104 @@ desc: pass
 
 from datamatrix.py3compat import *
 try:
-	import fastnumbers
+    import fastnumbers
 except ImportError:
-	warn('Install fastnumbers for better performance')
-	fastnumbers = None
+    warn('Install fastnumbers for better performance')
+    fastnumbers = None
 import math
 
 
 class SortableNAN(object):
 
-	"""
-	visible: False
+    """
+    visible: False
 
-	desc:
-		An object that is guaranteed to be larger than everything else,
-		including inf. This allows nan values to be last in any sorted sequence.
-	"""
+    desc:
+        An object that is guaranteed to be larger than everything else,
+        including inf. This allows nan values to be last in any sorted
+        sequence.
+    """
 
-	def __lt__(self, other):
+    def __lt__(self, other):
 
-		return False
+        return False
 
-	def __gt__(self, other):
+    def __gt__(self, other):
 
-		return True
+        return True
 
 
 class SortableNone(object):
 
-	"""
-	visible: False
+    """
+    visible: False
 
-	desc:
-		An object that is guaranteed to be larger than everything else except
-		NAN values. This allows nan values to be last in any sorted sequence.
-	"""
+    desc:
+        An object that is guaranteed to be larger than everything else except
+        NAN values. This allows nan values to be last in any sorted sequence.
+    """
 
-	def __lt__(self, other):
+    def __lt__(self, other):
 
-		return isinstance(other, SortableNAN)
+        return isinstance(other, SortableNAN)
 
-	def __gt__(self, other):
+    def __gt__(self, other):
 
-		return not isinstance(other, SortableNAN)
+        return not isinstance(other, SortableNAN)
 
 
 class SortableSTR(object):
 
-	"""
-	visible: False
+    """
+    visible: False
 
-	desc:
-		An object that is guaranteed to be larger than everything else except
-		NAN values. This allows nan values to be last in any sorted sequence.
-	"""
+    desc:
+        An object that is guaranteed to be larger than everything else except
+        NAN values. This allows nan values to be last in any sorted sequence.
+    """
 
-	def __init__(self, val):
+    def __init__(self, val):
 
-		self._val = val
+        self._val = val
 
-	def __lt__(self, other):
+    def __lt__(self, other):
 
-		return not isinstance(other, (int, float)) and (
-			isinstance(other, SortableNAN)
-			or isinstance(other, SortableNone)
-			or isinstance(other, SortableSTR) and other._val > self._val
-		)
+        return not isinstance(other, (int, float)) and (
+            isinstance(other, SortableNAN)
+            or isinstance(other, SortableNone)
+            or isinstance(other, SortableSTR) and other._val > self._val
+        )
 
-	def __gt__(self, other):
+    def __gt__(self, other):
 
-		return (
-			isinstance(other, (int, float))
-			or isinstance(other, SortableSTR) and other._val <= self._val
-		)
+        return (
+            isinstance(other, (int, float))
+            or isinstance(other, SortableSTR) and other._val <= self._val
+        )
 
 
 def _sortable_regular(val):
 
-	if val is None:
-		return sortable_none
-	if isinstance(val, float) and math.isnan(val):
-		return sortable_nan
-	try:
-		return float(val)
-	except (ValueError, TypeError):
-		pass
-	return SortableSTR(val)
+    if val is None:
+        return sortable_none
+    if isinstance(val, float) and math.isnan(val):
+        return sortable_nan
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        pass
+    return SortableSTR(val)
 
 
 def _sortable_fastnumbers(val):
 
-	if val is None:
-		return sortable_none
-	return fastnumbers.fast_float(
-		val,
-		default=SortableSTR(val),
-		nan=sortable_nan
-	)
+    if val is None:
+        return sortable_none
+    return fastnumbers.fast_float(
+        val,
+        default=SortableSTR(val),
+        nan=sortable_nan
+    )
 
 
 sortable = _sortable_fastnumbers if fastnumbers else _sortable_regular

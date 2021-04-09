@@ -19,44 +19,45 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
-	SeriesColumn
+    SeriesColumn
+
 
 def check_iteration(col_type):
 
-	dm = DataMatrix(length=2, default_col_type=col_type)
-	dm.col1 = 1, 2
-	dm.col2 = 3, 4
-	# Row iteration
-	ref = [
-		[('col1', 1), ('col2', 3)],
-		[('col1', 2), ('col2', 4)]
-		]
-	for row, rowref in zip(dm, ref):
-		assert(list(row) == rowref)
-	# Column iteration
-	ref = [
-		('col1', [1,2]),
-		('col2', [3,4])
-		]
-	for (name, col), (ref_name, ref_col) in zip(dm.columns, ref):
-		assert(name == ref_name)
-		assert(list(col) == ref_col)
-	# Cells within column iteration
-	ref = [1,2]
-	for val, ref_val in zip(dm.col1, ref):
-		assert(val == ref_val)
-	# Cells within row iteration
-	ref = [
-		('col1', 1),
-		('col2', 3)
-		]
-	for (name, val), (ref_name, ref_val) in zip(dm[0], ref):
-		assert(val == ref_val)
-		assert(name == ref_name)
+    dm = DataMatrix(length=2, default_col_type=col_type)
+    dm.col1 = 1, 2
+    dm.col2 = 3, 4
+    # Row iteration
+    ref = [
+        [('col1', 1), ('col2', 3)],
+        [('col1', 2), ('col2', 4)]
+        ]
+    for row, rowref in zip(dm, ref):
+        assert(list(row) == rowref)
+    # Column iteration
+    ref = [
+        ('col1', [1,2]),
+        ('col2', [3,4])
+        ]
+    for (name, col), (ref_name, ref_col) in zip(dm.columns, ref):
+        assert(name == ref_name)
+        assert(list(col) == ref_col)
+    # Cells within column iteration
+    ref = [1,2]
+    for val, ref_val in zip(dm.col1, ref):
+        assert(val == ref_val)
+    # Cells within row iteration
+    ref = [
+        ('col1', 1),
+        ('col2', 3)
+        ]
+    for (name, val), (ref_name, ref_val) in zip(dm[0], ref):
+        assert(val == ref_val)
+        assert(name == ref_name)
 
 
 def test_iteration():
 
-	check_iteration(MixedColumn)
-	check_iteration(FloatColumn)
-	check_iteration(IntColumn)
+    check_iteration(MixedColumn)
+    check_iteration(FloatColumn)
+    check_iteration(IntColumn)

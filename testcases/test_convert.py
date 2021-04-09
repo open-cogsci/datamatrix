@@ -23,13 +23,13 @@ from testcases.test_tools import check_dm
 
 def test_convert():
 
-	refdm = DataMatrix(length=3)
-	refdm[u'tést'] = 1, 2, u''
-	refdm.B = u'mathôt', u'b', u'x'
-	refdm.C = u'a,\\b"\'c', 8, u''
-	testdm = io.readtxt('testcases/data/data.csv')
-	check_dm(refdm, testdm)
-	testdm = cnv.from_json(cnv.to_json(testdm))
-	check_dm(refdm, testdm)
-	testdm = cnv.from_pandas(cnv.to_pandas(testdm))
-	check_dm(refdm, testdm)
+    refdm = DataMatrix(length=3)
+    refdm[u'tést'] = 1, 2, u''
+    refdm.B = u'mathôt', u'b', u'x'
+    refdm.C = u'a,\\b"\'c', 8, u''
+    testdm = io.readtxt('testcases/data/data.csv')
+    check_dm(refdm, testdm)
+    testdm = cnv.from_json(cnv.to_json(testdm))
+    check_dm(refdm, testdm)
+    testdm = cnv.from_pandas(cnv.to_pandas(testdm))
+    check_dm(refdm, testdm)

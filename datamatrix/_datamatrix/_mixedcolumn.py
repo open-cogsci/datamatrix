@@ -20,11 +20,12 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._basecolumn import BaseColumn
 
+
 class MixedColumn(BaseColumn):
 
-	"""
-	desc:
-		A column that can contain numeric and string values.
-	"""
+    """
+    desc:
+        A column that can contain numeric and string values.
+    """
 
-	pass
+    pass

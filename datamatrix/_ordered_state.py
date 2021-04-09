@@ -21,32 +21,32 @@ from datamatrix.py3compat import *
 
 
 class OrderedState(object):
-	
-	"""
-	desc:
-		A base object that preserves the order of the object's __dict__ for
-		serialization (pickling). This is necessary to identify identical
-		objects. Based on trial and error it seems that two lists (one for
-		values and one for keys) can be consistenly pickled, whereas an
-		OrderedDict cannot.
-	"""
-	
-	def __getstate__(self, ignore=[]):
-				
-		keys = []
-		values = []
-		for k in sorted(self.__dict__):
-			if k in ignore:
-				continue
-			keys.append(k)
-			values.append(self.__dict__[k])
-		return keys, values
+    
+    """
+    desc:
+        A base object that preserves the order of the object's __dict__ for
+        serialization (pickling). This is necessary to identify identical
+        objects. Based on trial and error it seems that two lists (one for
+        values and one for keys) can be consistenly pickled, whereas an
+        OrderedDict cannot.
+    """
+    
+    def __getstate__(self, ignore=[]):
+                
+        keys = []
+        values = []
+        for k in sorted(self.__dict__):
+            if k in ignore:
+                continue
+            keys.append(k)
+            values.append(self.__dict__[k])
+        return keys, values
 
-	def __setstate__(self, state):
+    def __setstate__(self, state):
 
-		if isinstance(state, dict):
-			warn(u'Unpickling an old datamatrix')
-			self.__dict__.update(state)
-			return
-		keys, values = state
-		self.__dict__.update({key : val for key, val in zip(keys, values)})
+        if isinstance(state, dict):
+            warn(u'Unpickling an old datamatrix')
+            self.__dict__.update(state)
+            return
+        keys, values = state
+        self.__dict__.update({key: val for key, val in zip(keys, values)})

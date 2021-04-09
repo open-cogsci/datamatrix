@@ -24,50 +24,50 @@ import numpy as np
 
 
 def _test_numeric_properties(coltype, nan):
-	
-	dm = DataMatrix(length=4, default_col_type=coltype)
-	dm.c = 1, 1, nan, 4
-	dm.d = [nan]*4
-	assert dm.c.mean == 2
-	assert dm.c.median == 1
-	assert dm.c.std == np.std([1,1,4], ddof=1)
-	assert dm.c.max == 4
-	assert dm.c.min == 1
-	assert dm.c.sum == 6
-	all_nan(dm.d.mean, nan)
-	all_nan(dm.d.median, nan)
-	all_nan(dm.d.std, nan)
-	all_nan(dm.d.max, nan)
-	all_nan(dm.d.min, nan)
-	all_nan(dm.d.sum, nan)
-	
-	
+    
+    dm = DataMatrix(length=4, default_col_type=coltype)
+    dm.c = 1, 1, nan, 4
+    dm.d = [nan]*4
+    assert dm.c.mean == 2
+    assert dm.c.median == 1
+    assert dm.c.std == np.std([1,1,4], ddof=1)
+    assert dm.c.max == 4
+    assert dm.c.min == 1
+    assert dm.c.sum == 6
+    all_nan(dm.d.mean, nan)
+    all_nan(dm.d.median, nan)
+    all_nan(dm.d.std, nan)
+    all_nan(dm.d.max, nan)
+    all_nan(dm.d.min, nan)
+    all_nan(dm.d.sum, nan)
+    
+    
 def _test_basic_properties(coltype):
-	
-	dm = DataMatrix(length=4, default_col_type=coltype)
-	dm.c = 3,1,2,3
-	dm.d = dm.c
-	dm.e = 3,1,2,3
-	assert dm.c.name == ['c', 'd']
-	assert dm.d.name == ['c', 'd']
-	assert dm.e.name == 'e'
-	assert list(dm.c.unique) == [1,2,3]
-	assert dm.c.count == 3
-	assert dm.c.shape == (4,)
-	
-	
+    
+    dm = DataMatrix(length=4, default_col_type=coltype)
+    dm.c = 3,1,2,3
+    dm.d = dm.c
+    dm.e = 3,1,2,3
+    assert dm.c.name == ['c', 'd']
+    assert dm.d.name == ['c', 'd']
+    assert dm.e.name == 'e'
+    assert list(dm.c.unique) == [1,2,3]
+    assert dm.c.count == 3
+    assert dm.c.shape == (4,)
+    
+    
 def test_intcolumn():
-	
-	_test_basic_properties(IntColumn)
+    
+    _test_basic_properties(IntColumn)
 
 
 def test_floatcolumn():
-	
-	_test_numeric_properties(FloatColumn, np.nan)
-	_test_basic_properties(FloatColumn)
-	
-	
+    
+    _test_numeric_properties(FloatColumn, np.nan)
+    _test_basic_properties(FloatColumn)
+    
+    
 def test_mixedcolumn():
-	
-	_test_numeric_properties(MixedColumn, float('nan'))
-	_test_basic_properties(MixedColumn)
+    
+    _test_numeric_properties(MixedColumn, float('nan'))
+    _test_basic_properties(MixedColumn)

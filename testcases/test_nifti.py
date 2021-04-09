@@ -25,18 +25,18 @@ import numpy as np
 
 def test_nifti():
 
-	dm = DataMatrix(length=2)
-	dm.n = NiftiColumn
-	dm.n[0] = nib.Nifti2Image(
-		np.array([[[0, 0], [1, 1]], [[-1, -1], [1, 1]]]),
-		None
-	)
-	dm.n[1] = nib.Nifti2Image(
-		np.array([[[1, 1], [0, 0]], [[np.nan, 1], [0, 0]]]),
-		None
-	)
-	m = dm.n.mean.get_data()
-	assert np.all(m == np.array([[[.5, .5], [.5, .5]], [[-1, 0], [.5, .5]]]))
+    dm = DataMatrix(length=2)
+    dm.n = NiftiColumn
+    dm.n[0] = nib.Nifti2Image(
+        np.array([[[0, 0], [1, 1]], [[-1, -1], [1, 1]]]),
+        None
+    )
+    dm.n[1] = nib.Nifti2Image(
+        np.array([[[1, 1], [0, 0]], [[np.nan, 1], [0, 0]]]),
+        None
+    )
+    m = dm.n.mean.get_data()
+    assert np.all(m == np.array([[[.5, .5], [.5, .5]], [[-1, 0], [.5, .5]]]))
 
 
 test_nifti()

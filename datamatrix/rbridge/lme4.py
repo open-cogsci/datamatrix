@@ -30,119 +30,123 @@ verbose = False
 
 def lmer(dm, formula):
 
-	cmd = u'''
+    cmd = u'''
 library(lmerTest)
 result <- lmer(%s)
 s = summary(result)
 s;
 write.csv(s$coef, ".r-out.csv")
 ''' % formula
-	rm = _launchr(dm, cmd)
-	rm.rename(u'', u'effect')
-	rm.rename(u'Estimate', u'est')
-	rm.rename(u'Std. Error', u'se')
-	rm.rename(u't value', u't')
-	if u'Pr(>|t|)' in rm:
-		rm.rename(u'Pr(>|t|)', u'p')
-	else:
-		rm.p = -1
-	return rm
+    rm = _launchr(dm, cmd)
+    rm.rename(u'', u'effect')
+    rm.rename(u'Estimate', u'est')
+    rm.rename(u'Std. Error', u'se')
+    rm.rename(u't value', u't')
+    if u'Pr(>|t|)' in rm:
+        rm.rename(u'Pr(>|t|)', u'p')
+    else:
+        rm.p = -1
+    return rm
 
 
 def glmer(dm, formula, family):
 
-	cmd = u'''
+    cmd = u'''
 library(lme4)
 result <- glmer(%s, family="%s")
 s = summary(result)
 s;
 write.csv(s$coef, ".r-out.csv")
 ''' % (formula, family)
-	rm = _launchr(dm, cmd)
-	rm.rename(u'', u'effect')
-	rm.rename(u'Estimate', u'est')
-	rm.rename(u'Std. Error', u'se')
-	rm.rename(u'z value', u'z')
-	if u'Pr(>|z|)' in rm:
-		rm.rename(u'Pr(>|z|)', u'p')
-	else:
-		rm.p = -1
-	return rm
+    rm = _launchr(dm, cmd)
+    rm.rename(u'', u'effect')
+    rm.rename(u'Estimate', u'est')
+    rm.rename(u'Std. Error', u'se')
+    rm.rename(u'z value', u'z')
+    if u'Pr(>|z|)' in rm:
+        rm.rename(u'Pr(>|z|)', u'p')
+    else:
+        rm.p = -1
+    return rm
 
 
 def lmer_series(dm, formula, winlen=1):
 
-	col = formula.split()[0]
-	depth = dm[col].depth
-	rm = None
-	for i in range(0, depth, winlen):
-		wm = dm[:]
-		wm[col] = series.reduce_(
-			series.window(wm[col], start=i, end=i+winlen))
-		lm = lmer(wm, formula)
-		print('Sample %d' % i)
-		print(lm)
-		if rm is None:
-			rm = DataMatrix(length=len(lm))
-			rm.effect = list(lm.effect)
-			rm.p = SeriesColumn(depth=depth)
-			rm.t = SeriesColumn(depth=depth)
-			rm.est = SeriesColumn(depth=depth)
-			rm.se = SeriesColumn(depth=depth)
-		for lmrow, rmrow in zip(lm, rm):
-			rmrow.p[i:i+winlen] = lmrow.p
-			rmrow.t[i:i+winlen] = lmrow.t
-			rmrow.est[i:i+winlen] = lmrow.est
-			rmrow.se[i:i+winlen] = lmrow.se
-	return rm
+    col = formula.split()[0]
+    depth = dm[col].depth
+    rm = None
+    for i in range(0, depth, winlen):
+        wm = dm[:]
+        wm[col] = series.reduce_(
+            series.window(wm[col], start=i, end=i+winlen))
+        lm = lmer(wm, formula)
+        print('Sample %d' % i)
+        print(lm)
+        if rm is None:
+            rm = DataMatrix(length=len(lm))
+            rm.effect = list(lm.effect)
+            rm.p = SeriesColumn(depth=depth)
+            rm.t = SeriesColumn(depth=depth)
+            rm.est = SeriesColumn(depth=depth)
+            rm.se = SeriesColumn(depth=depth)
+        for lmrow, rmrow in zip(lm, rm):
+            rmrow.p[i:i+winlen] = lmrow.p
+            rmrow.t[i:i+winlen] = lmrow.t
+            rmrow.est[i:i+winlen] = lmrow.est
+            rmrow.se[i:i+winlen] = lmrow.se
+    return rm
 
 
 def glmer_series(dm, formula, family, winlen=1):
 
-	col = formula.split()[0]
-	depth = dm[col].depth
-	rm = None
-	for i in range(0, depth, winlen):
-		wm = dm[:]
-		wm[col] = series.reduce_(
-			series.window(wm[col], start=i, end=i+winlen))
-		lm = glmer(wm, formula, family=family)
-		print('Sample %d' % i)
-		print(lm)
-		if rm is None:
-			rm = DataMatrix(length=len(lm))
-			rm.effect = list(lm.effect)
-			rm.p = SeriesColumn(depth=depth)
-			rm.z = SeriesColumn(depth=depth)
-			rm.est = SeriesColumn(depth=depth)
-			rm.se = SeriesColumn(depth=depth)
-		for lmrow, rmrow in zip(lm, rm):
-			rmrow.p[i:i+winlen] = lmrow.p
-			rmrow.z[i:i+winlen] = lmrow.z
-			rmrow.est[i:i+winlen] = lmrow.est
-			rmrow.se[i:i+winlen] = lmrow.se
-	return rm
+    col = formula.split()[0]
+    depth = dm[col].depth
+    rm = None
+    for i in range(0, depth, winlen):
+        wm = dm[:]
+        wm[col] = series.reduce_(
+            series.window(wm[col], start=i, end=i+winlen))
+        lm = glmer(wm, formula, family=family)
+        print('Sample %d' % i)
+        print(lm)
+        if rm is None:
+            rm = DataMatrix(length=len(lm))
+            rm.effect = list(lm.effect)
+            rm.p = SeriesColumn(depth=depth)
+            rm.z = SeriesColumn(depth=depth)
+            rm.est = SeriesColumn(depth=depth)
+            rm.se = SeriesColumn(depth=depth)
+        for lmrow, rmrow in zip(lm, rm):
+            rmrow.p[i:i+winlen] = lmrow.p
+            rmrow.z[i:i+winlen] = lmrow.z
+            rmrow.est[i:i+winlen] = lmrow.est
+            rmrow.se[i:i+winlen] = lmrow.se
+    return rm
 
 
 def _launchr(dm, cmd):
 
-	dm = dm[:]
-	# SeriesColumns cannot be saved to a csv file, so we delete those first.
-	for name, col in dm.columns:
-		if isinstance(col, _SeriesColumn):
-			del dm[name]
-	# Write the data to an input file
-	io.writetxt(dm, u'.r-in.csv')
-	# Launch R, read the data, and communicate the commands
-	if verbose:
-		proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE)
-	else:
-		proc = subprocess.Popen( ['R', '--vanilla'], stdin=subprocess.PIPE,
-			stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	cmd = u'data <- read.csv(".r-in.csv")\nattach(data)\n%s' % cmd
-	proc.communicate(safe_encode(cmd, u'ascii'))
-	# Wait until the output file has been generated and return it
-	while not os.path.exists(u'.r-out.csv'):
-		time.sleep(.5)
-	dm = io.readtxt(u'.r-out.csv')
-	return dm
+    dm = dm[:]
+    # SeriesColumns cannot be saved to a csv file, so we delete those first.
+    for name, col in dm.columns:
+        if isinstance(col, _SeriesColumn):
+            del dm[name]
+    # Write the data to an input file
+    io.writetxt(dm, u'.r-in.csv')
+    # Launch R, read the data, and communicate the commands
+    if verbose:
+        proc = subprocess.Popen(['R', '--vanilla'], stdin=subprocess.PIPE)
+    else:
+        proc = subprocess.Popen(
+            ['R', '--vanilla'],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+    cmd = u'data <- read.csv(".r-in.csv")\nattach(data)\n%s' % cmd
+    proc.communicate(safe_encode(cmd, u'ascii'))
+    # Wait until the output file has been generated and return it
+    while not os.path.exists(u'.r-out.csv'):
+        time.sleep(.5)
+    dm = io.readtxt(u'.r-out.csv')
+    return dm

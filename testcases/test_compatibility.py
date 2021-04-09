@@ -19,8 +19,8 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 from datamatrix import (
-	DataMatrix, MixedColumn, FloatColumn, IntColumn,
-	SeriesColumn, NAN
+    DataMatrix, MixedColumn, FloatColumn, IntColumn,
+    SeriesColumn, NAN
 )
 from testcases.test_tools import check_col
 import pytest

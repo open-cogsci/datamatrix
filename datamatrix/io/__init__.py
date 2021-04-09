@@ -18,7 +18,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 ---
 desc:
-	Functions to read and write DataMatrix objects from and to file.
+    Functions to read and write DataMatrix objects from and to file.
 ---
 """
 

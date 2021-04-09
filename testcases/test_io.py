@@ -23,31 +23,31 @@ from testcases.test_tools import check_dm
 
 def test_io():
 
-	refdm = DataMatrix(length=3)
-	refdm[u'tést'] = 1, 2, u''
-	refdm.B = u'mathôt', u'b', u'x'
-	refdm.C = u'a,\\b"\'c', 8, u''
+    refdm = DataMatrix(length=3)
+    refdm[u'tést'] = 1, 2, u''
+    refdm.B = u'mathôt', u'b', u'x'
+    refdm.C = u'a,\\b"\'c', 8, u''
 
-	testdm = io.readtxt('testcases/data/data.csv')
-	check_dm(refdm, testdm)
-	io.writetxt(testdm, 'tmp.csv')
-	testdm = io.readtxt('tmp.csv')
-	check_dm(refdm, testdm)
+    testdm = io.readtxt('testcases/data/data.csv')
+    check_dm(refdm, testdm)
+    io.writetxt(testdm, 'tmp.csv')
+    testdm = io.readtxt('tmp.csv')
+    check_dm(refdm, testdm)
 
-	refdm = io.readtxt('testcases/data/line-ending-cr.csv')
-	check_dm(refdm, testdm)
-	refdm = io.readtxt('testcases/data/line-ending-crlf.csv')
-	check_dm(refdm, testdm)
-	refdm = io.readtxt('testcases/data/data-with-bom.csv')
-	check_dm(refdm, testdm)
+    refdm = io.readtxt('testcases/data/line-ending-cr.csv')
+    check_dm(refdm, testdm)
+    refdm = io.readtxt('testcases/data/line-ending-crlf.csv')
+    check_dm(refdm, testdm)
+    refdm = io.readtxt('testcases/data/data-with-bom.csv')
+    check_dm(refdm, testdm)
 
-	io.writepickle(testdm, 'tmp.pickle')
-	testdm = io.readpickle('tmp.pickle')
-	check_dm(refdm, testdm)
+    io.writepickle(testdm, 'tmp.pickle')
+    testdm = io.readpickle('tmp.pickle')
+    check_dm(refdm, testdm)
 
-	io.writexlsx(testdm, 'tmp.xlsx')
-	testdm = io.readxlsx('tmp.xlsx')
-	check_dm(refdm, testdm)
-	io.writexlsx(testdm, 'tmp.xlsx')
-	testdm = io.readxlsx('tmp.xlsx')
-	check_dm(refdm, testdm)
+    io.writexlsx(testdm, 'tmp.xlsx')
+    testdm = io.readxlsx('tmp.xlsx')
+    check_dm(refdm, testdm)
+    io.writexlsx(testdm, 'tmp.xlsx')
+    testdm = io.readxlsx('tmp.xlsx')
+    check_dm(refdm, testdm)

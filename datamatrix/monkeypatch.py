@@ -17,33 +17,34 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+
 def _monkey_patch_matplotlib():
 
-	"""
-	visible: False
+    """
+    visible: False
 
-	desc:
-		This patch decorates the is_string_like function of matplotlib, because
-		this consider BaseColumn objects to be strings, with causes trouble when
-		plotting.
-	"""
+    desc:
+        This patch decorates the is_string_like function of matplotlib, because
+        this consider BaseColumn objects to be strings, with causes trouble
+        when plotting.
+    """
 
-	try:
-		from matplotlib.axes import _base
-	except ImportError:
-		return
-	# matplotlib 3 doesn't need to be monkeypatched, apparently.
-	if not hasattr(_base, u'is_string_like'):
-		return
+    try:
+        from matplotlib.axes import _base
+    except ImportError:
+        return
+    # matplotlib 3 doesn't need to be monkeypatched, apparently.
+    if not hasattr(_base, u'is_string_like'):
+        return
 
-	from datamatrix._datamatrix._basecolumn import BaseColumn
+    from datamatrix._datamatrix._basecolumn import BaseColumn
 
-	def decorate(fnc):
-		def inner(obj):
-			if isinstance(obj, BaseColumn):
-				return False
-			return fnc(obj)
-		return inner
+    def decorate(fnc):
+        def inner(obj):
+            if isinstance(obj, BaseColumn):
+                return False
+            return fnc(obj)
+        return inner
 
 
 _monkey_patch_matplotlib()

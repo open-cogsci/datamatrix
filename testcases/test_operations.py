@@ -18,7 +18,8 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
-from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, SeriesColumn
+from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
+    SeriesColumn
 from testcases.test_tools import check_col, check_series, check_integrity
 import numpy as np
 import pytest
@@ -26,158 +27,158 @@ import pytest
 
 def check_operations(col_type):
 
-	dm = DataMatrix(length=2, default_col_type=col_type)
-	dm.col = 1, '2'
-	dm.col += 1
-	check_col(dm.col, [2, 3])
-	dm.col += 1, '2'
-	check_col(dm.col, [3, 5])
-	dm.col -= 1
-	check_col(dm.col, [2, 4])
-	dm.col -= 1, '2'
-	check_col(dm.col, [1, 2])
-	dm.col *= 2
-	check_col(dm.col, [2, 4])
-	dm.col *= 1, '2'
-	check_col(dm.col, [2, 8])
-	dm.col /= 2
-	check_col(dm.col, [1, 4])
-	dm.col /= 1, '2'
-	check_col(dm.col, [1, 2])
-	# Right-hand operations
-	dm.col = 1 + dm.col
-	check_col(dm.col, [2, 3])
-	dm.col = (1, 2) + dm.col
-	check_col(dm.col, [3, 5])
-	dm.col = 5 - dm.col
-	check_col(dm.col, [2, 0])
-	dm.col = (3, 1) - dm.col
-	check_col(dm.col, [1, 1])
-	dm.col = 2 * dm.col
-	check_col(dm.col, [2, 2])
-	dm.col = (1, 2) * dm.col
-	check_col(dm.col, [2, 4])
-	dm.col = 4 / dm.col
-	check_col(dm.col, [2, 1])
-	dm.col = (4, 2) / dm.col
-	check_col(dm.col, [2, 2])
-	dm.col = 2 ** dm.col
-	check_col(dm.col, [4, 4])
-	dm.col = (2, 4) ** dm.col
-	check_col(dm.col, [16, 256])
-	dm.col = 17 % dm.col
-	check_col(dm.col, [1, 17])
-	dm.col = (2, 16) % dm.col
-	check_col(dm.col, [0, 16])
-	check_integrity(dm)
+    dm = DataMatrix(length=2, default_col_type=col_type)
+    dm.col = 1, '2'
+    dm.col += 1
+    check_col(dm.col, [2, 3])
+    dm.col += 1, '2'
+    check_col(dm.col, [3, 5])
+    dm.col -= 1
+    check_col(dm.col, [2, 4])
+    dm.col -= 1, '2'
+    check_col(dm.col, [1, 2])
+    dm.col *= 2
+    check_col(dm.col, [2, 4])
+    dm.col *= 1, '2'
+    check_col(dm.col, [2, 8])
+    dm.col /= 2
+    check_col(dm.col, [1, 4])
+    dm.col /= 1, '2'
+    check_col(dm.col, [1, 2])
+    # Right-hand operations
+    dm.col = 1 + dm.col
+    check_col(dm.col, [2, 3])
+    dm.col = (1, 2) + dm.col
+    check_col(dm.col, [3, 5])
+    dm.col = 5 - dm.col
+    check_col(dm.col, [2, 0])
+    dm.col = (3, 1) - dm.col
+    check_col(dm.col, [1, 1])
+    dm.col = 2 * dm.col
+    check_col(dm.col, [2, 2])
+    dm.col = (1, 2) * dm.col
+    check_col(dm.col, [2, 4])
+    dm.col = 4 / dm.col
+    check_col(dm.col, [2, 1])
+    dm.col = (4, 2) / dm.col
+    check_col(dm.col, [2, 2])
+    dm.col = 2 ** dm.col
+    check_col(dm.col, [4, 4])
+    dm.col = (2, 4) ** dm.col
+    check_col(dm.col, [16, 256])
+    dm.col = 17 % dm.col
+    check_col(dm.col, [1, 17])
+    dm.col = (2, 16) % dm.col
+    check_col(dm.col, [0, 16])
+    check_integrity(dm)
 
 
 def check_int_operations():
 
-	dm = DataMatrix(length=2, default_col_type=IntColumn)
-	dm.col = 1.5, 2.5
-	check_col(dm.col, [1, 2])
-	dm.col *= 2.5
-	check_col(dm.col, [2, 4])
-	def _():
-		with pytest.raises(TypeError):
-			dm.col *= 'x'
-	_()
-	check_integrity(dm)
+    dm = DataMatrix(length=2, default_col_type=IntColumn)
+    dm.col = 1.5, 2.5
+    check_col(dm.col, [1, 2])
+    dm.col *= 2.5
+    check_col(dm.col, [2, 4])
+    def _():
+        with pytest.raises(TypeError):
+            dm.col *= 'x'
+    _()
+    check_integrity(dm)
 
 
 def check_float_operations():
 
-	dm = DataMatrix(length=2, default_col_type=FloatColumn)
-	dm.col = 1, 2
-	check_col(dm.col, [1, 2])
-	dm.col *= 2.5
-	check_col(dm.col, [2.5, 5])
-	dm.col *= np.inf, np.nan
-	check_col(dm.col, [np.inf, np.nan])
-	check_integrity(dm)
+    dm = DataMatrix(length=2, default_col_type=FloatColumn)
+    dm.col = 1, 2
+    check_col(dm.col, [1, 2])
+    dm.col *= 2.5
+    check_col(dm.col, [2.5, 5])
+    dm.col *= np.inf, np.nan
+    check_col(dm.col, [np.inf, np.nan])
+    check_integrity(dm)
 
 
 def check_str_operations():
 
-	dm = DataMatrix(length=2, default_col_type=MixedColumn)
-	dm.col = 'a', 'b'
-	check_col(dm.col, ['a', 'b'])
-	dm.col += 'c', 'd'
-	check_col(dm.col, ['ac', 'bd'])
-	check_integrity(dm)
+    dm = DataMatrix(length=2, default_col_type=MixedColumn)
+    dm.col = 'a', 'b'
+    check_col(dm.col, ['a', 'b'])
+    dm.col += 'c', 'd'
+    check_col(dm.col, ['ac', 'bd'])
+    check_integrity(dm)
 
 
 def test_seriescolumn():
 
-	dm = DataMatrix(length=2)
-	dm.col = SeriesColumn(depth=2)
-	dm.col[0] = 1, 2
-	dm.col[1] = 3, 4
-	dm.col += 1
-	check_series(dm.col, [[2,3], [4,5]])
-	dm.col += 1, 2
-	check_series(dm.col, [[3,4], [6,7]])
-	dm.col -= 1
-	check_series(dm.col, [[2,3], [5,6]])
-	dm.col -= 1, 2
-	check_series(dm.col, [[1,2], [3,4]])
-	dm.col *= 2
-	check_series(dm.col, [[2,4], [6,8]])
-	dm.col *= 1.5, 3
-	check_series(dm.col, [[3,6], [18,24]])
-	dm.col /= 3
-	check_series(dm.col, [[1,2], [6,8]])
-	dm.col /= 1, 2
-	check_series(dm.col, [[1,2], [3,4]])
-	dm.col //= 1.5, 2.5
-	check_series(dm.col, [[0,1], [1,1]])
-	dm.col += np.array([
-		[0,0],
-		[10, 10]
-		])
-	check_series(dm.col, [[0,1], [11,11]])
-	# Right-side operations
-	dm.col[0] = 1, 2
-	dm.col[1] = 3, 4
-	dm.col = 1 + dm.col
-	check_series(dm.col, [[2,3], [4,5]])
-	dm.col = (1, 2) + dm.col
-	check_series(dm.col, [[3,4], [6,7]])
-	dm.col = 1 - dm.col
-	check_series(dm.col, [[-2,-3], [-5,-6]])
-	dm.col = (1, 2) - dm.col
-	check_series(dm.col, [[3, 4], [7, 8]])
-	dm.col = 2 * dm.col
-	check_series(dm.col, [[6, 8], [14, 16]])
-	dm.col = (1.5, 3) * dm.col
-	check_series(dm.col, [[9, 12], [42, 48]])
-	dm.col = 3 / dm.col
-	check_series(dm.col, [[1./3, 1./4], [3./42, 1./16]])
-	dm.col = (1, 2) / dm.col
-	check_series(dm.col, [[3, 4], [28, 32]])
-	dm.col = (1.5, 2.5) // dm.col
-	check_series(dm.col, [[0, 0], [0, 0]])
-	dm.col = np.array([
-		[0, 0],
-		[10, 10]
-		]) + dm.col
-	check_series(dm.col, [[0, 0], [10, 10]])
+    dm = DataMatrix(length=2)
+    dm.col = SeriesColumn(depth=2)
+    dm.col[0] = 1, 2
+    dm.col[1] = 3, 4
+    dm.col += 1
+    check_series(dm.col, [[2,3], [4,5]])
+    dm.col += 1, 2
+    check_series(dm.col, [[3,4], [6,7]])
+    dm.col -= 1
+    check_series(dm.col, [[2,3], [5,6]])
+    dm.col -= 1, 2
+    check_series(dm.col, [[1,2], [3,4]])
+    dm.col *= 2
+    check_series(dm.col, [[2,4], [6,8]])
+    dm.col *= 1.5, 3
+    check_series(dm.col, [[3,6], [18,24]])
+    dm.col /= 3
+    check_series(dm.col, [[1,2], [6,8]])
+    dm.col /= 1, 2
+    check_series(dm.col, [[1,2], [3,4]])
+    dm.col //= 1.5, 2.5
+    check_series(dm.col, [[0,1], [1,1]])
+    dm.col += np.array([
+        [0,0],
+        [10, 10]
+        ])
+    check_series(dm.col, [[0,1], [11,11]])
+    # Right-side operations
+    dm.col[0] = 1, 2
+    dm.col[1] = 3, 4
+    dm.col = 1 + dm.col
+    check_series(dm.col, [[2,3], [4,5]])
+    dm.col = (1, 2) + dm.col
+    check_series(dm.col, [[3,4], [6,7]])
+    dm.col = 1 - dm.col
+    check_series(dm.col, [[-2,-3], [-5,-6]])
+    dm.col = (1, 2) - dm.col
+    check_series(dm.col, [[3, 4], [7, 8]])
+    dm.col = 2 * dm.col
+    check_series(dm.col, [[6, 8], [14, 16]])
+    dm.col = (1.5, 3) * dm.col
+    check_series(dm.col, [[9, 12], [42, 48]])
+    dm.col = 3 / dm.col
+    check_series(dm.col, [[1./3, 1./4], [3./42, 1./16]])
+    dm.col = (1, 2) / dm.col
+    check_series(dm.col, [[3, 4], [28, 32]])
+    dm.col = (1.5, 2.5) // dm.col
+    check_series(dm.col, [[0, 0], [0, 0]])
+    dm.col = np.array([
+        [0, 0],
+        [10, 10]
+        ]) + dm.col
+    check_series(dm.col, [[0, 0], [10, 10]])
 
 
 def test_mixedcolumn():
 
-	check_operations(MixedColumn)
-	check_str_operations()
+    check_operations(MixedColumn)
+    check_str_operations()
 
 
 def test_floatcolumn():
 
-	check_operations(FloatColumn)
-	check_float_operations()
+    check_operations(FloatColumn)
+    check_float_operations()
 
 
 def test_intcolumn():
 
-	check_int_operations()
-	check_operations(IntColumn)
+    check_int_operations()
+    check_operations(IntColumn)

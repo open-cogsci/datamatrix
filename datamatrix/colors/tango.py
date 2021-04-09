@@ -37,7 +37,7 @@ grey = aluminium
 gray = aluminium
 
 allcolors = butter + orange + chocolate + chameleon + skyblue + plum + \
-	scarletred
+    scarletred
 
 brightcolors = [butter[0], orange[0], chameleon[0], skyblue[0], plum[0], \
-	scarletred[0]]
+    scarletred[0]]

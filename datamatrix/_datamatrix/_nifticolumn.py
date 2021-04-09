@@ -24,131 +24,131 @@ import os
 
 def _set_globals():
 
-	global nib, IMAGES, image, np
-	import nibabel as nib
-	import numpy as np
-	from nilearn import image
+    global nib, IMAGES, image, np
+    import nibabel as nib
+    import numpy as np
+    from nilearn import image
 
-	IMAGES = nib.nifti1.Nifti1Image, nib.nifti2.Nifti2Image
-	_set_globals = lambda: None  # suicide
+    IMAGES = nib.nifti1.Nifti1Image, nib.nifti2.Nifti2Image
+    _set_globals = lambda: None  # suicide
 
 
 class NiftiColumn(BaseColumn):
 
-	"""
-	desc:
-		A column that contains either Nifti images or None values.
-	"""
+    """
+    desc:
+        A column that contains either Nifti images or None values.
+    """
 
-	default_value = None
+    default_value = None
 
-	def __init__(self, datamatrix):
+    def __init__(self, datamatrix):
 
-		_set_globals()
-		super(NiftiColumn, self).__init__(datamatrix)
+        _set_globals()
+        super(NiftiColumn, self).__init__(datamatrix)
 
-	@property
-	def mean(self):
+    @property
+    def mean(self):
 
-		_set_globals()
-		s = self.shape
-		if s is None:
-			raise ValueError(u'Nifti images must have the same shape')
-		f = self.format
-		if s is None:
-			raise ValueError(u'Nifti images must have the same format')
-		data = np.empty((len(self),) + s)
-		for i, img in enumerate(self._images):
-			data[i] = img.get_data()
-		return f(np.nanmean(data, axis=0), self.affine)
+        _set_globals()
+        s = self.shape
+        if s is None:
+            raise ValueError(u'Nifti images must have the same shape')
+        f = self.format
+        if s is None:
+            raise ValueError(u'Nifti images must have the same format')
+        data = np.empty((len(self),) + s)
+        for i, img in enumerate(self._images):
+            data[i] = img.get_data()
+        return f(np.nanmean(data, axis=0), self.affine)
 
-	@property
-	def shape(self):
+    @property
+    def shape(self):
 
-		shape = None
-		for img in self._images:
-			if shape is not None and shape != img.shape:
-				return None
-			shape = img.shape
-		return shape
+        shape = None
+        for img in self._images:
+            if shape is not None and shape != img.shape:
+                return None
+            shape = img.shape
+        return shape
 
-	@property
-	def format(self):
+    @property
+    def format(self):
 
-		format = None
-		for img in self._images:
-			if format is not None and not isinstance(img, format):
-				return None
-			format = type(img)
-		return format
+        format = None
+        for img in self._images:
+            if format is not None and not isinstance(img, format):
+                return None
+            format = type(img)
+        return format
 
-	@property
-	def affine(self):
+    @property
+    def affine(self):
 
-		_set_globals()
-		affine = None
-		for img in self._images:
-			if affine is not None and np.any(affine != img.affine):
-				return None
-			affine = img.affine
-		return affine
+        _set_globals()
+        affine = None
+        for img in self._images:
+            if affine is not None and np.any(affine != img.affine):
+                return None
+            affine = img.affine
+        return affine
 
-	@property
-	def _images(self):
+    @property
+    def _images(self):
 
-		return [img for img in self._seq if img is not None]
+        return [img for img in self._seq if img is not None]
 
-	def _checktype(self, value):
+    def _checktype(self, value):
 
-		_set_globals()
-		if value is None or isinstance(value, IMAGES):
-			return value
-		if isinstance(value, basestring) and os.path.isfile(value):
-			return image.load_img(value)
-		raise TypeError('Invalid type: {}'.format(value))
+        _set_globals()
+        if value is None or isinstance(value, IMAGES):
+            return value
+        if isinstance(value, basestring) and os.path.isfile(value):
+            return image.load_img(value)
+        raise TypeError('Invalid type: {}'.format(value))
 
-	def _tosequence(self, value, length=None):
+    def _tosequence(self, value, length=None):
 
-		if isinstance(value, (basestring, IMAGES)):
-			return [self._checktype(value)] * (
-				len(self._datamatrix)
-				if length is None
-				else length
-			)
-		return super(NiftiColumn, self)._tosequence(value, length=length)
+        if isinstance(value, (basestring, IMAGES)):
+            return [self._checktype(value)] * (
+                len(self._datamatrix)
+                if length is None
+                else length
+            )
+        return super(NiftiColumn, self)._tosequence(value, length=length)
 
-	def _printable_list(self):
+    def _printable_list(self):
 
-		return [u'' if img is None else u'[nifti]' for img in self._seq]
+        return [u'' if img is None else u'[nifti]' for img in self._seq]
 
-	# To implement
+    # To implement
 
-	@property
-	def median(self):
+    @property
+    def median(self):
 
-		raise NotImplementedError(u'Not implemented for NiftiColumns')
+        raise NotImplementedError(u'Not implemented for NiftiColumns')
 
-	@property
-	def std(self):
+    @property
+    def std(self):
 
-		raise NotImplementedError(u'Not implemented for NiftiColumns')
+        raise NotImplementedError(u'Not implemented for NiftiColumns')
 
-	@property
-	def max(self):
+    @property
+    def max(self):
 
-		raise NotImplementedError(u'Not implemented for NiftiColumns')
+        raise NotImplementedError(u'Not implemented for NiftiColumns')
 
-	@property
-	def min(self):
+    @property
+    def min(self):
 
-		raise NotImplementedError(u'Not implemented for NiftiColumns')
+        raise NotImplementedError(u'Not implemented for NiftiColumns')
 
-	@property
-	def sum(self):
+    @property
+    def sum(self):
 
-		raise NotImplementedError(u'Not implemented for NiftiColumns')
+        raise NotImplementedError(u'Not implemented for NiftiColumns')
 
-	@property
-	def unique(self):
+    @property
+    def unique(self):
 
-		raise NotImplementedError(u'Not implemented for NiftiColumns')
+        raise NotImplementedError(u'Not implemented for NiftiColumns')

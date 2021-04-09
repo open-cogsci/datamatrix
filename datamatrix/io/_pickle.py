@@ -24,68 +24,68 @@ import os
 
 def readpickle(path):
 
-	"""
-	desc: |
-		Reads a DataMatrix from a pickle file.
+    """
+    desc: |
+        Reads a DataMatrix from a pickle file.
 
-		__Example:__
+        __Example:__
 
-		~~~.python
-		dm = io.readpickle('data.pkl')
-		~~~
+        ~~~.python
+        dm = io.readpickle('data.pkl')
+        ~~~
 
-	arguments:
-		path:	The path to the pickle file.
+    arguments:
+        path: The path to the pickle file.
 
-	returns:
-		A DataMatrix.
-	"""
+    returns:
+        A DataMatrix.
+    """
 
-	with open(path, 'rb') as picklefile:
-		dm = pickle.load(picklefile)
-	if not hasattr(dm._rowid, '_a'):
-		dm = _upgrade_datamatrix_index(dm)
-	return dm
+    with open(path, 'rb') as picklefile:
+        dm = pickle.load(picklefile)
+    if not hasattr(dm._rowid, '_a'):
+        dm = _upgrade_datamatrix_index(dm)
+    return dm
 
 
 def writepickle(dm, path, protocol=-1):
 
-	"""
-	desc: |
-		Writes a DataMatrix to a pickle file.
+    """
+    desc: |
+        Writes a DataMatrix to a pickle file.
 
-		__Example:__
+        __Example:__
 
-		~~~ .python
-		io.writepickle(dm, 'data.pkl')
-		~~~
+        ~~~ .python
+        io.writepickle(dm, 'data.pkl')
+        ~~~
 
 
-	arguments:
-		dm:		The DataMatrix to write.
-		path:	The path to the pickle file.
+    arguments:
+        dm:     The DataMatrix to write.
+        path:   The path to the pickle file.
 
-	keywords:
-		protocol:	The pickle protocol.
-	"""
+    keywords:
+        protocol:	The pickle protocol.
+    """
 
-	try:
-		os.makedirs(os.path.dirname(path))
-	except:
-		pass
-	with open(path, 'wb') as picklefile:
-		pickle.dump(dm, picklefile, protocol)
+    try:
+        os.makedirs(os.path.dirname(path))
+    except:
+        pass
+    with open(path, 'wb') as picklefile:
+        pickle.dump(dm, picklefile, protocol)
 
 
 def _upgrade_datamatrix_index(dm):
 
-	"""Fixes the Index object of deprecated versions of DataMatrix."""
+    """Fixes the Index object of deprecated versions of DataMatrix."""
 
-	from datamatrix._datamatrix._index import Index
-	object.__setattr__(dm, '_rowid', Index(dm._rowid._l))
-	for colname, col in dm.columns:
-		if hasattr(col._rowid, '_l'):
-			object.__setattr__(col, '_rowid', Index(col._rowid._l))
-		else:
-			object.__setattr__(col, '_rowid', Index(col._rowid))
-	return dm
+    from datamatrix._datamatrix._index import Index
+    object.__setattr__(dm, '_rowid', Index(dm._rowid._l))
+    for colname, col in dm.columns:
+        if hasattr(col._rowid, '_l'):
+            object.__setattr__(col, '_rowid', Index(col._rowid._l))
+        else:
+            object.__setattr__(col, '_rowid', Index(col._rowid))
+    return dm

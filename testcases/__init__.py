@@ -16,25 +16,3 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
-
-# def run_all_tests(tests=None, N=1000):
-# 	
-# 	def dummy(*args, **kwargs): pass
-# 	
-# 	if tests is None:
-# 		tests = ['basics', 'desc_stats', 'extra_operations', 'io', 'iteration',
-# 			'operations', 'order', 'select_merge', 'series_operations']
-# 			
-# 	from testcases import test_tools
-# 	test_tools.check_col = dummy
-# 	test_tools.check_series = dummy
-# 	test_tools.check_integrity = dummy
-# 			
-# 	for test in tests:		
-# 		mod = __import__('testcases.test_%s' % test)
-# 		mod = getattr(mod, 'test_%s' % test)
-# 		for name, obj in mod.__dict__.items():
-# 			if name.startswith('test_') and callable(obj):
-# 				print(name)
-# 				for i in range(N):
-# 					obj()

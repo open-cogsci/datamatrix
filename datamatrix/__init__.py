@@ -25,8 +25,7 @@ from datamatrix._datamatrix._numericcolumn import FloatColumn, IntColumn
 from datamatrix._datamatrix._seriescolumn import SeriesColumn
 from datamatrix._datamatrix._nifticolumn import NiftiColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
-from datamatrix._cache import cached, iscached
 
-__version__ = '0.11.1'
+__version__ = '0.12.0a1'
 NAN = float('nan')
 INF = float('inf')
