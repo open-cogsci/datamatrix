@@ -325,7 +325,10 @@ class BaseColumn(OrderedState):
 
     def _checktype_fastnumber(self, value):
 
-        value = fastnumbers.fast_real(value)
+        # There appears to be a bug in some versions of fastnumbers such that
+        # the string 'nan' is converted to 0 instead of NAN. This can be
+        # fixed by explicitly using the NAN keyword.
+        value = fastnumbers.fast_real(value, nan=NAN)
         if isinstance(value, bytes):
             return safe_decode(value)
         return value
