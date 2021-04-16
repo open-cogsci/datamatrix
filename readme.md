@@ -3,8 +3,8 @@
 *An intuitive, Pythonic way to work with tabular data.*
 
 Sebastiaan Mathôt  <br />
-Copyright 2015-2020  <br />
-http://www.cogsci.nl/smathot
+Copyright 2015-2021  <br />
+<https:/datamatrix.cogsci.nl>
 
 [![Build Status](https://travis-ci.org/smathot/python-datamatrix.svg?branch=master)](https://travis-ci.org/smathot/python-datamatrix)
 
@@ -21,7 +21,7 @@ The main advantage of `datamatrix` over similar libraries is the clean, Pythonic
 
 Required:
 
-- Python 2.7 or >= 3.4
+- Python >= 3.7
 
 Optional:
 
