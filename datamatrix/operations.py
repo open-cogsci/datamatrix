@@ -173,6 +173,9 @@ def split(col, *values):
     """
     desc: |
         Splits a DataMatrix by unique values in a column.
+        
+        *Version note:* As of 0.12.0, `split()` accepts multiple columns as
+        shown below.
 
         __Example:__
 
@@ -185,16 +188,17 @@ def split(col, *values):
          dm.B = 'a', 'b', 'c', 'd'
          # If no values are specified, a (value, DataMatrix) iterator is
          # returned.
+         print('Splitting by a single column')
          for A, sdm in ops.split(dm.A):
              print('sdm.A = %s' % A)
              print(sdm)
          # You can also split by multiple columns at the same time.
+         print('Splitting by two columns')
          for A, B, sdm in ops.split(dm.A, dm.B):
-             print('sdm.A = %s' % A)
-             print('sdm.B = %s' % B)
-             print(sdm)
+             print('sdm.A = %s, sdm.B = %s' % (A, B))
          # If values are specific an iterator over DataMatrix objects is
          # returned.
+         print('Splitting by values')
          dm_a, dm_c = ops.split(dm.B, 'a', 'c')
          print('dm.B == "a"')
          print(dm_a)
@@ -226,7 +230,7 @@ def split(col, *values):
             raise ValueError('Don\'t know how to split by {}'.format(values))
         for val1, dm in split(col):
             for val_sdm in split(*[dm[col.name] for col in values]):
-                yield val1, *val_sdm[:-1], val_sdm[-1]
+                yield (val1, *val_sdm[:-1], val_sdm[-1])
         return
     # Otherwise we determine the number of unique values, or use the values
     # that are passed to the function
