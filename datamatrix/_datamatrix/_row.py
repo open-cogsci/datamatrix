@@ -42,6 +42,10 @@ class Row(object):
         object.__setattr__(self, u'_index', index)
         
     @property
+    def as_slice(self):
+        return self._datamatrix[self._index:self._index + 1]
+        
+    @property
     def column_names(self):
         return self._datamatrix.column_names
 

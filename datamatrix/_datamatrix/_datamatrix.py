@@ -729,6 +729,8 @@ class DataMatrix(OrderedState):
 
         if isinstance(other, dict):
             other = DataMatrix()._fromdict(other)
+        elif isinstance(other, Row):
+            other = other.as_slice
         # Create a new DataMatrix with the combined length of self and other.
         # Add all columns from self into the new DataMatrix, and put data from
         # self at the beginning of those columns.
