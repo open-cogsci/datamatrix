@@ -185,9 +185,14 @@ def split(col, *values):
          dm.B = 'a', 'b', 'c', 'd'
          # If no values are specified, a (value, DataMatrix) iterator is
          # returned.
-         for A, dm in ops.split(dm.A):
-            print('dm.A = %s' % A)
-            print(dm)
+         for A, sdm in ops.split(dm.A):
+             print('sdm.A = %s' % A)
+             print(sdm)
+         # You can also split by multiple columns at the same time.
+         for A, B, sdm in ops.split(dm.A, dm.B):
+             print('sdm.A = %s' % A)
+             print('sdm.B = %s' % B)
+             print(sdm)
          # If values are specific an iterator over DataMatrix objects is
          # returned.
          dm_a, dm_c = ops.split(dm.B, 'a', 'c')
@@ -199,21 +204,32 @@ def split(col, *values):
 
     arguments:
         col:
-            desc:	The column to split by.
-            type:	BaseColumn
+            desc: The column to split by.
+            type: BaseColumn
 
     argument-list:
-        values:		Splits the DataMatrix based on these values. If this is
+        values:     Splits the DataMatrix based on these values. If this is
                     provided, an iterator over DataMatrix objects is returned,
                     rather than an iterator over (value, DataMatrix) tuples.
 
     returns:
-        desc:	A iterator over (value, DataMatrix) tuples if no values are
+        desc:   A iterator over (value, DataMatrix) tuples if no values are
                 provided; an iterator over DataMatrix objects if values are
                 provided.
-        type:	Iterator
+        type:   Iterator
     """
 
+    # If values is a list of columns, then we split by multiple columns at the
+    # same time
+    if values and any(isinstance(value, BaseColumn) for value in values):
+        if not all(isinstance(value, BaseColumn) for value in values):
+            raise ValueError('Don\'t know how to split by {}'.format(values))
+        for val1, dm in split(col):
+            for val_sdm in split(*[dm[col.name] for col in values]):
+                yield val1, *val_sdm[:-1], val_sdm[-1]
+        return
+    # Otherwise we determine the number of unique values, or use the values
+    # that are passed to the function
     _values = values if values else col.unique
     for val in _values:
         dm = col == val
