@@ -60,6 +60,11 @@ def _test_numericcolumn(cls):
     dm.y[dm.x > 3] = 10
     dm.y[dm.x >= 8] = 11
     check_col(dm.y, [np.nan] * 3 + [10] * 3 + [11] * 2)
+    # Test setting by row
+    dm = DataMatrix(length=2)
+    for i, row in enumerate(dm):
+        row.col = i
+    check_col(dm.col, [0, 1])
     # Test shortening and lengthening
     dm = DataMatrix(length=4)
     dm.length = 0

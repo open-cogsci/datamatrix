@@ -20,7 +20,8 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
     SeriesColumn
-from testcases.test_tools import check_col, check_series, check_integrity
+from testcases.test_tools import check_col, check_series, check_integrity, \
+    check_dm
 import numpy as np
 import pytest
 
@@ -84,7 +85,13 @@ def check_concat(col_type, invalid):
     dm3 = dm1 << dm2
     check_col(dm3.col1, [1,2,invalid,invalid])
     check_col(dm3.col_shared, [3,4,7,8])
-    check_col(dm3.col2, [invalid,invalid,5,6])
+    check_col(dm3.col2, [invalid, invalid, 5, 6])
+    dm4 = DataMatrix(default_col_type=col_type)
+    for row in dm1:
+        dm4 <<= row
+    for row in dm2:
+        dm4 <<= row
+    check_dm(dm3, dm4)
 
 
 def test_mixedcolumn():

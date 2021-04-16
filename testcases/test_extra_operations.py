@@ -97,6 +97,69 @@ def test_split():
     check_col(dma.b, [0, 1])
     check_col(dmb.a, ['b', 'b'])
     check_col(dmb.b, [2, 3])
+    # With multiple columns
+    dm = DataMatrix(length=8)
+    dm.A = 0, 0, 1, 1, 0, 0, 1, 1
+    dm.B = 'a', 'b', 'a', 'b', 'a', 'b', 'a', 'b'
+    dm.C = 'x', 'x', 'x', 'x', 'y', 'y', 'y', 'y'
+    g = ops.split(dm.A, dm.B)
+    val1, val2, sdm = next(g)
+    assert val1 == 0
+    assert val2 == 'a'
+    assert(len(sdm) == 2)
+    val1, val2, sdm = next(g)
+    assert val1 == 0
+    assert val2 == 'b'
+    assert(len(sdm) == 2)
+    val1, val2, sdm = next(g)
+    assert val1 == 1
+    assert val2 == 'a'
+    assert(len(sdm) == 2)
+    val1, val2, sdm = next(g)
+    assert val1 == 1
+    assert val2 == 'b'
+    assert(len(sdm) == 2)
+    g = ops.split(dm.A, dm.B, dm.C)
+    val1, val2, val3, sdm = next(g)
+    assert val1 == 0
+    assert val2 == 'a'
+    assert val3 == 'x'
+    assert(len(sdm) == 1)
+    val1, val2, val3, sdm = next(g)
+    assert val1 == 0
+    assert val2 == 'a'
+    assert val3 == 'y'
+    assert(len(sdm) == 1)
+    val1, val2, val3, sdm = next(g)
+    assert val1 == 0
+    assert val2 == 'b'
+    assert val3 == 'x'
+    assert(len(sdm) == 1)
+    val1, val2, val3, sdm = next(g)
+    assert val1 == 0
+    assert val2 == 'b'
+    assert val3 == 'y'
+    assert(len(sdm) == 1)
+    val1, val2, val3, sdm = next(g)
+    assert val1 == 1
+    assert val2 == 'a'
+    assert val3 == 'x'
+    assert(len(sdm) == 1)
+    val1, val2, val3, sdm = next(g)
+    assert val1 == 1
+    assert val2 == 'a'
+    assert val3 == 'y'
+    assert(len(sdm) == 1)
+    val1, val2, val3, sdm = next(g)
+    assert val1 == 1
+    assert val2 == 'b'
+    assert val3 == 'x'
+    assert(len(sdm) == 1)
+    val1, val2, val3, sdm = next(g)
+    assert val1 == 1
+    assert val2 == 'b'
+    assert val3 == 'y'
+    assert(len(sdm) == 1)
 
 
 def test_bin_split():
