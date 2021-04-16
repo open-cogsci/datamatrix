@@ -63,7 +63,7 @@ class Row(object):
         
     def __dir__(self):
         
-        return self.column_names + object.__dir__(self)			
+        return self.column_names + object.__dir__(self)
 
     def __len__(self):
 
@@ -71,7 +71,7 @@ class Row(object):
 
     def __getattr__(self, key):
 
-        return self._datamatrix[key][self._index]
+        return self.__getitem__(key)
 
     def __getitem__(self, key):
 
@@ -81,7 +81,7 @@ class Row(object):
 
     def __setattr__(self, key, value):
 
-        self._datamatrix[key][self._index] = value
+        self.__setitem__(key, value)
 
     def __setitem__(self, key, value):
 
