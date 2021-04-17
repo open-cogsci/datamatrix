@@ -4,5 +4,6 @@ python:
   - "3.8"
   - "3.9"
 before_install:
+  - pip install numpy --upgrade
   - pip install openpyxl fastnumbers json_tricks nilearn nibabel scipy numpy pandas scikit-learn
 script: pytest
