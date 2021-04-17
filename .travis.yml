@@ -1,10 +1,8 @@
 language: python
 python:
-  - "3.7"
   - "3.8"
-  - "3.9"
 sudo: false
-virtualenv:
+virtualenv:g
   system_site_packages: true
 before_install:
   - pip install openpyxl fastnumbers json_tricks nilearn nibabel scipy numpy pandas scikit-learn
