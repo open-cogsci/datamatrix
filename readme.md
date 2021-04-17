@@ -6,7 +6,7 @@ Sebastiaan Mathôt  <br />
 Copyright 2015-2021  <br />
 <https:/datamatrix.cogsci.nl>
 
-[![Build Status](https://travis-ci.org/smathot/python-datamatrix.svg?branch=master)](https://travis-ci.org/smathot/python-datamatrix)
+[![Build Status](https://travis-ci.com/open-cogsci/python-datamatrix.svg?branch=0.12)](https://travis-ci.com/open-cogsci/python-datamatrix)
 
 
 ## About
@@ -16,10 +16,10 @@ tabular data, that is, datasets that consist of named columns and numbered rows.
 
 The main advantage of `datamatrix` over similar libraries is the clean, Pythonic syntax, which makes your code easy to read and understand.
 
+`datamatrix` is also one of the core libraries of [OpenSesame](https://osdoc.cogsci.nl/), a graphical experiment builder for the social sciences, and [Rapunzel](https://rapunzel.cogsci.nl/), a modern code editor for numerical computing with Python and R.
+
 
 ## Dependencies
-
-Required:
 
 - Python >= 3.7
 
