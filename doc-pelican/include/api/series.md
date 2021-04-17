@@ -91,7 +91,7 @@ and tested largely with the EyeLink 1000 eye tracker.
 __Source:__
 
 - Mathot, S. (2013). A simple way to reconstruct pupil size during eye
-blinks. <http://doi.org/10.6084/m9.figshare.688002>
+  blinks. <http://doi.org/10.6084/m9.figshare.688002>
 
 __Arguments:__
 
@@ -158,12 +158,12 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7feaf3363bf8>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7ffb0f3acc80>\)
 
-Downsamples a series by a factor, so that it becomes 'by' times shorter.
-The depth of the downsampled series is the highest multiple of the depth
-of the original series divided by 'by'. For example, downsampling a
-series with a depth of 10 by 3 results in a depth of 3.
+Downsamples a series by a factor, so that it becomes 'by' times
+shorter. The depth of the downsampled series is the highest multiple of
+the depth of the original series divided by 'by'. For example,
+downsampling a series with a depth of 10 by 3 results in a depth of 3.
 
 __Example:__
 
@@ -209,7 +209,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7feaf3363bf8>
+	- Default: <function nanmean at 0x7ffb0f3acc80>
 
 __Returns:__
 
@@ -247,7 +247,7 @@ python: |
  dm.y += np.random.random(LENGTH)
  # Set some observations at the end to nan
  for i, row in enumerate(dm):
-        row.y[-i:] = np.nan
+    row.y[-i:] = np.nan
  # Lock the degraded traces to the end, so that all nans
  # now come at the start of the trace
  dm.y2 = srs.endlock(dm.y)
@@ -301,7 +301,8 @@ python: |
  LENGTH = 3
  DEPTH = 200
 
- # Create one fast oscillation, and two combined fast and slow oscillations
+ # Create one fast oscillation, and two combined fast and slow
+ # oscillations
  dm = DataMatrix(length=LENGTH)
  dm.s = SeriesColumn(depth=DEPTH)
  dm.s[0] = np.sin(np.linspace(0, 150 * np.pi, DEPTH))
@@ -366,36 +367,37 @@ __Example:__
 
 %--
 python: |
-        import numpy as np
-        from matplotlib import pyplot as plt
-        from datamatrix import DataMatrix, SeriesColumn, series as srs
-        
-        LENGTH = 3
-        DEPTH = 100
-        SAMPLING_FREQ = 100
-        
-        # Create one fast oscillation, and two combined fast and slow oscillations
-        dm = DataMatrix(length=LENGTH)
-        dm.s = SeriesColumn(depth=DEPTH)
-        dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))  # 10 Hz
-        dm.s[1] = np.sin(np.linspace(0, 10 * np.pi, DEPTH)) + dm.s[0]  # 5 Hz
-        dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
-        dm.f = srs.filter_bandpass(dm.s, freq_range=(4, 6), sampling_freq=SAMPLING_FREQ)
-        
-        # Plot the original signal
-        plt.clf()
-        plt.subplot(121)
-        plt.title('Original')
-        plt.plot(dm.s[0])
-        plt.plot(dm.s[1])
-        plt.plot(dm.s[2])
-        plt.subplot(122)
-        # And the filtered signal!
-        plt.title('Bandpass')
-        plt.plot(dm.f[0])
-        plt.plot(dm.f[1])
-        plt.plot(dm.f[2])
-        plt.savefig('content/pages/img/series/bandpass.png')
+    import numpy as np
+    from matplotlib import pyplot as plt
+    from datamatrix import DataMatrix, SeriesColumn, series as srs
+    
+    LENGTH = 3
+    DEPTH = 100
+    SAMPLING_FREQ = 100
+    
+    # Create one fast oscillation, and two combined fast and slow
+    # oscillations
+    dm = DataMatrix(length=LENGTH)
+    dm.s = SeriesColumn(depth=DEPTH)
+    dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))  # 10 Hz
+    dm.s[1] = np.sin(np.linspace(0, 10 * np.pi, DEPTH)) + dm.s[0]  # 5 Hz
+    dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
+    dm.f = srs.filter_bandpass(dm.s, freq_range=(4, 6), sampling_freq=SAMPLING_FREQ)
+    
+    # Plot the original signal
+    plt.clf()
+    plt.subplot(121)
+    plt.title('Original')
+    plt.plot(dm.s[0])
+    plt.plot(dm.s[1])
+    plt.plot(dm.s[2])
+    plt.subplot(122)
+    # And the filtered signal!
+    plt.title('Bandpass')
+    plt.plot(dm.f[0])
+    plt.plot(dm.f[1])
+    plt.plot(dm.f[2])
+    plt.savefig('content/pages/img/series/bandpass.png')
 --%
 
 %--
@@ -444,36 +446,37 @@ __Example:__
 
 %--
 python: |
-        import numpy as np
-        from matplotlib import pyplot as plt
-        from datamatrix import DataMatrix, SeriesColumn, series as srs
-        
-        LENGTH = 3
-        DEPTH = 100
-        SAMPLING_FREQ = 100
-        
-        # Create one fast oscillation, and two combined fast and slow oscillations
-        dm = DataMatrix(length=LENGTH)
-        dm.s = SeriesColumn(depth=DEPTH)
-        dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))  # 10 Hz
-        dm.s[1] = np.sin(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
-        dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
-        dm.f = srs.filter_highpass(dm.s, freq_min=3, sampling_freq=SAMPLING_FREQ)
-        
-        # Plot the original signal
-        plt.clf()
-        plt.subplot(121)
-        plt.title('Original')
-        plt.plot(dm.s[0])
-        plt.plot(dm.s[1])
-        plt.plot(dm.s[2])
-        plt.subplot(122)
-        # And the filtered signal!
-        plt.title('Highpass')
-        plt.plot(dm.f[0])
-        plt.plot(dm.f[1])
-        plt.plot(dm.f[2])
-        plt.savefig('content/pages/img/series/highpass.png')
+    import numpy as np
+    from matplotlib import pyplot as plt
+    from datamatrix import DataMatrix, SeriesColumn, series as srs
+    
+    LENGTH = 3
+    DEPTH = 100
+    SAMPLING_FREQ = 100
+    
+    # Create one fast oscillation, and two combined fast and slow
+    # oscillations
+    dm = DataMatrix(length=LENGTH)
+    dm.s = SeriesColumn(depth=DEPTH)
+    dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))  # 10 Hz
+    dm.s[1] = np.sin(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
+    dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
+    dm.f = srs.filter_highpass(dm.s, freq_min=3, sampling_freq=SAMPLING_FREQ)
+    
+    # Plot the original signal
+    plt.clf()
+    plt.subplot(121)
+    plt.title('Original')
+    plt.plot(dm.s[0])
+    plt.plot(dm.s[1])
+    plt.plot(dm.s[2])
+    plt.subplot(122)
+    # And the filtered signal!
+    plt.title('Highpass')
+    plt.plot(dm.f[0])
+    plt.plot(dm.f[1])
+    plt.plot(dm.f[2])
+    plt.savefig('content/pages/img/series/highpass.png')
 --%
 
 %--
@@ -522,36 +525,37 @@ __Example:__
 
 %--
 python: |
-        import numpy as np
-        from matplotlib import pyplot as plt
-        from datamatrix import DataMatrix, SeriesColumn, series as srs
-        
-        LENGTH = 3
-        DEPTH = 100
-        SAMPLING_FREQ = 100
-        
-        # Create one fast oscillation, and two combined fast and slow oscillations
-        dm = DataMatrix(length=LENGTH)
-        dm.s = SeriesColumn(depth=DEPTH)
-        dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))  # 10 Hz
-        dm.s[1] = np.sin(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
-        dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
-        dm.f = srs.filter_lowpass(dm.s, freq_max=3, sampling_freq=SAMPLING_FREQ)
-        
-        # Plot the original signal
-        plt.clf()
-        plt.subplot(121)
-        plt.title('Original')
-        plt.plot(dm.s[0])
-        plt.plot(dm.s[1])
-        plt.plot(dm.s[2])
-        plt.subplot(122)
-        # And the filtered signal!
-        plt.title('Lowpass')
-        plt.plot(dm.f[0])
-        plt.plot(dm.f[1])
-        plt.plot(dm.f[2])
-        plt.savefig('content/pages/img/series/lowpass.png')
+    import numpy as np
+    from matplotlib import pyplot as plt
+    from datamatrix import DataMatrix, SeriesColumn, series as srs
+    
+    LENGTH = 3
+    DEPTH = 100
+    SAMPLING_FREQ = 100
+    
+    # Create one fast oscillation, and two combined fast and slow
+    # oscillations
+    dm = DataMatrix(length=LENGTH)
+    dm.s = SeriesColumn(depth=DEPTH)
+    dm.s[0] = np.sin(np.linspace(0, 20 * np.pi, DEPTH))  # 10 Hz
+    dm.s[1] = np.sin(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
+    dm.s[2] = np.cos(np.linspace(0, 2 * np.pi, DEPTH)) + dm.s[0]  # 1 Hz
+    dm.f = srs.filter_lowpass(dm.s, freq_max=3, sampling_freq=SAMPLING_FREQ)
+    
+    # Plot the original signal
+    plt.clf()
+    plt.subplot(121)
+    plt.title('Original')
+    plt.plot(dm.s[0])
+    plt.plot(dm.s[1])
+    plt.plot(dm.s[2])
+    plt.subplot(122)
+    # And the filtered signal!
+    plt.title('Lowpass')
+    plt.plot(dm.f[0])
+    plt.plot(dm.f[1])
+    plt.plot(dm.f[2])
+    plt.savefig('content/pages/img/series/lowpass.png')
 --%
 
 %--
@@ -612,8 +616,8 @@ python: |
  # Now interpolate the missing data!
  dm.i = srs.interpolate(dm.y)
 
- # And plot the original data as circles and the interpolated data as dotted
- # lines
+ # And plot the original data as circles and the interpolated data as
+ # dotted lines
  plt.clf()
  plt.plot(dm.i.plottable, ':')
  plt.plot(dm.y.plottable, 'o')
@@ -644,8 +648,8 @@ The interpolated signal.
 ## function __lock__\(series, lock\)
 
 Shifts each row from a series by a certain number of steps along its
-depth. This is useful to lock, or align, a series based on a sequence of
-values.
+depth. This is useful to lock, or align, a series based on a sequence
+of values.
 
 __Example:__
 
@@ -665,12 +669,14 @@ python: |
  dm.x_offset = -1
  dm.y_offset = -1
  for row in dm:
-        row.x_offset = np.random.randint(0, DEPTH)
-        row.y_offset = np.random.random()
-        row.y = np.roll(np.cos(np.linspace(0, np.pi, DEPTH)),
-                row.x_offset)+row.y_offset
- # Now use the x offset to lock the traces to the 0 point of the cosine,
- # i.e. to their peaks.
+    row.x_offset = np.random.randint(0, DEPTH)
+    row.y_offset = np.random.random()
+    row.y = np.roll(
+        np.cos(np.linspace(0, np.pi, DEPTH)),
+        row.x_offset
+    ) + row.y_offset
+ # Now use the x offset to lock the traces to the 0 point of the
+ # cosine, i.e. to their peaks.
  dm.y2, zero_point = srs.lock(dm.y, lock=dm.x_offset)
 
  plt.clf()
@@ -713,8 +719,8 @@ used as the indices for a series of data point (`dataseries`). This is
 useful, for example, if you have a series of measurements and a
 separate series of timestamps, and you want to combine the two.
 
-The resulting series will generally contain a lot of `nan` values, which
-you can interpolate with `interpolate()`.
+The resulting series will generally contain a lot of `nan` values,
+which you can interpolate with `interpolate()`.
 
 __Example:__
 
@@ -736,8 +742,8 @@ python: |
  # the timestamps, and also create an interpolate version of this
  # column for smooth plotting.
  dm.normalized = srs.normalize_time(
-        dataseries=dm.samples,
-        timeseries=dm.time
+    dataseries=dm.samples,
+    timeseries=dm.time
  )
  dm.interpolated = srs.interpolate(dm.normalized)
  # And plot!
@@ -772,7 +778,7 @@ A new series in which the data points are spread according to the timestamps.
 
 <div class="FunctionDoc YAMLDoc" id="reduce" markdown="1">
 
-## function __reduce__\(series, operation=<function nanmean at 0x7feaf3363bf8>\)
+## function __reduce__\(series, operation=<function nanmean at 0x7ffb0f3acc80>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -806,7 +812,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7feaf3363bf8>
+	- Default: <function nanmean at 0x7ffb0f3acc80>
 
 __Returns:__
 
@@ -818,7 +824,7 @@ A reduction of the signal.
 
 <div class="FunctionDoc YAMLDoc" id="reduce" markdown="1">
 
-## function __reduce__\(series, operation=<function nanmean at 0x7feaf3363bf8>\)
+## function __reduce__\(series, operation=<function nanmean at 0x7ffb0f3acc80>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -852,7 +858,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7feaf3363bf8>
+	- Default: <function nanmean at 0x7ffb0f3acc80>
 
 __Returns:__
 
@@ -1088,7 +1094,8 @@ python: |
  LENGTH = 3
  DEPTH = 200
 
- # Create one fast oscillation, and two combined fast and slow oscillations
+ # Create one fast oscillation, and two combined fast and slow
+ # oscillations
  dm = DataMatrix(length=LENGTH)
  dm.s = SeriesColumn(depth=DEPTH)
  dm.s[0] = 1 * np.sin(np.linspace(0, 4 * np.pi, DEPTH))

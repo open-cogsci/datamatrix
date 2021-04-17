@@ -21,7 +21,7 @@ python: |
  @fnc.curry
  def add(a, b, c):
 
-        return a + b + c
+    return a + b + c
 
  print(add(1)(2)(3)) # Curried approach with single arguments
  print(add(1, 2)(3)) # Partly curried approach
@@ -50,10 +50,10 @@ Filters rows from a datamatrix or column based on filter function
 (`fnc`).
 
 If `obj` is a column, `fnc` should be a function that accepts a single
-value. If `obj` is a datamatrix, `fnc` should be a function that accepts
-a keyword `dict`, where column names are keys and cells are values. In
-both cases, `fnc` should return a `bool` indicating whether the row or
-value should be included.
+value. If `obj` is a datamatrix, `fnc` should be a function that
+accepts a keyword `dict`, where column names are keys and cells are 
+values. In both cases, `fnc` should return a `bool` indicating whether 
+the row or value should be included.
 
 *New in v0.8.0*: You can also directly compare a column with a function
 or `lambda` expression. However, this is different from `filter_()` in
@@ -125,8 +125,9 @@ python: |
  # Map a 2x function onto the entire dm to create dm_new, using a fancy
  # dict comprehension wrapped inside a lambda function.
  dm_new = fnc.map_(
-        lambda **d: {col : 2*val for col, val in d.items()},
-        dm)
+    lambda **d: {col : 2*val for col, val in d.items()},
+    dm
+)
  print(dm_new)
 --%
 
@@ -152,8 +153,8 @@ A new column or datamatrix.
 *Requires json_tricks*
 
 A memoization decorator that stores the result of a function call, and
-returns the stored value when the function is called again with the same
-arguments. That is, memoization is a specific kind of caching that
+returns the stored value when the function is called again with the
+same arguments. That is, memoization is a specific kind of caching that
 improves performance for expensive function calls.
 
 This decorator only works for return values that can be pickled, and
@@ -161,8 +162,8 @@ arguments that can be serialized to `json`.
 
 The memoized function becomes a callable object. To clear the
 memoization cache, call the `.clear()` function on the memoized
-function. The total size of all cached return values is available as the
-`.cache_size` property.
+function. The total size of all cached return values is available as 
+the `.cache_size` property.
 
 For a more detailed description, see:
 
@@ -180,8 +181,8 @@ python: |
  @fnc.memoize
  def add(a, b):
 
-        print('add(%d, %d)' % (a, b))
-        return a + b
+    print('add(%d, %d)' % (a, b))
+    return a + b
 
  three = add(1, 2)  # Storing result in memory
  three = add(1, 2)  # Re-using previous result
@@ -191,8 +192,8 @@ python: |
  @fnc.memoize(persistent=True, key='persistent-add')
  def persistent_add(a, b):
 
-        print('persistent_add(%d, %d)' % (a, b))
-        return a + b
+    print('persistent_add(%d, %d)' % (a, b))
+    return a + b
 
  three = persistent_add(1, 2)  # Writing result to disk
  three = persistent_add(1, 2)  # Re-using previous result
@@ -217,9 +218,9 @@ python: |
  from datamatrix import functional as fnc
 
  with fnc.profile(path=u'profile.txt', sortby=u'cumulative'):
-         dm = DataMatrix(length=1000)
-         dm.col = range(1000)
-         dm.is_even = dm.col @ (lambda x: not x % 2)
+     dm = DataMatrix(length=1000)
+     dm.col = range(1000)
+     dm.is_even = dm.col @ (lambda x: not x % 2)
 --%
 
 __Argument list:__

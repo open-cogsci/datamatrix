@@ -56,8 +56,8 @@ python: |
  dm.A = 1, 0, 3, 2, 4
  dm.B = 'a', 'b', 'c', 'd', 'e'
  for bin, dm in enumerate(ops.bin_split(dm.A, bins=3)):
-        print('bin %d' % bin)
-        print(dm)
+    print('bin %d' % bin)
+    print(dm)
 --%
 
 __Arguments:__
@@ -79,9 +79,9 @@ A generator that iterates over the bins.
 
 *Requires numpy*
 
-Creates a new DataMatrix that uses a specified DataMatrix as the base of
-a full-factorial design. That is, each value of every row is combined
-with each value from every other row. For example:
+Creates a new DataMatrix that uses a specified DataMatrix as the base
+of a full-factorial design. That is, each value of every row is 
+combined with each value from every other row. For example:
 
 __Example:__
 
@@ -254,9 +254,9 @@ __Keywords:__
 
 ## function __shuffle__\(obj\)
 
-Shuffles a DataMatrix or a column. If a DataMatrix is shuffled, the order
-of the rows is shuffled, but values that were in the same row will stay
-in the same row.
+Shuffles a DataMatrix or a column. If a DataMatrix is shuffled, the
+order of the rows is shuffled, but values that were in the same row
+will stay in the same row.
 
 __Example:__
 
@@ -321,16 +321,18 @@ The shuffled DataMatrix.
 
 ## function __sort__\(obj, by=None\)
 
-Sorts a column or DataMatrix. In the case of a DataMatrix, a column must
-be specified to determine the sort order. In the case of a column, this
-needs to be specified if the column should be sorted by another column.
+Sorts a column or DataMatrix. In the case of a DataMatrix, a column
+must be specified to determine the sort order. In the case of a column,
+this needs to be specified if the column should be sorted by another
+column.
 
 The sort order is as follows:
 
 - `-INF`
 - `int` and `float` values in increasing order
 - `INF`
-- `str` values in alphabetical order, where uppercase letters come first
+- `str` values in alphabetical order, where uppercase letters come
+  first
 - `None`
 - `NAN`
 
@@ -377,6 +379,9 @@ The sorted DataMatrix, or the sorted column.
 
 Splits a DataMatrix by unique values in a column.
 
+*Version note:* As of 0.12.0, `split()` accepts multiple columns as
+shown below.
+
 __Example:__
 
 %--
@@ -388,11 +393,17 @@ python: |
  dm.B = 'a', 'b', 'c', 'd'
  # If no values are specified, a (value, DataMatrix) iterator is
  # returned.
- for A, dm in ops.split(dm.A):
-        print('dm.A = %s' % A)
-        print(dm)
+ print('Splitting by a single column')
+ for A, sdm in ops.split(dm.A):
+     print('sdm.A = %s' % A)
+     print(sdm)
+ # You can also split by multiple columns at the same time.
+ print('Splitting by two columns')
+ for A, B, sdm in ops.split(dm.A, dm.B):
+     print('sdm.A = %s, sdm.B = %s' % (A, B))
  # If values are specific an iterator over DataMatrix objects is
  # returned.
+ print('Splitting by values')
  dm_a, dm_c = ops.split(dm.B, 'a', 'c')
  print('dm.B == "a"')
  print(dm_a)
@@ -421,8 +432,8 @@ A iterator over (value, DataMatrix) tuples if no values are provided; an iterato
 
 ## function __weight__\(col\)
 
-Weights a DataMatrix by a column. That is, each row from a DataMatrix is
-repeated as many times as the value in the weighting column.
+Weights a DataMatrix by a column. That is, each row from a DataMatrix
+is repeated as many times as the value in the weighting column.
 
 __Example:__
 
