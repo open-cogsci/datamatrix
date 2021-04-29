@@ -20,7 +20,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import time
 import subprocess
-from datamatrix import io, series, SeriesColumn, DataMatrix, cached
+from datamatrix import io, series, SeriesColumn, DataMatrix
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix.py3compat import *
 
