@@ -260,10 +260,12 @@ class _SeriesColumn(NumericColumn):
             return a
         raise Exception('Cannot convert to sequence: %s' % str(value))
 
-    def _empty_col(self):
+    def _empty_col(self, datamatrix=None):
 
         return self.__class__(
-            self._datamatrix, depth=self._depth, defaultnan=self.defaultnan
+            datamatrix if datamatrix else self._datamatrix,
+            depth=self._depth,
+            defaultnan=self.defaultnan
         )
 
     def _addrowid(self, _rowid):

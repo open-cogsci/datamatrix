@@ -800,18 +800,26 @@ class BaseColumn(OrderedState):
         col._seq = [fnc(val) for val in self._seq]
         return col
 
-    def _empty_col(self):
+    def _empty_col(self, datamatrix=None):
 
         """
         visible: False
 
         desc:
             Create an empty column of the same type as the current column.
+            
+        keywords:
+            datamatrix: The DataMatrix to which the empty column should
+                        belong or None. If None, then the DataMatrix of current
+                        column is used unless it has a different length, in
+                        which case a new DataMatrix object is initialized.
 
         returns:
             BaseColumn
         """
 
+        if datamatrix:
+            return self.__class__(datamatrix)
         # If this column results from slicing from an original column, the
         # rowids do not match with the DataMatrix. In that case, create a new
         # DataMatrix for the empty column.
