@@ -199,6 +199,12 @@ class NumericColumn(BaseColumn):
         a[:old_length] = self._seq
         a[old_length:] = self.invalid
         self._seq = a
+        
+    def _getdatamatrixkey(self, key):
+
+        if key != self._datamatrix:
+            raise ValueError('Cannot slice column with a different DataMatrix')
+        return self._getrowidkey(key._rowid)
 
     def _getrowidkey(self, key):
 

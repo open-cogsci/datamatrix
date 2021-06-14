@@ -91,6 +91,10 @@ def _test_numericcolumn(cls):
     val = dm.col[1:-1]
     assert isinstance(val, cls)
     check_col(val, [2, 3, 4])
+    # datamatrix → FloatColumn
+    val = dm.col[dm[1:-1]]
+    assert isinstance(val, cls)
+    check_col(val, [2, 3, 4])
     # Check array setting and getting
     if cls != MixedColumn:
         a = dm.col.array
