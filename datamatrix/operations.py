@@ -686,6 +686,9 @@ def keep_only(dm, *cols):
                     u'Specify name as str instead.'
                 ) % colname
             )
+    for colname in colnames:
+        if colname not in dm.column_names:
+            warn('no column named {}'.format(colname))
     for colname in dm.column_names:
         if colname not in colnames:
             del dm[colname]
