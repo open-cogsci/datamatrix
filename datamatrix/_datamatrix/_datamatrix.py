@@ -775,3 +775,30 @@ class DataMatrix(OrderedState):
 
         for i in self.rows:
             yield self[i]
+
+    def __array__(self):
+        
+        """
+        visible: False
+
+        desc:
+            Use by numpy to convert the DataMatrix to an array where the first
+            axis corresponds to the rows and the second axis to the columns.
+            The dtype of the array is object, float, or int, depending on which
+            dtype fits best.
+        """
+        
+        import numpy as np
+        
+        a = np.empty((len(self), len(self.columns)), dtype=object)
+        for i, row in enumerate(self):
+            for j, (name, cell) in enumerate(row):
+                a[i, j] = cell
+        try:
+            return np.array(a, dtype=int)
+        except TypeError:
+            try:
+                return np.array(a, dtype=float)
+            except TypeError:
+                pass
+        return a
