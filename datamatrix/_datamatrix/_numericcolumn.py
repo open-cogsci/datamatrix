@@ -243,7 +243,10 @@ class NumericColumn(BaseColumn):
 
         # In some cases, we need to argsort very often, which is time
         # consuming. Therefore, this function acts as a cached argsort.
-        rowid_hash = self._rowid.tostring()
+        try:
+            rowid_hash = self._rowid.tobytes()  # As of NumPy 1.9.0
+        except AttributeError:
+            rowid_hash = self._rowid.tostring()
         if rowid_hash == self._rowid_argsort_cache[0]:
             return self._rowid_argsort_cache[1]
         self._rowid_argsort_cache = rowid_hash, self._rowid.argsort()
