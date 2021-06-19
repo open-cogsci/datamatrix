@@ -135,6 +135,14 @@ class NumericColumn(BaseColumn):
             a = np.empty(length, dtype=self.dtype)
             a[:] = self._checktype(value)
             return a
+        # Numerical values should be efficiently cast to an array
+        if isinstance(value, (int, float)):
+            a = np.empty(length, dtype=self.dtype)
+            a[:] = value
+            return a
+        # Other numerical columns should be efficient cast to an array
+        if isinstance(value, NumericColumn) and len(value) == length:
+            return value.array
         return super(NumericColumn, self)._tosequence(value, length)
 
     def _compare_value(self, other, op):
@@ -174,13 +182,13 @@ class NumericColumn(BaseColumn):
         col._rowid = self._rowid
         if flip:
             col._seq = number_op(
-                self._tosequence(other, len(self._datamatrix)),
+                self._tosequence(other, len(self)),
                 self._seq
             )
         else:
             col._seq = number_op(
                 self._seq,
-                self._tosequence(other, len(self._datamatrix))
+                self._tosequence(other, len(self))
             )
         return col
 
