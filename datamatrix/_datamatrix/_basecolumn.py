@@ -39,10 +39,14 @@ NAN = float('nan')
 NUMBER = numbers.Number
 BASESTRING_OR_NUMBER = NUMBER, basestring
 try:
-    import numpy as np
-    SEQUENCE = collections.Sequence, np.ndarray
+    from collections.abc import Sequence  # As of Python 3.3
 except ImportError:
-    SEQUENCE = collections.Sequence
+    from collections import Sequence
+try:
+    import numpy as np
+    SEQUENCE = Sequence, np.ndarray
+except ImportError:
+    SEQUENCE = Sequence
 
 
 class BaseColumn(OrderedState):
