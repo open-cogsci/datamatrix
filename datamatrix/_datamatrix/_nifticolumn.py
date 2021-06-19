@@ -59,7 +59,7 @@ class NiftiColumn(BaseColumn):
             raise ValueError(u'Nifti images must have the same format')
         data = np.empty((len(self),) + s)
         for i, img in enumerate(self._images):
-            data[i] = img.get_data()
+            data[i] = img.get_fdata()
         return f(np.nanmean(data, axis=0), self.affine)
 
     @property

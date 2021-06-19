@@ -35,7 +35,7 @@ def test_nifti():
         np.array([[[1, 1], [0, 0]], [[np.nan, 1], [0, 0]]]),
         None
     )
-    m = dm.n.mean.get_data()
+    m = dm.n.mean.get_fdata()
     assert np.all(m == np.array([[[.5, .5], [.5, .5]], [[-1, 0], [.5, .5]]]))
 
 
