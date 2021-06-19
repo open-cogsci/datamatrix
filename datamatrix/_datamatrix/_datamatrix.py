@@ -529,7 +529,6 @@ class DataMatrix(OrderedState):
                 raise ValueError(
                     u'Column should have the same length as the DataMatrix'
                 )
-            warn(u'This column does not belong to this DataMatrix')
             self._cols[name] = value._empty_col(datamatrix=self)
         if not isinstance(name, str):
             raise TypeError(u'Column names should be str, not %s' % type(name))
