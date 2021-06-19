@@ -67,18 +67,31 @@ def check_desc_stats(col_type, invalid, assert_invalid):
     dm.col = 1
     assert dm.col.mean == 1
     assert dm.col.median == 1
-    assert_invalid(dm.col.std)
+    if col_type in (IntColumn, FloatColumn):
+        with pytest.warns(RuntimeWarning):
+            assert_invalid(dm.col.std)
+    else:
+        assert_invalid(dm.col.std)
     assert dm.col.min == 1
     assert dm.col.max == 1
     assert dm.col.sum == 1
     # Zero lengths
     dm.length = 0
-    assert_invalid(dm.col.mean)
-    assert_invalid(dm.col.median)
-    assert_invalid(dm.col.std)
-    assert_invalid(dm.col.min)
-    assert_invalid(dm.col.max)
-    assert_invalid(dm.col.sum)
+    if col_type in (IntColumn, FloatColumn):
+        with pytest.warns(RuntimeWarning):
+            assert_invalid(dm.col.mean)
+            assert_invalid(dm.col.median)
+            assert_invalid(dm.col.std)
+            assert_invalid(dm.col.min)
+            assert_invalid(dm.col.max)
+            assert_invalid(dm.col.sum)
+    else:
+        assert_invalid(dm.col.mean)
+        assert_invalid(dm.col.median)
+        assert_invalid(dm.col.std)
+        assert_invalid(dm.col.min)
+        assert_invalid(dm.col.max)
+        assert_invalid(dm.col.sum)
 
 
 def assert_None(val):

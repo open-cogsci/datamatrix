@@ -22,7 +22,10 @@ desc: |
 ---
 """
 
-import inspect
+try:
+    from inspect import getfullargspec as getargspec  # Python 3.0 and later
+except ImportError:
+    from inspect import getargspec
 import functools
 from contextlib import contextmanager
 from datamatrix.py3compat import *
@@ -321,4 +324,4 @@ def _count_unbound_arguments(fnc):
     while isinstance(fnc, functools.partial):
         nbound += len(fnc.args)
         fnc = fnc.func
-    return len(inspect.getargspec(fnc).args) - nbound
+    return len(getargspec(fnc).args) - nbound

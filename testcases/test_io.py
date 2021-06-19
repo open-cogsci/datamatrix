@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import pytest
 from datamatrix import DataMatrix, io
 from testcases.test_tools import check_dm
 
@@ -46,8 +47,10 @@ def test_io():
     check_dm(refdm, testdm)
 
     io.writexlsx(testdm, 'tmp.xlsx')
-    testdm = io.readxlsx('tmp.xlsx')
+    with pytest.warns(UserWarning):  # Not all rows have column C
+        testdm = io.readxlsx('tmp.xlsx')
     check_dm(refdm, testdm)
     io.writexlsx(testdm, 'tmp.xlsx')
-    testdm = io.readxlsx('tmp.xlsx')
+    with pytest.warns(UserWarning):  # Not all rows have column C
+        testdm = io.readxlsx('tmp.xlsx')
     check_dm(refdm, testdm)

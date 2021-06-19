@@ -20,7 +20,10 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 # from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._numericcolumn import NumericColumn, FloatColumn
-import collections
+try:
+    from collections.abc import Sequence  # Python 3.3 and later
+except ImportError:
+    from collections import Sequence
 try:
     import numpy as np
     from numpy import nanmean, nanmedian, nanstd
@@ -286,9 +289,9 @@ class _SeriesColumn(NumericColumn):
 
         if isinstance(key, tuple) and len(key) == 2:
             row, smp = key
-            if isinstance(row, collections.Sequence):
+            if isinstance(row, Sequence):
                 row = np.array(row)
-            if isinstance(smp, collections.Sequence):
+            if isinstance(smp, Sequence):
                 smp = np.array(smp)
             if isinstance(row, int):
                 # dm.s[0, 0] -> float

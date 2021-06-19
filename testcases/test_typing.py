@@ -83,27 +83,28 @@ def check_floatcolumn_typing():
     assert all(math.isinf(v) for v in dm.inf)
     dm.nan = NAN, NAN, 'nan', 'nan'
     assert all(math.isnan(v) for v in dm.nan)
-    dm.none = None, None, None, None
+    with pytest.warns(UserWarning):
+        dm.none = None, None, None, None
     assert all(math.isnan(v) for v in dm.none)
-    dm.s = 'alpha', 'beta', 'None', ' '
+    with pytest.warns(UserWarning):
+        dm.s = 'alpha', 'beta', 'None', ' '
     assert all(math.isnan(v) for v in dm.s)
-    def _():
-        with pytest.raises(TypeError):
-            dm.err = Exception, tuple, str, map
-    _()
+    with pytest.raises(TypeError):
+        dm.err = Exception, tuple, str, map
 
 
 def check_floatcolumn_sorting():
 
     dm = DataMatrix(length=24, default_col_type=FloatColumn)
-    dm.c = [
-        1, '1', 2, '2',
-        1.1, '1.1', 2.1, '2.1',
-        INF, -INF, 'inf', '-inf',
-        NAN, NAN, 'nan', 'nan',
-        None, None, None, None,
-        'alpha', 'beta', 'None', ''
-    ]
+    with pytest.warns(UserWarning):
+        dm.c = [
+            1, '1', 2, '2',
+            1.1, '1.1', 2.1, '2.1',
+            INF, -INF, 'inf', '-inf',
+            NAN, NAN, 'nan', 'nan',
+            None, None, None, None,
+            'alpha', 'beta', 'None', ''
+        ]
     dm.c = ops.shuffle(dm.c)
     dm = ops.sort(dm, by=dm.c)
     check_col(dm.c, [

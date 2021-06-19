@@ -23,7 +23,11 @@ from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._mixedcolumn import MixedColumn
 from datamatrix._datamatrix._index import Index
 from datamatrix._ordered_state import OrderedState
-import collections
+try:
+    from collections.abc import Sequence  # Python 3.3 and later
+except ImportError:
+    from collections import Sequence
+from collections import OrderedDict
 _id = 0
 
 
@@ -74,7 +78,7 @@ class DataMatrix(OrderedState):
             length = int(length)
         except ValueError:
             raise TypeError('length should be an integer')
-        object.__setattr__(self, u'_cols', collections.OrderedDict())
+        object.__setattr__(self, u'_cols', OrderedDict())
         object.__setattr__(self, u'_rowid', Index(length))
         object.__setattr__(self, u'_default_col_type', default_col_type)
         object.__setattr__(self, u'_id', _id)
@@ -679,7 +683,7 @@ class DataMatrix(OrderedState):
             return self._getrow(key)
         if isinstance(key, slice):
             return self._slice(key)
-        if isinstance(key, collections.Sequence):
+        if isinstance(key, Sequence):
             if all(isinstance(v, (basestring, BaseColumn)) for v in key):
                 from datamatrix import operations as ops
                 return ops.keep_only(self, *key)

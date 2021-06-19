@@ -175,11 +175,13 @@ def test_floatcolumn():
     # Test nans
     dm.col = 'nan'
     check_col(dm.col, [np.nan, np.nan])
-    dm.col = None
+    with pytest.warns(UserWarning):
+        dm.col = None
     check_col(dm.col, [np.nan, np.nan])
     dm.col = np.nan
     check_col(dm.col, [np.nan, np.nan])
-    dm.col = 'x'
+    with pytest.warns(UserWarning):
+        dm.col = 'x'
     check_col(dm.col, [np.nan, np.nan])
     # Test infs
     dm.col = 'inf'
@@ -191,7 +193,8 @@ def test_floatcolumn():
     check_col(dm.col, [np.nan, np.inf])
     dm.col = np.inf, np.nan
     check_col(dm.col, [np.inf, np.nan])
-    dm.col = 'x', None
+    with pytest.warns(UserWarning):
+        dm.col = 'x', None
     check_col(dm.col, [np.nan, np.nan])
     # Check dtype
     assert dm.col._seq.dtype == np.float64

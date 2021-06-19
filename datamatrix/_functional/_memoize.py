@@ -24,7 +24,11 @@ import tarfile
 import sys
 import os
 import warnings
-import collections
+try:
+    from collections.abc import Sequence  # Python 3.3 and later
+except ImportError:
+    from collections import Sequence
+from collections import OrderedDict
 import hashlib
 import pickle
 
@@ -233,7 +237,7 @@ class memoize(object):
         if isinstance(obj, dict):
             return self._lazy_evaluation_kwargs(obj)
         if (
-            isinstance(obj, collections.Sequence)
+            isinstance(obj, Sequence)
             and not isinstance(obj, basestring)
         ):
             return self._lazy_evaluation_args(obj)
@@ -252,7 +256,7 @@ class memoize(object):
 
     def _init_cache(self):
 
-        self._cache = collections.OrderedDict()
+        self._cache = OrderedDict()
         if self._persistent and not os.path.exists(self._folder):
             os.mkdir(self._folder)
 
@@ -326,7 +330,7 @@ class memoize(object):
         if isinstance(obj, dict):
             return self._serialize_kwargs(obj)
         if (
-            isinstance(obj, collections.Sequence)
+            isinstance(obj, Sequence)
             and not isinstance(obj, basestring)
         ):
             return self._serialize_args(obj)

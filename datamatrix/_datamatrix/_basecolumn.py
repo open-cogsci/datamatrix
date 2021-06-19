@@ -29,9 +29,12 @@ import collections
 import numbers
 import operator
 import math
-import inspect
 import types
 import itertools
+try:
+    from inspect import getfullargspec as getargspec  # Python 3.0 and later
+except ImportError:
+    from inspect import getargspec
 
 
 INF = float('inf')
@@ -736,7 +739,7 @@ class BaseColumn(OrderedState):
             test = lambda val: not other(val)
         else:
             raise TypeError('functions can only be compared with == or !=')
-        if not len(inspect.getargspec(other).args) == 1:
+        if not len(getargspec(other).args) == 1:
             raise TypeError('function must take exactly one argument')
         return self._datamatrix._selectrowid(
             Index([

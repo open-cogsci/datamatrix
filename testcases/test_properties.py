@@ -18,6 +18,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
+import pytest
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn	
 from testcases.test_tools import all_nan
 import numpy as np
@@ -34,12 +35,21 @@ def _test_numeric_properties(coltype, nan):
     assert dm.c.max == 4
     assert dm.c.min == 1
     assert dm.c.sum == 6
-    all_nan(dm.d.mean, nan)
-    all_nan(dm.d.median, nan)
-    all_nan(dm.d.std, nan)
-    all_nan(dm.d.max, nan)
-    all_nan(dm.d.min, nan)
-    all_nan(dm.d.sum, nan)
+    if coltype in (IntColumn, FloatColumn):
+        with pytest.warns(RuntimeWarning):
+            all_nan(dm.d.mean, nan)
+            all_nan(dm.d.median, nan)
+            all_nan(dm.d.std, nan)
+            all_nan(dm.d.max, nan)
+            all_nan(dm.d.min, nan)
+            all_nan(dm.d.sum, nan)
+    else:
+        all_nan(dm.d.mean, nan)
+        all_nan(dm.d.median, nan)
+        all_nan(dm.d.std, nan)
+        all_nan(dm.d.max, nan)
+        all_nan(dm.d.min, nan)
+        all_nan(dm.d.sum, nan)
     
     
 def _test_basic_properties(coltype):
