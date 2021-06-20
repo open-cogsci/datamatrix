@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import numpy as np
 from datamatrix import DataMatrix, convert as cnv, io
 from testcases.test_tools import check_dm
 
@@ -31,5 +32,9 @@ def test_convert():
     check_dm(refdm, testdm)
     testdm = cnv.from_json(cnv.to_json(testdm))
     check_dm(refdm, testdm)
-    testdm = cnv.from_pandas(cnv.to_pandas(testdm))
+    testdf = cnv.to_pandas(testdm)
+    testdm = cnv.from_pandas(testdf)
     check_dm(refdm, testdm)
+    print(np.array(testdf))
+    print(np.array(testdm))
+    assert (np.array(testdf, dtype=str) == np.array(testdm, dtype=str)).all()

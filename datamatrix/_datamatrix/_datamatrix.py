@@ -187,7 +187,7 @@ class DataMatrix(OrderedState):
         except SyntaxError:
             raise ValueError(u'Invalid column name')
         # A rename recipe that preservers order.
-        _cols = collections.OrderedDict([
+        _cols = OrderedDict([
             (new, v) if k == old else (k, v)
             for k, v in self._cols.items()
         ])
@@ -776,7 +776,7 @@ class DataMatrix(OrderedState):
         for i in self.rows:
             yield self[i]
 
-    def __array__(self):
+    def __array__(self, *args):
         
         """
         visible: False
@@ -789,16 +789,24 @@ class DataMatrix(OrderedState):
         """
         
         import numpy as np
-        
         a = np.empty((len(self), len(self.columns)), dtype=object)
-        for i, row in enumerate(self):
-            for j, (name, cell) in enumerate(row):
-                a[i, j] = cell
+        for i, col in enumerate(self._cols.values()):
+            if hasattr(col, 'depth'):
+                for j, row in enumerate(col):
+                    a[j, i] = row
+            else:
+                a[:, i] = col
         try:
             return np.array(a, dtype=int)
-        except TypeError:
+        except (TypeError, ValueError):
             try:
                 return np.array(a, dtype=float)
-            except TypeError:
+            except (TypeError, ValueError):
                 pass
         return a
+
+    def __dataframe__(self):
+        
+        from datamatrix import convert as cnv
+        
+        return cnv.to_pandas(self)
