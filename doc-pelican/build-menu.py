@@ -2,7 +2,6 @@
 # coding=utf-8
 
 from collections import OrderedDict
-from yamldoc._yaml import orderedLoad
 import yaml
 import sys
 
@@ -13,6 +12,20 @@ else:
 
 ROOT = conf.SITEURL
 SUFFIX = ''
+
+
+def orderedLoad(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
+
+	class OrderedLoader(Loader):
+		pass
+	def construct_mapping(loader, node):
+		loader.flatten_mapping(node)
+		return object_pairs_hook(loader.construct_pairs(node))
+	OrderedLoader.add_constructor(
+		yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+		construct_mapping)
+	return yaml.load(stream, OrderedLoader)
+	
 
 def isseparator(pagename):
 
