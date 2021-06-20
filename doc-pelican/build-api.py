@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # coding=utf-8
 
+import sys
+sys.path.insert(0, '/home/sebastiaan/git/python-yamldoc/')
 import yamldoc
 import imp
-import sys
 
 ROOT = '/home/sebastiaan/git/python-datamatrix/'
 TARGET = 'include/api/'
