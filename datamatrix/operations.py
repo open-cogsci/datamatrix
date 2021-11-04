@@ -230,7 +230,7 @@ def split(col, *values):
             raise ValueError('Don\'t know how to split by {}'.format(values))
         for val1, dm in split(col):
             for val_sdm in split(*[dm[col.name] for col in values]):
-                yield (val1, *val_sdm[:-1], val_sdm[-1])
+                yield (val1,) + tuple(val_sdm)
         return
     # Otherwise we determine the number of unique values, or use the values
     # that are passed to the function
