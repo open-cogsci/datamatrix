@@ -574,19 +574,17 @@ def baseline(
     raise Exception('Baseline method should be divisive or subtractive')
 
 
-def blinkreconstruct(
-    series,
-    vt=5,
-    maxdur=500,
-    margin=10,
-    smooth_winlen=21,
-    std_thr=3
-):
-
+def blinkreconstruct(series, vt=5, maxdur=500, margin=10, smooth_winlen=21,
+                     std_thr=3, gap_margin=20, gap_vt=10, mode='original'):
     """
     desc: |
         Reconstructs pupil size during blinks. This algorithm has been designed
         and tested largely with the EyeLink 1000 eye tracker.
+        
+        *Version note:* As of 0.13.0, an advanced algorithm has been
+        introduced, wich can be specified through the `mode` keyword. The
+        advanced algorithm is recommended for new analyses, and will be made
+        the default in future releases.
 
         __Source:__
 
@@ -600,31 +598,50 @@ def blinkreconstruct(
 
     keywords:
         vt:
-            desc:   A pupil velocity threshold. Lower tresholds more easily
-                    trigger blinks.
+            desc:   A pupil-velocity threshold for blink detection. Lower
+                    tresholds more easily trigger blinks.
             type:   [int, float]
         maxdur:
             desc:   The maximum duration (in samples) for a blink. Longer
                     blinks are not reconstructed.
             type:   int
         margin:
-            desc:   The margin to take around missing data.
+            desc:   The margin to take around missing data that is
+                    reconstructed.
             type:   int
+        smooth_winlen:
+            desc:   The window length for a hanning window that is used to
+                    smooth the velocity profile.
+            type:   int
+        std_thr:
+            desc:   A standard-deviation threshold for when data should be
+                    considered invalid.
+            type:   [float, int]
+        gap_margin:
+            desc:   The margin to take around missing data that is not
+                    reconstructed. Only applies to advanced mode.
+            type: int
+        gap_vt:
+            desc:   A pupil-velocity threshold for detection of invalid data.
+                    Lower tresholds mean more data marked as invalid. Only
+                    applies to advanced mode.
+            type:   [int, float]
+        mode:
+            desc:   The algorithm to be used for blink reconstruction. Should
+                    be 'original' or 'advanced'. An advanced algorith was
+                    introduced in v0.13., and should be used for new analysis.
+                    The original algorithm is still the default for backwards
+                    compatibility.
+            type:   [str]
 
     returns:
         desc: A reconstructed singal.
         type: SeriesColumn
     """
 
-    return _map(
-        series,
-        _blinkreconstruct,
-        vt=vt,
-        maxdur=maxdur,
-        margin=margin,
-        smooth_winlen=21,
-        std_thr=3
-    )
+    return _map(series, _blinkreconstruct, vt=vt, maxdur=maxdur, margin=margin,
+                smooth_winlen=smooth_winlen, std_thr=std_thr, gap_vt=gap_vt,
+                gap_margin=gap_margin, mode=mode)
 
 
 def smooth(series, winlen=11, wintype='hanning'):
@@ -1377,14 +1394,8 @@ def _map(series, fnc_, **kwdict):
     return f(np.array(series))
 
 
-def _blinkreconstruct(
-    a,
-    vt=5,
-    maxdur=500,
-    margin=10,
-    smooth_winlen=21,
-    std_thr=3
-):
+def _blinkreconstruct(a, vt=5, maxdur=500, margin=10, gap_margin=20,
+                      gap_vt=10, smooth_winlen=21, std_thr=3, mode='original'):
 
     """
     visible: False
@@ -1392,7 +1403,20 @@ def _blinkreconstruct(
     desc:
         Reconstructs a single array.
     """
-
+    if mode == 'advanced':
+        from datamatrix._datamatrix._blinkreconstruct import \
+            _blinkreconstruct_recursive
+        return _blinkreconstruct_recursive(a, vt=vt, maxdur=maxdur,
+                                           margin=margin,
+                                           gap_margin=gap_margin,
+                                           gap_vt=gap_vt,
+                                           smooth_winlen=smooth_winlen,
+                                           std_thr=std_thr)
+    if mode != 'original':
+        raise ValueError(
+            'blinkreconstruct() mode should be "orignal" or "advanced"')
+    warn('Using "original" blink-reconstruction mode. For new code, '
+         '"advanced" mode is recommended.')
     # Create a copy of the signal, a smoothed version, and calculate the
     # velocity profile.
     a = np.copy(a)
@@ -1473,7 +1497,7 @@ def _blinkreconstruct(
     for i in b:
         if i == 0:
             continue
-        a[i] = a[i-1]
+        a[i] = a[max(0, i - margin)]
     return a
 
 

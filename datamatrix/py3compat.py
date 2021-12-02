@@ -18,6 +18,7 @@ along with OpenSesame.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import sys
+import logging
 
 if sys.version_info >= (3, 0, 0):
     py3 = True
@@ -30,6 +31,7 @@ else:
     py3 = False
     universal_newline_mode = u'rU'
 
+logger = logging.getLogger('datamatrix')
 
 def safe_decode(s, enc='utf-8', errors='strict'):
     if isinstance(s, str):
@@ -101,8 +103,7 @@ else:
 def warn(msg, *args):
     import warnings
     warnings.warn(safe_str(msg), *args)
-
-
+    
 __all__ = [
     'py3',
     'safe_decode',
@@ -111,7 +112,8 @@ __all__ = [
     'safe_sorted',
     'universal_newline_mode',
     'warn',
-    'safe_open'
+    'safe_open',
+    'logger'
 ]
 if not py3:
     __all__ += ['str', 'bytes']
