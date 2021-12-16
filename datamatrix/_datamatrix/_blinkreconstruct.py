@@ -142,10 +142,7 @@ def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
     except Exception as e:
         warn(e)
         strace = a
-    vtrace = np.diff(a)
-    # from matplotlib import pyplot as plt
-    # plt.plot(vtrace)
-    # plt.show()
+    vtrace = np.diff(strace)
     # Get the first occuring blink
     blink_points = _blink_points(vtrace, vt_start=vt_start, vt_end=vt_end,
                                  maxdur=maxdur, margin=margin)
