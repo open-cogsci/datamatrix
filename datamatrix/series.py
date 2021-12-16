@@ -574,8 +574,9 @@ def baseline(
     raise Exception('Baseline method should be divisive or subtractive')
 
 
-def blinkreconstruct(series, vt=5, maxdur=500, margin=10, smooth_winlen=21,
-                     std_thr=3, gap_margin=20, gap_vt=10, mode='original'):
+def blinkreconstruct(series, vt=5, vt_start=10, vt_end=5, maxdur=500,
+                     margin=10, smooth_winlen=21, std_thr=3, gap_margin=20,
+                     gap_vt=10, mode='original'):
     """
     desc: |
         Reconstructs pupil size during blinks. This algorithm has been designed
@@ -599,7 +600,18 @@ def blinkreconstruct(series, vt=5, maxdur=500, margin=10, smooth_winlen=21,
     keywords:
         vt:
             desc:   A pupil-velocity threshold for blink detection. Lower
-                    tresholds more easily trigger blinks.
+                    tresholds more easily trigger blinks. This argument only
+                    applies to 'original' mode.
+            type:   [int, float]
+        vt_start:
+            desc:   A pupil-velocity threshold for detecting the onset of a
+                    blink. Lower tresholds more easily trigger blinks. This
+                    argument only applies to 'advanced' mode.
+            type:   [int, float]
+        vt_end:
+            desc:   A pupil-velocity threshold for detecting the offset of a
+                    blink. Lower tresholds more easily trigger blinks. This
+                    argument only applies to 'advanced' mode.
             type:   [int, float]
         maxdur:
             desc:   The maximum duration (in samples) for a blink. Longer
@@ -639,10 +651,11 @@ def blinkreconstruct(series, vt=5, maxdur=500, margin=10, smooth_winlen=21,
         type: SeriesColumn
     """
 
-    return _map(series, _blinkreconstruct, vt=vt, maxdur=maxdur, margin=margin,
+    return _map(series, _blinkreconstruct, vt=vt, vt_start=vt_start,
+                vt_end=vt_end, maxdur=maxdur, margin=margin,
                 smooth_winlen=smooth_winlen, std_thr=std_thr, gap_vt=gap_vt,
                 gap_margin=gap_margin, mode=mode)
-
+    
 
 def smooth(series, winlen=11, wintype='hanning'):
 
@@ -1394,8 +1407,9 @@ def _map(series, fnc_, **kwdict):
     return f(np.array(series))
 
 
-def _blinkreconstruct(a, vt=5, maxdur=500, margin=10, gap_margin=20,
-                      gap_vt=10, smooth_winlen=21, std_thr=3, mode='original'):
+def _blinkreconstruct(a, vt=5, vt_start=10, vt_end=5, maxdur=500, margin=10,
+                      gap_margin=20, gap_vt=10, smooth_winlen=21, std_thr=3,
+                      mode='original'):
 
     """
     visible: False
@@ -1406,8 +1420,8 @@ def _blinkreconstruct(a, vt=5, maxdur=500, margin=10, gap_margin=20,
     if mode == 'advanced':
         from datamatrix._datamatrix._blinkreconstruct import \
             _blinkreconstruct_recursive
-        return _blinkreconstruct_recursive(a, vt=vt, maxdur=maxdur,
-                                           margin=margin,
+        return _blinkreconstruct_recursive(a, vt_start=vt_start, vt_end=vt_end,
+                                           maxdur=maxdur, margin=margin,
                                            gap_margin=gap_margin,
                                            gap_vt=gap_vt,
                                            smooth_winlen=smooth_winlen,
@@ -1497,7 +1511,7 @@ def _blinkreconstruct(a, vt=5, maxdur=500, margin=10, gap_margin=20,
     for i in b:
         if i == 0:
             continue
-        a[i] = a[max(0, i - margin)]
+        a[i] = a[i - 1]
     return a
 
 

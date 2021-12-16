@@ -25,20 +25,20 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 
-def _blink_points(vtrace, vt, maxdur, margin):
+def _blink_points(vtrace, vt_start, vt_end, maxdur, margin):
     """Detects the starting and ending index of the first blink in the trace,
     based on a velocity threshold. Returns None if no blink was detected.
     """
     # Detect a blink
     # The onset of the blink is the moment at which the pupil velocity
     # exceeds the threshold
-    astart = np.where(vtrace < -vt)[0]
+    astart = np.where(vtrace < -vt_start)[0]
     if len(astart) == 0:
         return None
     istart = astart[0]
     # The reversal period is the moment at which the pupil starts to dilate
     # again with a velocity above threshold.
-    amid = np.where(vtrace[istart:] > vt)[0]
+    amid = np.where(vtrace[istart:] > vt_end)[0]
     if len(amid) == 0:
         return None
     imid = amid[0] + istart
@@ -99,7 +99,7 @@ def _group(a):
     yield a[i2], a[-1] + 1
 
 
-def _trim(a, vtrace, vt, std_thr, gap_margin, gap_vt):
+def _trim(a, vtrace, std_thr, gap_margin, gap_vt):
     """Sets missing data, or values that diverge too much from the mean, or
     values that exceed a velocity threshold to zero, taking a margin around the
     trimmed data. The only gaps that are not trimmed are at the end.
@@ -121,15 +121,16 @@ def _trim(a, vtrace, vt, std_thr, gap_margin, gap_vt):
     return a
 
 
-def _blinkreconstruct_recursive(a, vt=5, maxdur=500, margin=10, gap_margin=20,
-                                gap_vt=10, smooth_winlen=21, std_thr=3):
+def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
+                                margin=10, gap_margin=20, gap_vt=10,
+                                smooth_winlen=21, std_thr=3):
     """Implements a recursive blink-reconstruction algorithm that is a big
     improvement over the original algorithm.
     """
     def fnc_recursive(a):
         """Shortcut for recursive function call that retains all keywords."""
-        return _blinkreconstruct_recursive(a, vt=vt, maxdur=maxdur,
-                                           margin=margin,
+        return _blinkreconstruct_recursive(a, vt_start=vt_start, vt_end=vt_end,
+                                           maxdur=maxdur, margin=margin,
                                            gap_margin=gap_margin,
                                            gap_vt=gap_vt,
                                            smooth_winlen=smooth_winlen,
@@ -142,12 +143,17 @@ def _blinkreconstruct_recursive(a, vt=5, maxdur=500, margin=10, gap_margin=20,
         warn(e)
         strace = a
     vtrace = np.diff(a)
+    # from matplotlib import pyplot as plt
+    # plt.plot(vtrace)
+    # plt.show()
     # Get the first occuring blink
-    blink_points = _blink_points(vtrace, vt=vt, maxdur=maxdur, margin=margin)
+    blink_points = _blink_points(vtrace, vt_start=vt_start, vt_end=vt_end,
+                                 maxdur=maxdur, margin=margin)
     # If no blink exists, we trim the signal as a final operation and then
     # leave it.
     if blink_points is None:
-        return _trim(a, vtrace, vt=vt, std_thr=std_thr, gap_margin=gap_margin,
+        logger.debug('no more blinks')
+        return _trim(a, vtrace, std_thr=std_thr, gap_margin=gap_margin,
                      gap_vt=gap_vt)
     # If a blink exists, see if we can get four valid points around it for
     # cubic spline interpolation. If not, then we do linear interpolation.
