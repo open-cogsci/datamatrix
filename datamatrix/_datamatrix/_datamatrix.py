@@ -274,6 +274,10 @@ class DataMatrix(OrderedState):
             type:	DataMatrix.
         """
 
+        # A tuple of length two is interpreted by a SeriesColumn as a sample
+        # and row. Therefore, we turn tuples into lists.
+        if isinstance(key, tuple):
+            key = list(key)
         _rowid = self._rowid[key]
         dm = DataMatrix(len(_rowid))
         object.__setattr__(dm, u'_rowid', _rowid)
