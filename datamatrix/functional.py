@@ -163,7 +163,7 @@ def map_(fnc, obj):
          dm_new = fnc.map_(
             lambda **d: {col : 2*val for col, val in d.items()},
             dm
-        )
+         )
          print(dm_new)
         --%
 

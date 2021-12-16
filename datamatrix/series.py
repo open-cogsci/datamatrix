@@ -121,13 +121,7 @@ def endlock(series):
          plt.subplot(122)
          plt.title('Endlocked (nans at start)')
          plt.plot(dm.y2.plottable)
-         plt.savefig('content/pages/img/series/endlock.png')
-        --%
-
-        %--
-        figure:
-         source: endlock.png
-         id: FigEndLock
+         plt.show()
         --%
 
     arguments:
@@ -202,13 +196,7 @@ def lock(series, lock):
          plt.title('Locked to peak')
          plt.plot(dm.y2.plottable)
          plt.axvline(zero_point, color='black', linestyle=':')
-         plt.savefig('content/pages/img/series/lock.png')
-        --%
-
-        %--
-        figure:
-         source: lock.png
-         id: FigLock
+         plt.show()
         --%
 
     arguments:
@@ -284,13 +272,7 @@ def normalize_time(dataseries, timeseries):
          plt.plot(dm.interpolated.plottable, ':')
          plt.xlabel('Time')
          plt.ylabel('Data')
-         plt.savefig('content/pages/img/series/normalize_time.png')
-        --%
-
-        %--
-        figure:
-         source: normalize_time.png
-         id: FigNormalizeTime
+         plt.show()
         --%
 
     arguments:
@@ -423,7 +405,7 @@ def window(series, start=0, end=None):
          from datamatrix import DataMatrix, SeriesColumn, series as srs
 
          LENGTH = 5 # Number of rows
-         DEPTH = 10 # Depth (or length) of SeriesColumnsplt.show()
+         DEPTH = 10 # Depth (or length) of SeriesColumns
 
          sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
 
@@ -443,13 +425,7 @@ def window(series, start=0, end=None):
          plt.subplot(122)
          plt.title('Window (middle half)')
          plt.plot(dm.y2.plottable)
-         plt.savefig('content/pages/img/series/window.png')
-        --%
-
-        %--
-        figure:
-         source: window.png
-         id: FigWindow
+         plt.show()
         --%
 
     arguments:
@@ -520,13 +496,7 @@ def baseline(
          plt.subplot(122)
          plt.title('Baseline corrected')
          plt.plot(dm.y2.plottable)
-         plt.savefig('content/pages/img/series/baseline.png')
-        --%
-
-        %--
-        figure:
-         source: baseline.png
-         id: FigBaseline
+         plt.show()
         --%
 
     arguments:
@@ -701,13 +671,7 @@ def smooth(series, winlen=11, wintype='hanning'):
          plt.subplot(122)
          plt.title('Smoothed')
          plt.plot(dm.y2.plottable)
-         plt.savefig('content/pages/img/series/smooth.png')
-        --%
-
-        %--
-        figure:
-         source: smooth.png
-         id: FigSmooth
+         plt.show()
         --%
 
     arguments:
@@ -768,13 +732,7 @@ def downsample(series, by, fnc=nanmean):
          plt.subplot(122)
          plt.title('Downsampled')
          plt.plot(dm.y2.plottable, 'o-')
-         plt.savefig('content/pages/img/series/downsample.png')
-        --%
-
-        %--
-        figure:
-         source: downsample.png
-         id: FigDownsample
+         plt.show()
         --%
 
     arguments:
@@ -828,15 +786,8 @@ def threshold(series, fnc, min_length=1):
          # Mark the thresholded signal
          plt.fill_between(np.arange(DEPTH), dm.t[0], color='black', alpha=.25)
          plt.plot(dm.y.plottable)
-         plt.savefig('content/pages/img/series/threshold.png')
-
          print(dm)
-        --%
-
-        %--
-        figure:
-         source: threshold.png
-         id: FigThreshold
+         plt.show()
         --%
 
     arguments:
@@ -912,13 +863,7 @@ def interpolate(series):
          plt.clf()
          plt.plot(dm.i.plottable, ':')
          plt.plot(dm.y.plottable, 'o')
-         plt.savefig('content/pages/img/series/interpolate.png')
-        --%
-
-        %--
-        figure:
-         source: interpolate.png
-         id: FigInterpolate
+         plt.show()
         --%
 
     arguments:
@@ -981,13 +926,7 @@ def filter_bandpass(series, freq_range, order=2, sampling_freq=None):
             plt.plot(dm.f[0])
             plt.plot(dm.f[1])
             plt.plot(dm.f[2])
-            plt.savefig('content/pages/img/series/bandpass.png')
-        --%
-
-        %--
-        figure:
-         source: bandpass.png
-         id: FigBandpass
+            plt.show()
         --%
 
     arguments:
@@ -1068,13 +1007,7 @@ def filter_highpass(series, freq_min, order=2, sampling_freq=None):
             plt.plot(dm.f[0])
             plt.plot(dm.f[1])
             plt.plot(dm.f[2])
-            plt.savefig('content/pages/img/series/highpass.png')
-        --%
-
-        %--
-        figure:
-         source: highpass.png
-         id: FigHighpass
+            plt.show()
         --%
 
     arguments:
@@ -1155,13 +1088,7 @@ def filter_lowpass(series, freq_max, order=2, sampling_freq=None):
             plt.plot(dm.f[0])
             plt.plot(dm.f[1])
             plt.plot(dm.f[2])
-            plt.savefig('content/pages/img/series/lowpass.png')
-        --%
-
-        %--
-        figure:
-         source: lowpass.png
-         id: FigLowpass
+            plt.show()
         --%
 
     arguments:
@@ -1238,13 +1165,7 @@ def fft(series, truncate=True):
          plt.plot(dm.f[0])
          plt.plot(dm.f[1])
          plt.plot(dm.f[2])
-         plt.savefig('content/pages/img/series/fft.png')
-        --%
-
-        %--
-        figure:
-         source: fft.png
-         id: FigFFT
+         plt.show()
         --%
 
     arguments:
@@ -1311,13 +1232,7 @@ def z(series):
          plt.plot(dm.z[0])
          plt.plot(dm.z[1])
          plt.plot(dm.z[2])
-         plt.savefig('content/pages/img/series/z.png')
-        --%
-
-        %--
-        figure:
-         source: z.png
-         id: FigZ
+         plt.show()
         --%
 
     arguments:
