@@ -30,6 +30,7 @@ from testcases.test_tools import check_col, check_row, check_series
 import numpy as np
 import itertools
 import pytest
+import math
 
 
 def test_replace():
@@ -57,10 +58,21 @@ def test_replace():
 def test_z():
 
     dm = DataMatrix(length=5)
-    dm.a = range(-2,3)
+    dm.a = range(-2, 3)
     dm.z = ops.z(dm.a)
-    for x, y in zip(dm.z, [-1.26, -0.63, 0, .63, 1.26]):
-        assert(abs(x-y) < .1)
+    for test, ref in zip(dm.z, [-1.26, -0.63, 0, .63, 1.26]):
+        assert(math.isclose(test, ref, abs_tol=.01))
+    # Add a non-numeric value, which should be ignored and its z value should
+    # be NAN.
+    dm.length = 6
+    dm.z = ops.z(dm.a)
+    assert(dm.z[5] != dm.z[5])
+    for test, ref in zip(dm.z[:-1], [-1.26, -0.63, 0, .63, 1.26]):
+        assert(math.isclose(test, ref, abs_tol=.01))
+    # If there is no variability, the z-scores should be NAN
+    dm.a = 2
+    dm.z = ops.z(dm.a)
+    assert(all(ref != ref for ref in dm.z))
 
 
 def test_weight():

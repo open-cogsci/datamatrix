@@ -25,7 +25,7 @@ desc:
 import random
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, FloatColumn, IntColumn, SeriesColumn, \
-    MixedColumn
+    MixedColumn, NAN
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._index import Index
@@ -47,6 +47,10 @@ def z(col):
     """
     desc: |
         Transforms a column into z scores.
+        
+        *Version note:* As of 0.13.2, `z()` returns a `FloatColumn`. For
+        non-numeric values, the z score is NAN. If the standard deviation is 0,
+        z scores are also NAN.
 
         __Example:__
 
@@ -69,7 +73,15 @@ def z(col):
         type: BaseColumn
     """
 
-    return (col-col.mean)/col.std
+    zcol = FloatColumn(col.dm)
+    zcol[:] = col
+    try:
+        return (zcol - zcol.mean) / zcol.std
+    except ZeroDivisionError:
+        pass
+    warn('z scores are NAN because standard deviation is 0')
+    zcol[:] = NAN
+    return zcol
 
 
 def weight(col):
