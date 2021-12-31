@@ -3,7 +3,7 @@
 *An intuitive, Pythonic way to work with tabular data.*
 
 Sebastiaan Mathôt  <br />
-Copyright 2015-2021  <br />
+Copyright 2015-2022  <br />
 <https:/datamatrix.cogsci.nl>
 
 [![Build Status](https://travis-ci.com/open-cogsci/python-datamatrix.svg?branch=0.12)](https://travis-ci.com/open-cogsci/python-datamatrix)
@@ -11,10 +11,7 @@ Copyright 2015-2021  <br />
 
 ## About
 
-The `datamatrix` package provides a high-level, intuitive way to work with
-tabular data, that is, datasets that consist of named columns and numbered rows.
-
-The main advantage of `datamatrix` over similar libraries is the clean, Pythonic syntax, which makes your code easy to read and understand.
+`DataMatrix` is an intuitive Python library for working with column-based and continuous data. It's a light-weight and easy-to-use alternative to `pandas`.
 
 `datamatrix` is also one of the core libraries of [OpenSesame](https://osdoc.cogsci.nl/), a graphical experiment builder for the social sciences, and [Rapunzel](https://rapunzel.cogsci.nl/), a modern code editor for numerical computing with Python and R.
 
@@ -22,7 +19,9 @@ The main advantage of `datamatrix` over similar libraries is the clean, Pythonic
 ## Ultra-short cheat sheet
 
 ```python
-from datamatrix import DataMatrix
+from datamatrix import DataMatrix, io
+# Read a DataMatrix from file
+dm = io.readtxt('data.csv')
 # Create a new DataMatrix
 dm = DataMatrix(length=5)
 # The first two rows
@@ -45,11 +44,11 @@ print('Mean: %s' % dm.fibonacci.mean)
 dm.fibonacci_times_two = dm.fibonacci * 2
 # Loop through all rows
 for row in dm:
-	print(row.fibonacci) # get the fibonacci cell from the row
+    print(row.fibonacci) # get the fibonacci cell from the row
 # Loop through all columns
 for colname, col in dm.columns:
-	for cell in col: # Loop through all cells in the column
-		print(cell) # do something with the cell
+    for cell in col: # Loop through all cells in the column
+        print(cell) # do something with the cell
 # Or just see which columns exist
 print(dm.column_names)
 ```
