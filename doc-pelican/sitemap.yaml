@@ -13,6 +13,7 @@ Modules:
     datamatrix.operations: operations
     datamatrix.series: series
 v0.12:
+    v0.13: http://datamatrix.cogsci.nl/0.13/
     v0.12: http://datamatrix.cogsci.nl/0.12/
     v0.11: http://datamatrix.cogsci.nl/0.11/
     v0.10: http://datamatrix.cogsci.nl/0.10/
