@@ -100,6 +100,7 @@ class AcademicMarkdownReader(MarkdownReader):
 				)
 				text = text.replace(m.group(0), new_block)				
 			text = build.MD(text)
+			text = text.replace('![](/img/', '![](/{}/img/'.format(BRANCH))
 			# Process internal links
 			for m in re.finditer('%link:(?P<link>[\w/-]+)%', text):
 				full = m.group(0)

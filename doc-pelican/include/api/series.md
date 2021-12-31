@@ -40,13 +40,7 @@ python: |
  plt.subplot(122)
  plt.title('Baseline corrected')
  plt.plot(dm.y2.plottable)
- plt.savefig('content/pages/img/series/baseline.png')
---%
-
-%--
-figure:
- source: baseline.png
- id: FigBaseline
+ plt.show()
 --%
 
 __Arguments:__
@@ -83,10 +77,15 @@ A baseline-correct version of the signal.
 
 <div class="FunctionDoc YAMLDoc" id="blinkreconstruct" markdown="1">
 
-## function __blinkreconstruct__\(series, vt=5, maxdur=500, margin=10, smooth\_winlen=21, std\_thr=3\)
+## function __blinkreconstruct__\(series, vt=5, vt\_start=10, vt\_end=5, maxdur=500, margin=10, smooth\_winlen=21, std\_thr=3, gap\_margin=20, gap\_vt=10, mode=u'original'\)
 
 Reconstructs pupil size during blinks. This algorithm has been designed
 and tested largely with the EyeLink 1000 eye tracker.
+
+*Version note:* As of 0.13.0, an advanced algorithm has been
+introduced, wich can be specified through the `mode` keyword. The
+advanced algorithm is recommended for new analyses, and will be made
+the default in future releases.
 
 __Source:__
 
@@ -100,19 +99,36 @@ __Arguments:__
 
 __Keywords:__
 
-- `vt` -- A pupil velocity threshold. Lower tresholds more easily trigger blinks.
+- `vt` -- A pupil-velocity threshold for blink detection. Lower tresholds more easily trigger blinks. This argument only applies to 'original' mode.
+	- Type: int, float
+	- Default: 5
+- `vt_start` -- A pupil-velocity threshold for detecting the onset of a blink. Lower tresholds more easily trigger blinks. This argument only applies to 'advanced' mode.
+	- Type: int, float
+	- Default: 10
+- `vt_end` -- A pupil-velocity threshold for detecting the offset of a blink. Lower tresholds more easily trigger blinks. This argument only applies to 'advanced' mode.
 	- Type: int, float
 	- Default: 5
 - `maxdur` -- The maximum duration (in samples) for a blink. Longer blinks are not reconstructed.
 	- Type: int
 	- Default: 500
-- `margin` -- The margin to take around missing data.
+- `margin` -- The margin to take around missing data that is reconstructed.
 	- Type: int
 	- Default: 10
-- `smooth_winlen` -- No description
+- `smooth_winlen` -- The window length for a hanning window that is used to smooth the velocity profile.
+	- Type: int
 	- Default: 21
-- `std_thr` -- No description
+- `std_thr` -- A standard-deviation threshold for when data should be considered invalid.
+	- Type: float, int
 	- Default: 3
+- `gap_margin` -- The margin to take around missing data that is not reconstructed. Only applies to advanced mode.
+	- Type: int
+	- Default: 20
+- `gap_vt` -- A pupil-velocity threshold for detection of invalid data. Lower tresholds mean more data marked as invalid. Only applies to advanced mode.
+	- Type: int, float
+	- Default: 10
+- `mode` -- The algorithm to be used for blink reconstruction. Should be 'original' or 'advanced'. An advanced algorith was introduced in v0.13., and should be used for new analysis. The original algorithm is still the default for backwards compatibility.
+	- Type: str
+	- Default: 'original'
 
 __Returns:__
 
@@ -158,7 +174,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7efc65e65790>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7f3f5ebcd790>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times
 shorter. The depth of the downsampled series is the highest multiple of
@@ -190,13 +206,7 @@ python: |
  plt.subplot(122)
  plt.title('Downsampled')
  plt.plot(dm.y2.plottable, 'o-')
- plt.savefig('content/pages/img/series/downsample.png')
---%
-
-%--
-figure:
- source: downsample.png
- id: FigDownsample
+ plt.show()
 --%
 
 __Arguments:__
@@ -209,7 +219,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7efc65e65790>
+	- Default: <function nanmean at 0x7f3f5ebcd790>
 
 __Returns:__
 
@@ -259,13 +269,7 @@ python: |
  plt.subplot(122)
  plt.title('Endlocked (nans at start)')
  plt.plot(dm.y2.plottable)
- plt.savefig('content/pages/img/series/endlock.png')
---%
-
-%--
-figure:
- source: endlock.png
- id: FigEndLock
+ plt.show()
 --%
 
 __Arguments:__
@@ -323,13 +327,7 @@ python: |
  plt.plot(dm.f[0])
  plt.plot(dm.f[1])
  plt.plot(dm.f[2])
- plt.savefig('content/pages/img/series/fft.png')
---%
-
-%--
-figure:
- source: fft.png
- id: FigFFT
+ plt.show()
 --%
 
 __Arguments:__
@@ -397,13 +395,7 @@ python: |
     plt.plot(dm.f[0])
     plt.plot(dm.f[1])
     plt.plot(dm.f[2])
-    plt.savefig('content/pages/img/series/bandpass.png')
---%
-
-%--
-figure:
- source: bandpass.png
- id: FigBandpass
+    plt.show()
 --%
 
 __Arguments:__
@@ -476,13 +468,7 @@ python: |
     plt.plot(dm.f[0])
     plt.plot(dm.f[1])
     plt.plot(dm.f[2])
-    plt.savefig('content/pages/img/series/highpass.png')
---%
-
-%--
-figure:
- source: highpass.png
- id: FigHighpass
+    plt.show()
 --%
 
 __Arguments:__
@@ -555,13 +541,7 @@ python: |
     plt.plot(dm.f[0])
     plt.plot(dm.f[1])
     plt.plot(dm.f[2])
-    plt.savefig('content/pages/img/series/lowpass.png')
---%
-
-%--
-figure:
- source: lowpass.png
- id: FigLowpass
+    plt.show()
 --%
 
 __Arguments:__
@@ -621,13 +601,7 @@ python: |
  plt.clf()
  plt.plot(dm.i.plottable, ':')
  plt.plot(dm.y.plottable, 'o')
- plt.savefig('content/pages/img/series/interpolate.png')
---%
-
-%--
-figure:
- source: interpolate.png
- id: FigInterpolate
+ plt.show()
 --%
 
 __Arguments:__
@@ -687,13 +661,7 @@ python: |
  plt.title('Locked to peak')
  plt.plot(dm.y2.plottable)
  plt.axvline(zero_point, color='black', linestyle=':')
- plt.savefig('content/pages/img/series/lock.png')
---%
-
-%--
-figure:
- source: lock.png
- id: FigLock
+ plt.show()
 --%
 
 __Arguments:__
@@ -752,13 +720,7 @@ python: |
  plt.plot(dm.interpolated.plottable, ':')
  plt.xlabel('Time')
  plt.ylabel('Data')
- plt.savefig('content/pages/img/series/normalize_time.png')
---%
-
-%--
-figure:
- source: normalize_time.png
- id: FigNormalizeTime
+ plt.show()
 --%
 
 __Arguments:__
@@ -778,7 +740,7 @@ A new series in which the data points are spread according to the timestamps.
 
 <div class="FunctionDoc YAMLDoc" id="reduce" markdown="1">
 
-## function __reduce__\(series, operation=<function nanmean at 0x7efc65e65790>\)
+## function __reduce__\(series, operation=<function nanmean at 0x7f3f5ebcd790>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -812,7 +774,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7efc65e65790>
+	- Default: <function nanmean at 0x7f3f5ebcd790>
 
 __Returns:__
 
@@ -824,7 +786,7 @@ A reduction of the signal.
 
 <div class="FunctionDoc YAMLDoc" id="reduce" markdown="1">
 
-## function __reduce__\(series, operation=<function nanmean at 0x7efc65e65790>\)
+## function __reduce__\(series, operation=<function nanmean at 0x7f3f5ebcd790>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -858,7 +820,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7efc65e65790>
+	- Default: <function nanmean at 0x7f3f5ebcd790>
 
 __Returns:__
 
@@ -912,13 +874,7 @@ python: |
  plt.subplot(122)
  plt.title('Smoothed')
  plt.plot(dm.y2.plottable)
- plt.savefig('content/pages/img/series/smooth.png')
---%
-
-%--
-figure:
- source: smooth.png
- id: FigSmooth
+ plt.show()
 --%
 
 __Arguments:__
@@ -975,15 +931,8 @@ python: |
  # Mark the thresholded signal
  plt.fill_between(np.arange(DEPTH), dm.t[0], color='black', alpha=.25)
  plt.plot(dm.y.plottable)
- plt.savefig('content/pages/img/series/threshold.png')
-
  print(dm)
---%
-
-%--
-figure:
- source: threshold.png
- id: FigThreshold
+ plt.show()
 --%
 
 __Arguments:__
@@ -1025,7 +974,7 @@ python: |
  from datamatrix import DataMatrix, SeriesColumn, series as srs
 
  LENGTH = 5 # Number of rows
- DEPTH = 10 # Depth (or length) of SeriesColumnsplt.show()
+ DEPTH = 10 # Depth (or length) of SeriesColumns
 
  sinewave = np.sin(np.linspace(0, 2*np.pi, DEPTH))
 
@@ -1045,13 +994,7 @@ python: |
  plt.subplot(122)
  plt.title('Window (middle half)')
  plt.plot(dm.y2.plottable)
- plt.savefig('content/pages/img/series/window.png')
---%
-
-%--
-figure:
- source: window.png
- id: FigWindow
+ plt.show()
 --%
 
 __Arguments:__
@@ -1116,13 +1059,7 @@ python: |
  plt.plot(dm.z[0])
  plt.plot(dm.z[1])
  plt.plot(dm.z[2])
- plt.savefig('content/pages/img/series/z.png')
---%
-
-%--
-figure:
- source: z.png
- id: FigZ
+ plt.show()
 --%
 
 __Arguments:__

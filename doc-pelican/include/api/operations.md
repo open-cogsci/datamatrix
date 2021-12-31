@@ -470,6 +470,10 @@ No description
 
 Transforms a column into z scores.
 
+*Version note:* As of 0.13.2, `z()` returns a `FloatColumn`. For
+non-numeric values, the z score is NAN. If the standard deviation is 0,
+z scores are also NAN.
+
 __Example:__
 
 %--

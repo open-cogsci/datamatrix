@@ -25,7 +25,7 @@ EyeLink data files (and data files for most other eye trackers) correspond to an
 
 For example, a `start_trial` user message followed by four gaze samples might look like this:
 
-~~~bash
+~~~text
 MSG	451224 start_trial
 451224	  517.6	  388.9	 1691.0	...
 451225	  517.5	  389.1	 1690.0	...
@@ -66,6 +66,9 @@ For each phase, four columns of type `SeriesColumn` will be created with informa
 - `fixylist_[phase name]` is a series of Y coordinates
 - `fixstlist_[phase name]` is a series of fixation start times
 - `fixetlist_[phase name]` is a series of fixation end times
+- `blinkstlist_[phase name]` is a series of blink start times
+- `blinketlist_[phase name]` is a series of blink end times
+
 
 Additionally, four columns will be created with information about individual gaze samples:
 
@@ -83,45 +86,41 @@ We first define a function to parse the EyeLink data; that is, we read the data 
 
 We define a `get_data()` function that is decorated with `@fnc.memoize()` such that parsing is not redone unnecessarily (see [memoization](%link:memoization%)).
 
-%--
-python: |
-  from datamatrix import (
-    operations as ops,
-    functional as fnc,
-    series as srs
-  )
-  from eyelinkparser import parse, defaulttraceprocessor
+```python
+from datamatrix import (
+  operations as ops,
+  functional as fnc,
+  series as srs
+)
+from eyelinkparser import parse, defaulttraceprocessor
 
 
-  @fnc.memoize(persistent=True)
-  def get_data():
+@fnc.memoize(persistent=True)
+def get_data():
 
-      # The heavy lifting is done by eyelinkparser.parse()
-      dm = parse(
-          folder='data', # Folder with .asc files
-          traceprocessor=defaulttraceprocessor(
-            blinkreconstruct=True, # Interpolate pupil size during blinks
-            downsample=10 # Reduce sampling rate to 100 Hz
-          )
-      )
-      # To save memory, we keep only a subset of relevant columns.
-      dm = ops.keep_only(
-          dm,
-          dm.set_size, dm.correct, dm.ptrace_sounds, dm.ptrace_retention,
-          dm.fixxlist_retention, dm.fixylist_retention
-      )
-      return dm
---%
+    # The heavy lifting is done by eyelinkparser.parse()
+    dm = parse(
+        folder='data',           # Folder with .asc files
+        traceprocessor=defaulttraceprocessor(
+          blinkreconstruct=True, # Interpolate pupil size during blinks
+          downsample=10,         # Reduce sampling rate to 100 Hz,
+          mode='advanced'        # Use the new 'advanced' algorithm
+        )
+    )
+    # To save memory, we keep only a subset of relevant columns.
+    dm = dm[dm.set_size, dm.correct, dm.ptrace_sounds, dm.ptrace_retention, 
+            dm.fixxlist_retention, dm.fixylist_retention]
+    return dm
+```
 
 We now call this function to get the data as a a `DataMatrix`. If you want to clear the cache, you can call `get_data.clear()` first.
 
 Let's also print out the `DataMatrix` to get some idea of what our data structure looks like. As you can see, traces are stored as [series](%url:series-tutorial%), which is convenient for further analysis.
 
-%--
-python: |
- dm = get_data()
- print(dm)
---%
+```python
+dm = get_data()
+print(dm)
+```
 
 
 ### Preprocessing
@@ -132,145 +131,112 @@ We are interested in two traces, `sounds` and `retention`. The length of `sounds
 
 To get some idea of what this means, let's plot pupil size during the `sounds` trace for the first 5 trials, both with and without applying `srs.endlock()`.
 
-%--
-python: |
-  from matplotlib import pyplot as plt
-  from datamatrix import series as srs
+```python
+from matplotlib import pyplot as plt
+from datamatrix import series as srs
 
-  plt.figure()
-  plt.subplot(211)
-  plt.title('NANs at the end')
-  for pupil in dm.ptrace_sounds[:5]:
-      plt.plot(pupil)
-  plt.subplot(212)
-  plt.title('NANs at the start')
-  for pupil in srs.endlock(dm.ptrace_sounds[:5]):
-      plt.plot(pupil)
-  plt.savefig('content/pages/img/eyelinkparser/endlock.png')
-  plt.clf()      
---%
-
-%--
-figure:
- source: endlock.png
- id: FigEndLock
- caption: Pupil traces for individual trials during the sounds trace.
---%
+plt.figure()
+plt.subplot(211)
+plt.title('NANs at the end')
+for pupil in dm.ptrace_sounds[:5]:
+    plt.plot(pupil)
+plt.subplot(212)
+plt.title('NANs at the start')
+for pupil in srs.endlock(dm.ptrace_sounds[:5]):
+    plt.plot(pupil)
+plt.show()
+```
 
 Next, we concatenate the (end-locked) `sounds` and `retention` traces, and save the result as a series called `pupil`.
 
-%--
-python: |
-  dm.pupil = srs.concatenate(
-      srs.endlock(dm.ptrace_sounds),
-      dm.ptrace_retention
-  )
---%
+```python
+dm.pupil = srs.concatenate(
+    srs.endlock(dm.ptrace_sounds),
+    dm.ptrace_retention
+)
+```
 
 We then perform baseline correction. As a baseline, we use the first two samples of the `sounds` trace. (This trace still has the `nan` padding at the end.)
 
-%--
-python: |
-  dm.pupil = srs.baseline(
-      series=dm.pupil,
-      baseline=dm.ptrace_sounds,
-      bl_start=0,
-      bl_end=2,
-      method='subtractive'
-  )
---%
+```python
+dm.pupil = srs.baseline(
+    series=dm.pupil,
+    baseline=dm.ptrace_sounds,
+    bl_start=0,
+    bl_end=2
+)
+```
 
 And we explicitly set the depth of the `pupil` trace to 1200, which given our original 1000 Hz signal, downsampled 10 ×, corresponds to 12 s.
 
-%--
-python: |
-  dm.pupil.depth = 1200
---%
+```python
+dm.pupil.depth = 1200
+```
 
 
 ### Analyzing pupil size
 
 And now we plot the pupil traces for each of the three set sizes!
 
-%--
-python: |
-  import numpy as np
+```python
+import numpy as np
 
 
-  def plot_series(x, s, color, label):
+def plot_series(x, s, color, label):
 
-      se = s.std / np.sqrt(len(s))
-      plt.fill_between(x, s.mean-se, s.mean+se, color=color, alpha=.25)
-      plt.plot(x, s.mean, color=color, label=label)
+    se = s.std / np.sqrt(len(s))
+    plt.fill_between(x, s.mean-se, s.mean+se, color=color, alpha=.25)
+    plt.plot(x, s.mean, color=color, label=label)
 
 
-  x = np.linspace(-7, 5, 1200)
-  dm3, dm5, dm7 = ops.split(dm.set_size, 3, 5, 7)
+x = np.linspace(-7, 5, 1200)
+dm3, dm5, dm7 = ops.split(dm.set_size, 3, 5, 7)
 
-  plt.figure()
-  plt.xlim(-7, 5)
-  plt.ylim(-150, 150)
-  plt.axvline(0, linestyle=':', color='black')
-  plt.axhline(1, linestyle=':', color='black')
-  plot_series(x, dm3.pupil, color='green', label='3 (N=%d)' % len(dm3))
-  plot_series(x, dm5.pupil, color='blue', label='5 (N=%d)' % len(dm5))
-  plot_series(x, dm7.pupil, color='red', label='7 (N=%d)' % len(dm7))
-  plt.ylabel('Pupil size (norm)')
-  plt.xlabel('Time relative to onset retention interval (s)')
-  plt.legend(frameon=False, title='Memory load')
-  plt.savefig('content/pages/img/eyelinkparser/setsize.png')
-  plt.clf()
---%
+plt.figure()
+plt.xlim(-7, 5)
+plt.ylim(-150, 150)
+plt.axvline(0, linestyle=':', color='black')
+plt.axhline(1, linestyle=':', color='black')
+plot_series(x, dm3.pupil, color='green', label='3 (N=%d)' % len(dm3))
+plot_series(x, dm5.pupil, color='blue', label='5 (N=%d)' % len(dm5))
+plot_series(x, dm7.pupil, color='red', label='7 (N=%d)' % len(dm7))
+plt.ylabel('Pupil size (norm)')
+plt.xlabel('Time relative to onset retention interval (s)')
+plt.legend(frameon=False, title='Memory load')
+plt.show()
+```
 
 And a beautiful replication of [Kahneman & Beatty (1966)](#references)!
-
-%--
-figure:
- source: setsize.png
- id: FigSetSize
- caption: Pupil size as a function of set size.
---%
 
 
 ### Analyzing fixations
 
 Now let's look at fixations during the `retention` phase. To get an idea of how the data is structured, we print out the x, y coordinates of all fixations of the first two trials.
 
-%--
-python: |
-  for i, row in zip(range(2), dm):
-      print('Trial %d' % i)
-      for x, y in zip(
-          row.fixxlist_retention,
-          row.fixylist_retention
-      ):
-          print('\t', x, y)
---%
+```python
+for i, row in zip(range(2), dm):
+    print('Trial %d' % i)
+    for x, y in zip(
+        row.fixxlist_retention,
+        row.fixylist_retention
+    ):
+        print('\t', x, y)
+```
 
 A common way to plot fixation distributions is as a heatmap. To do this, we need to create numpy arrays from the `fixxlist_retention` and `fixylist_retention` columns. This will result in two 2D arrays, whereas `plt.hexbin()` expects two 1D arrays. So we additionally flatten the arrays.
 
 The resulting heatmap clearly shows that fixations are clustered around the display center (512, 384), just as you would expect from an experiment in which the participant needs to maintain central fixation.
 
-%--
-python: |
-  import numpy as np
+```python
+import numpy as np
 
-  x = np.array(dm.fixxlist_retention)
-  y = np.array(dm.fixylist_retention)
-  x = x.flatten()
-  y = y.flatten()
-  plt.hexbin(x, y, gridsize=25)
-  plt.savefig('content/pages/img/eyelinkparser/heatmap.png')
-  plt.clf()
---%
-
-%--
-figure:
- source: heatmap.png
- id: FigHeatmap
- caption: Fixation distributions as a heatmap.
---%
-
+x = np.array(dm.fixxlist_retention)
+y = np.array(dm.fixylist_retention)
+x = x.flatten()
+y = y.flatten()
+plt.hexbin(x, y, gridsize=25)
+plt.show()
+```
 
 ## References
 

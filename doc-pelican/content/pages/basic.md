@@ -3,7 +3,9 @@ title: Basic use
 Ultra-short cheat sheet:
 
 ~~~python
-from datamatrix import DataMatrix
+from datamatrix import DataMatrix, io
+# Read a DataMatrix from file
+dm = io.readtxt('data.csv')
 # Create a new DataMatrix
 dm = DataMatrix(length=5)
 # The first two rows
