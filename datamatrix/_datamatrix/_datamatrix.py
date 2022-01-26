@@ -555,7 +555,23 @@ class DataMatrix(OrderedState):
                 )
             self._cols[name] = value._empty_col(datamatrix=self)
         if name not in self:
-            self._cols[name] = self._default_col_type(self)
+            # Create a new SeriesColumn by assigning a 2D ndarray, but only if the
+            # column doesn't exist yet
+            if np is not None and isinstance(value, np.ndarray) and \
+                    len(value.shape) == 2:
+                if value.shape[0] == len(self):
+                    depth = value.shape[1]
+                elif value.shape[1] == len(self):
+                    depth = value.shape[0]
+                    value = np.swapaxes(value, 0, 1)
+                else:
+                    raise ValueError(
+                        'Invalid shape for SeriesColumn: {}'.format(
+                            value.shape))
+                from datamatrix import SeriesColumn
+                self[name] = SeriesColumn(depth=depth)
+            else:
+                self._cols[name] = self._default_col_type(self)
         self._cols[name][:] = value
         self._mutate()
 
