@@ -26,6 +26,6 @@ from datamatrix._datamatrix._seriescolumn import SeriesColumn
 from datamatrix._datamatrix._nifticolumn import NiftiColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
 
-__version__ = '0.13.2'
+__version__ = '0.14.0'
 NAN = float('nan')
 INF = float('inf')
