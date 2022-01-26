@@ -588,7 +588,26 @@ class DataMatrix(OrderedState):
         if self._sorted:
             return list(sorted(seq, key=key))
         return list(seq)
+        
+    def _where(self, other_dm):
+        
+        """
+        visible: False
 
+        desc:
+            Returns the indices of other_dm in dm. This assumes that other_dm
+            is a subset of the current dm.
+        """
+        
+        if other_dm != self:
+            raise ValueError(
+                'Can only slice a DataMatrix with a subset of itself')
+        try:
+            return [self._rowid.index(rowid) for rowid in other_dm._rowid]
+        except KeyError:
+            raise ValueError(
+                'Can only slice a DataMatrix with a subset of itself')
+        
     # Implemented syntax
 
     def __hash__(self):
@@ -722,6 +741,8 @@ class DataMatrix(OrderedState):
                 from datamatrix import operations as ops
                 return ops.keep_only(self, *key)
             return self._slice(key)
+        if isinstance(key, DataMatrix):
+            return self._where(key)
         raise KeyError('Invalid key, index, or slice: %s' % key)
 
     def __str__(self):
