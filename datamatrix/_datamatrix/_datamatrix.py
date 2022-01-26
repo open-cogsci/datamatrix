@@ -27,6 +27,10 @@ try:
     from collections.abc import Sequence  # Python 3.3 and later
 except ImportError:
     from collections import Sequence
+try:
+    import numpy as np
+except ImportError:
+    np = None
 from collections import OrderedDict
 _id = 0
 
@@ -507,13 +511,25 @@ class DataMatrix(OrderedState):
             Sets columns in various formats. Is used by __setitem__ and
             __setattr__.
         """
-
+        
+        # Check if this is a valid column name
         if isinstance(name, bytes):
             name = safe_decode(name)
-        # Create a new column by type
-        if isinstance(value, type) and issubclass(value, BaseColumn):
-            self._cols[name] = value(self)
-            return
+        if not isinstance(name, str):
+            raise TypeError(u'Column names should be str, not %s' % type(name))
+        # Create a new column by column type:
+        # dm[name] = IntColumn
+        # dm[name] = float
+        if isinstance(value, type):
+            if value == int:
+                from datamatrix import IntColumn
+                value = IntColumn
+            elif value == float:
+                from datamatrix import FloatColumn
+                value = FloatColumn
+            if issubclass(value, BaseColumn):
+                self._cols[name] = value(self)
+                return
         # Create a new column by type, kwdict tuple
         if (
             isinstance(value, tuple) and
@@ -538,8 +554,6 @@ class DataMatrix(OrderedState):
                     u'Column should have the same length as the DataMatrix'
                 )
             self._cols[name] = value._empty_col(datamatrix=self)
-        if not isinstance(name, str):
-            raise TypeError(u'Column names should be str, not %s' % type(name))
         if name not in self:
             self._cols[name] = self._default_col_type(self)
         self._cols[name][:] = value
