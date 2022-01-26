@@ -145,6 +145,10 @@ def test_intcolumn():
     dm.col = IntColumn
     dm.col = 1.9, '2.9'
     check_col(dm.col, [1, 2])
+    del dm.col
+    dm.col = int
+    dm.col = 1.9, '2.9'
+    check_col(dm.col, [1, 2])
     # Test setting invalid values
     def _():
         with pytest.raises(TypeError):
@@ -170,6 +174,10 @@ def test_floatcolumn():
     # Test automatic conversion to float
     dm = DataMatrix(length=2)
     dm.col = FloatColumn
+    dm.col = 1.9, '2.9'
+    check_col(dm.col, [1.9, 2.9])
+    del dm.col
+    dm.col = float
     dm.col = 1.9, '2.9'
     check_col(dm.col, [1.9, 2.9])
     # Test nans
@@ -312,6 +320,19 @@ def test_seriescolumn():
         [7, 9],
         [17, 19],
     ])
+    # Check if assigning 2D arrays works
+    a = np.ones((2, 3))
+    a[0] = 1, 2, 3
+    a[1] = 4, 5, 6
+    b = np.ones((3, 2))
+    b[:,0] = 1, 2, 3
+    b[:,1] = 4, 5, 6
+    dm = DataMatrix(length=2)
+    dm.s = a
+    dm.t = b
+    check_series(dm.s, a)
+    check_series(dm.t, a)
+
 
 def test_resize():
 
@@ -344,3 +365,10 @@ def test_properties():
     dm.c = -1
     dm.d = -1
     assert len(dm) == 3
+
+
+def test_where():
+    
+    dm = DataMatrix(length=4)
+    dm.col = 1, 2, 3, 4
+    assert dm[dm.col == {2, 4}] == [1, 3]
