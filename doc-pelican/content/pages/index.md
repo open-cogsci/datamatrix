@@ -44,6 +44,8 @@ print(dm[:2])
 dm.fibonacci = 0, 1, 1, 2, 3
 # Remove 0 and 3 with a simple selection
 dm = (dm.fibonacci > 0) & (dm.fibonacci < 3)
+# Get a list of indices that match certain criteria
+print(dm[(dm.fibonacci > 0) & (dm.fibonacci < 3)])
 # Select 1, 1, and 2 by matching any of the values in a set
 dm = dm.fibonacci == {1, 2}
 # Select all odd numbers with a lambda expression

@@ -14,6 +14,8 @@ print(dm[:2])
 dm.fibonacci = 0, 1, 1, 2, 3
 # Remove 0 and 3 with a simple selection
 dm = (dm.fibonacci > 0) & (dm.fibonacci < 3)
+# Get a list of indices that match certain criteria
+print(dm[(dm.fibonacci > 0) & (dm.fibonacci < 3)])
 # Select 1, 1, and 2 by matching any of the values in a set
 dm = dm.fibonacci == {1, 2}
 # Select all odd numbers with a lambda expression
@@ -316,6 +318,15 @@ dm_subset = dm.col == int
 print(dm_subset)
 ```
 
+#### Getting indices for rows that match selection criteria ('where')
+
+You can get the indices for rows that match certain selection criteria by slicing a `DataMatrix` with a subset of itself. This is similar to the `numpy.where()` function.
+
+```python
+dm = DataMatrix(length=4)
+dm.col = 1, 2, 3, 4
+print(dm[(dm.col > 1) & (dm.col < 4)])
+```
 
 ### Element-wise column operations
 
@@ -416,7 +427,7 @@ print(dm)
 
 ### IntColumn (requires numpy)
 
-The `IntColumn` contains only `int` values.
+The `IntColumn` contains only `int` values. As of 0.14, the easiest way to create a `FloatColumn` column is to assign `int` to a new column name.
 
 Important notes:
 
@@ -426,9 +437,9 @@ Important notes:
 
 
 ```python
-from datamatrix import DataMatrix, IntColumn
+from datamatrix import DataMatrix
 dm = DataMatrix(length=2)
-dm.i = IntColumn
+dm.i = int
 dm.i = 1, 2
 print(dm)
 ```
@@ -454,7 +465,7 @@ except TypeError as e:
 
 ### FloatColumn (requires numpy)
 
-The `FloatColumn` contains `float`, `nan`, and `inf` values.
+The `FloatColumn` contains `float`, `nan`, and `inf` values. As of 0.14, the easiest way to create a `FloatColumn` column is to assign `float` to a new column name.
 
 Important notes:
 
@@ -467,7 +478,7 @@ Important notes:
 import numpy as np
 from datamatrix import DataMatrix, FloatColumn
 dm = DataMatrix(length=3)
-dm.f = FloatColumn
+dm.f = float
 dm.f = 1, np.nan, np.inf
 print(dm)
 ```
@@ -552,7 +563,12 @@ plt.plot(x, dm.series.mean, color='blue')
 plt.show()
 ```
 
+You can also create a `SeriesColumn` by assigning a 2D numpy array to a new column, where one of the dimensions matches the length of the DataMatrix. The other dimension is then assumed to be the depth of the `SeriesColumn`:
 
+```python
+dm = DataMatrix(length=3)
+dm.random_noise = np.random.random((3, 10))
+```
 
 ## Reading and writing files
 
