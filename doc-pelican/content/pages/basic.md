@@ -427,7 +427,7 @@ print(dm)
 
 ### IntColumn (requires numpy)
 
-The `IntColumn` contains only `int` values. As of 0.14, the easiest way to create a `FloatColumn` column is to assign `int` to a new column name.
+The `IntColumn` contains only `int` values. As of 0.14, the easiest way to create a `IntColumn` column is to assign `int` to a new column name.
 
 Important notes:
 
