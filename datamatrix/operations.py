@@ -23,6 +23,10 @@ desc:
 """
 
 import random
+try:
+    from collections.abc import Sequence  # Python 3
+except ImportError:
+    from collections import Sequence  # Python 2
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, FloatColumn, IntColumn, SeriesColumn, \
     MixedColumn, NAN
@@ -32,14 +36,77 @@ from datamatrix._datamatrix._index import Index
 # For backwards compatibility
 from datamatrix.functional import map_, filter_, setcol
 
-try:
-    from datamatrix import convert
-    import pandas as pd
-except (ImportError, AttributeError, RuntimeError) as e:
-    # AttributeError and RuntimeError can occur due to a PyQt4/5 conflict
-    pass
-else:
-    pivot_table = convert.wrap_pandas(pd.pivot_table)
+
+def pivot_table(dm, values, index, columns, *args, **kwargs):
+    
+    """
+    desc: |
+        *Requires pandas*
+        
+        *Version note:* New in 0.14.1
+        
+        Creates a pivot table where rows correspond to levels of `index`,
+        columns correspond to levels of `columns`, and cells contain aggregate
+        values of `values`.
+        
+        A typical use for a pivot table is to create a summary report for a
+        data set. For example, in an experiment where reaction times of human
+        participants were measured on a large number of trials under different
+        conditions, each row might correspond to one participant, each column
+        to an experimental condition (or a combination of experimental
+        conditions), and cells might contain mean reaction times.
+        
+        This function is a wrapper around the `pandas.pivot_table()`. For an
+        overview of possible `*args` and `**kwargs`, see
+        [this page](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.pivot_table.html).
+        
+        __Example:__
+
+        %--
+        python: |
+         from datamatrix import operations as ops, io
+
+         dm = io.readtxt('data/fratescu-replication-data-exp1.csv')
+         pm = ops.pivot_table(dm, values=dm.RT_search, index=dm.subject_nr,
+                              columns=dm.load)
+         print(pm)
+        --%
+        
+    arguments:
+        dm:
+            desc: The source DataMatrix.
+            type: DataMatrix
+        values:
+            desc: A column or list of columns to aggregate.
+            type: [BaseColumn, str, list]
+        columns:
+            desc: A column or list of columns to separate columns by.
+            type: [BaseColumn, str, list]
+        index:
+            desc: A column or list of columns to separate rows by.
+            type: [BaseColumn, str, list]
+    
+    returns:
+        type: DataMatrix
+    """
+    
+    def _to_names(obj):
+        if isinstance(obj, basestring):
+            return obj
+        if isinstance(obj, BaseColumn):
+            return obj.name
+        if isinstance(obj, Sequence):
+            return [_to_names(element) for element in obj]
+        raise TypeError('Expecting column name or BaseColumn or a list of '
+                        'column names or BaseColumns')
+    try:
+        pd_pivot_table
+    except NameError:
+        import pandas as pd
+        from datamatrix import convert as cnv
+        pd_pivot_table = cnv.wrap_pandas(pd.pivot_table)
+    return pd_pivot_table(dm, _to_names(values), _to_names(index),
+                          _to_names(columns), *args, **kwargs)
 
 
 def z(col):
