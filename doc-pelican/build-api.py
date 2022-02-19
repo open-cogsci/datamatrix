@@ -33,7 +33,7 @@ def main():
 		target='operations.md', onlyContents=True,
 		types=['function', 'module'], cls=None, exclude=[
 			'_SeriesColumn', 'BaseColumn', 'DataMatrix', 'FloatColumn',
-			'MixedColumn', 'Index', 'IntColumn', 'pivot_table', 'convert',
+			'MixedColumn', 'Index', 'IntColumn', 'convert',
 			'map_', 'filter_', 'setcol'])
 	createdoc('datamatrix/functional.py',
 		target='functional.md', onlyContents=True,
