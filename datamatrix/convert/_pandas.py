@@ -145,7 +145,7 @@ def from_pandas(df):
         if isinstance(colname, tuple):
             _colname = u'_'.join([safe_decode(i) for i in colname])
         else:
-            _colname = colname
+            _colname = safe_decode(colname)
         dm[_colname] = df[colname]
     ops.auto_type(dm)
     return dm
