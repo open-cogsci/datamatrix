@@ -5,4 +5,4 @@ import sys, os
 sys.path.append(os.path.dirname(__file__))
 from baseconf import *
 
-SITEURL = 'https://datamatrix.cogsci.nl/' + BRANCH
+SITEURL = 'https://pydatamatrix.eu/' + BRANCH

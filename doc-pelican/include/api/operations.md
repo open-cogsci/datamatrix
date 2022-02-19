@@ -184,6 +184,68 @@ __Argument list:__
 
 </div>
 
+<div class="FunctionDoc YAMLDoc" id="pivot_table" markdown="1">
+
+## function __pivot\_table__\(dm, values, index, columns, \*args, \*\*kwargs\)
+
+*Requires pandas*
+
+*Version note:* New in 0.14.1
+
+Creates a pivot table where rows correspond to levels of `index`,
+columns correspond to levels of `columns`, and cells contain aggregate
+values of `values`.
+
+A typical use for a pivot table is to create a summary report for a
+data set. For example, in an experiment where reaction times of human
+participants were measured on a large number of trials under different
+conditions, each row might correspond to one participant, each column
+to an experimental condition (or a combination of experimental
+conditions), and cells might contain mean reaction times.
+
+This function is a wrapper around the `pandas.pivot_table()`. For an
+overview of possible `*args` and `**kwargs`, see
+[this page](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.pivot_table.html).
+
+__Example:__
+
+%--
+python: |
+ from datamatrix import operations as ops, io
+
+ dm = io.readtxt('data/fratescu-replication-data-exp1.csv')
+ pm = ops.pivot_table(dm, values=dm.RT_search, index=dm.subject_nr,
+                      columns=dm.load)
+ print(pm)
+--%
+
+__Arguments:__
+
+- `dm` -- The source DataMatrix.
+	- Type: DataMatrix
+- `values` -- A column or list of columns to aggregate.
+	- Type: BaseColumn, str, list
+- `index` -- A column or list of columns to separate rows by.
+	- Type: BaseColumn, str, list
+- `columns` -- A column or list of columns to separate columns by.
+	- Type: BaseColumn, str, list
+
+__Argument list:__
+
+- `*args`: No description.
+
+__Keyword dict:__
+
+- `**kwargs`: No description.
+
+__Returns:__
+
+No description
+
+- Type: DataMatrix
+
+</div>
+
 <div class="FunctionDoc YAMLDoc" id="random_sample" markdown="1">
 
 ## function __random\_sample__\(obj, k\)
