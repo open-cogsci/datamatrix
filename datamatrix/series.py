@@ -877,7 +877,7 @@ def interpolate(series):
         type: SeriesColumn
     """
 
-    return ops.map_(_interpolate, series)
+    return _map(series, _interpolate)
 
 
 def filter_bandpass(series, freq_range, order=2, sampling_freq=None):
