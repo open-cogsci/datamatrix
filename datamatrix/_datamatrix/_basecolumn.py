@@ -61,6 +61,7 @@ class BaseColumn(OrderedState):
     """
 
     default_value = u''
+    ndim = 1
 
     def __init__(self, datamatrix):
 
@@ -876,6 +877,22 @@ class BaseColumn(OrderedState):
 
         from datamatrix.convert._html import to_html
         return to_html(self)
+        
+    def _requests_new_axis(self, key):
+        """
+        visible: False
+        
+        desc:
+            Matplotlib slices columns with [:, np.newaxis], where np.newaxis
+            is None and expects a re-orderd axis.
+        """
+        if np is None:
+            return False
+        if not isinstance(key, tuple) or len(key) != 2:
+            return False
+        if isinstance(key[0], slice) and key[1] is None:
+            return True
+        return False
 
     def __len__(self):
 
@@ -888,6 +905,9 @@ class BaseColumn(OrderedState):
         if isinstance(key, slice):
             return self._getslicekey(key)
         if isinstance(key, SEQUENCE):
+            # Hack for matplotlib
+            if self._requests_new_axis(key):
+                return np.array(self)[key]
             return self._getsequencekey(key)
         if isinstance(key, DataMatrix):
             return self._getdatamatrixkey(key)
