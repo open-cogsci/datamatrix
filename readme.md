@@ -16,6 +16,19 @@ Copyright 2015-2022  <br />
 `datamatrix` is also one of the core libraries of [OpenSesame](https://osdoc.cogsci.nl/), a graphical experiment builder for the social sciences, and [Rapunzel](https://rapunzel.cogsci.nl/), a modern code editor for numerical computing with Python and R.
 
 
+## Features
+
+- [An intuitive syntax](https://pydatamatrix.eu/basic) that makes your code easy to read
+- Requires only the Python standard libraries (but you can use `numpy` to improve performance)
+- Great support for [functional programming](https://pydatamatrix.eu/functional), including advanced [memoization (caching)](%link:memoization%)
+- Mix [two-dimensional](https://pydatamatrix.eu/series) (series) and one-dimensional data in a single data structure
+- Compatible with your favorite tools for numeric computation:
+    - `seaborn` and `matplotlib` for [plotting](https://pythontutorials.eu/numerical/plotting)
+    - `scipy`, `statsmodels`, and `pingouin` for [statistics](https://pythontutorials.eu/numerical/statistics)
+    - [Convert](https://pydatamatrix.eu/convert) to and from `pandas.DataFrame`
+    - Looks pretty inside a Jupyter Notebook
+
+
 ## Ultra-short cheat sheet
 
 ```python
