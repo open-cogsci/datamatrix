@@ -24,8 +24,8 @@ title: DataMatrix
 - Great support for [functional programming](%link:functional%), including advanced [memoization (caching)](%link:memoization%)
 - Mix [two-dimensional](%link:series%) (series) and one-dimensional data in a single data structure
 - Compatible with your favorite tools for numeric computation:
-    - `seaborn` for [plotting](%link:plotting%)
-    - `statsmodels` for [statistics](%link:statistics%)
+    - `seaborn` and `matplotlib` for [plotting](https://pythontutorials.eu/numerical/plotting)
+    - `scipy`, `statsmodels`, and `pingouin` for [statistics](https://pythontutorials.eu/numerical/statistics)
     - [Convert](%link:convert%) to and from `pandas.DataFrame`
     - Looks pretty inside a Jupyter Notebook
 
