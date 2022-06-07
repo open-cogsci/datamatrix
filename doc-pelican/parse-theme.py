@@ -5,7 +5,7 @@ import os
 import yaml
 
 with open('constants.yaml') as f:
-	const = yaml.load(f)
+	const = yaml.load(f, Loader=yaml.SafeLoader)
 
 
 def parse_folder(dirname):

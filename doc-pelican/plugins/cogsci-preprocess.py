@@ -40,7 +40,7 @@ ITEM_TYPES = [
 root = os.path.dirname(os.path.dirname(__file__)) + '/content'
 
 with open('constants.yaml') as f:
-	const = yaml.load(f)
+	const = yaml.load(f, Loader=yaml.SafeLoader)
 
 links = {}
 duplicate_names = []
