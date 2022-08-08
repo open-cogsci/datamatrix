@@ -42,6 +42,8 @@ dm = DataMatrix(length=5)
 print(dm[:2])
 # Create a new column and initialize it with the Fibonacci series
 dm.fibonacci = 0, 1, 1, 2, 3
+# You can also specify column names as if they are dict keys
+dm['fibonacci'] = 0, 1, 1, 2, 3
 # Remove 0 and 3 with a simple selection
 dm = (dm.fibonacci > 0) & (dm.fibonacci < 3)
 # Get a list of indices that match certain criteria
