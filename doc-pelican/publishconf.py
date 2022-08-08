@@ -6,3 +6,4 @@ sys.path.append(os.path.dirname(__file__))
 from baseconf import *
 
 SITEURL = 'https://pydatamatrix.eu/' + BRANCH
+BASEURL = ''
