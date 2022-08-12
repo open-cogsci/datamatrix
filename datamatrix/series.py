@@ -24,8 +24,9 @@ desc:
 
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
+from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix import FloatColumn, operations as ops, functional as fnc, \
-    DataMatrix
+    DataMatrix, NAN, INF
 import numpy as np
 from numpy import nanmean, nanmedian
 from scipy.interpolate import interp1d
@@ -34,6 +35,84 @@ from scipy.interpolate import interp1d
 # Placeholders for imports that will occur in _butter()
 butter = None
 sosfilt = None
+
+
+def nancount(series):
+    """
+    desc: |
+        Counts the number of `NAN` values for each cell in a series column, and
+        returns this as an int column.
+        
+        *Version note:* New in 0.15.0
+        
+        __Example: __
+        
+        %--
+        python:
+         from datamatrix import DataMatrix, series as srs, NAN
+
+         dm = DataMatrix(length=2)
+         dm.s = SeriesColumn(depth=3)
+         dm.s[0] = 1, 2, 3
+         dm.s[1] = 1, 2, NAN
+         dm.s[2] = NAN, NAN, NAN
+         dm.nr_of_nan = srs.nancount(dm.s)
+         print(dm)
+        --%
+        
+    arguments:
+        series:
+            desc: A series column to count the `NAN` values is.
+            type: SeriesColumn
+            
+    returns:
+        desc: An int column with the number of `NAN` values in each cell.
+        type: IntColumn
+    """
+    if isinstance(series, _SeriesColumn):
+        return reduce(series, operation=nancount)
+    if isinstance(series, BaseColumn):
+        return len(series == NAN)
+    return np.sum(np.isnan(np.array(series)))
+
+
+def infcount(series):
+    """
+    desc: |
+        Counts the number of `INF` values for each cell in a series column, and
+        returns this as an int column.
+        
+        *Version note:* New in 0.15.0
+        
+        __Example: __
+        
+        %--
+        python:
+         from datamatrix import DataMatrix, series as srs, NAN
+
+         dm = DataMatrix(length=2)
+         dm.s = SeriesColumn(depth=3)
+         dm.s[0] = 1, 2, 3
+         dm.s[1] = 1, 2, INF
+         dm.s[2] = INF, INF, INF
+         dm.nr_of_inf = srs.infcount(dm.s)
+         print(dm)
+        --%
+        
+    arguments:
+        series:
+            desc: A series column to count the `INF` values in.
+            type: SeriesColumn
+            
+    returns:
+        desc: An int column with the number of `INF` values in each cell.
+        type: IntColumn
+    """
+    if isinstance(series, _SeriesColumn):
+        return reduce(series, operation=infcount)
+    if isinstance(series, BaseColumn):
+        return len(series == INF)
+    return np.sum(np.isinf(series))
 
 
 def flatten(dm):
@@ -47,6 +126,8 @@ def flatten(dm):
         This function requires that all series in `dm` have the same depth, or
         that `dm` doesn't contain any series, in which case a copy of `dm` is
         returned.
+        
+        *Version note:* New in 0.15.0
         
         __Example: __
         

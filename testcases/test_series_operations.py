@@ -19,9 +19,47 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
 from datamatrix.py3compat import *
-from datamatrix import DataMatrix, SeriesColumn, series
+from datamatrix import DataMatrix, SeriesColumn, series, NAN, INF
 from testcases.test_tools import check_col, check_series, check_integrity
 import numpy as np
+
+
+def test_nancount():
+    dm = DataMatrix(length=2)
+    dm.col1 = 'a', NAN
+    dm.col2 = int
+    dm.col2 = 1, 2
+    dm.col3 = float
+    dm.col3 = 1, NAN
+    dm.s = SeriesColumn(depth=3)
+    dm.s[0] = 1,NAN,NAN
+    dm.s[1] = 1,INF,3
+    a = np.ones(3)
+    a[:2] = NAN
+    assert series.nancount(dm.col1) == 1
+    assert series.nancount(dm.col2) == 0
+    assert series.nancount(dm.col3) == 1
+    assert series.nancount(a) == 2
+    check_col(series.nancount(dm.s), [2, 0])
+
+
+def test_infcount():
+    dm = DataMatrix(length=2)
+    dm.col1 = 'a', INF
+    dm.col2 = int
+    dm.col2 = 1, 2
+    dm.col3 = float
+    dm.col3 = NAN, INF
+    dm.s = SeriesColumn(depth=3)
+    dm.s[0] = 1,NAN,NAN
+    dm.s[1] = 1,INF,3
+    a = np.ones(3)
+    a[:2] = INF
+    assert series.infcount(dm.col1) == 1
+    assert series.infcount(dm.col2) == 0
+    assert series.infcount(dm.col3) == 1
+    assert series.infcount(a) == 2
+    check_col(series.infcount(dm.s), [0, 1])
 
 
 def test_flatten():
