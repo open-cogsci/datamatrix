@@ -679,11 +679,11 @@ class BaseColumn(OrderedState):
         _rowid = Index(0)
         if op is operator.eq:
             for rowid, val in zip(self._rowid, self._seq):
-                if math.isnan(val):
+                if isinstance(val, float) and math.isnan(val):
                     _rowid.append(rowid)
         elif op is operator.ne:
             for rowid, val in zip(self._rowid, self._seq):
-                if not math.isnan(val):
+                if not isinstance(val, float) or not math.isnan(val):
                     _rowid.append(rowid)
         else:
             raise TypeError('nans can only be compared with == or !=')
