@@ -12,7 +12,8 @@ Modules:
     datamatrix.io: io
     datamatrix.operations: operations
     datamatrix.series: series
-v0.14:
+v0.15:
+    v0.15: http://pydatamatrix.eu/0.15/
     v0.14: http://pydatamatrix.eu/0.14/
     v0.13: http://pydatamatrix.eu/0.13/
     v0.12: http://pydatamatrix.eu/0.12/

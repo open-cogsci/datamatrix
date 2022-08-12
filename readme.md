@@ -13,7 +13,7 @@ Copyright 2015-2022  <br />
 
 `DataMatrix` is an intuitive Python library for working with column-based and continuous data. It's a light-weight and easy-to-use alternative to `pandas`.
 
-`datamatrix` is also one of the core libraries of [OpenSesame](https://osdoc.cogsci.nl/), a graphical experiment builder for the social sciences, and [Rapunzel](https://rapunzel.cogsci.nl/), a modern code editor for numerical computing with Python and R.
+`DataMatrix` is also one of the core libraries of [OpenSesame](https://osdoc.cogsci.nl/), a graphical experiment builder for the social sciences, and [Rapunzel](https://rapunzel.cogsci.nl/), a modern code editor for numerical computing with Python and R.
 
 
 ## Features
@@ -41,6 +41,8 @@ dm = DataMatrix(length=5)
 print(dm[:2])
 # Create a new column and initialize it with the Fibonacci series
 dm.fibonacci = 0, 1, 1, 2, 3
+# You can also specify column names as if they are dict keys
+dm['fibonacci'] = 0, 1, 1, 2, 3
 # Remove 0 and 3 with a simple selection
 dm = (dm.fibonacci > 0) & (dm.fibonacci < 3)
 # Get a list of indices that match certain criteria
