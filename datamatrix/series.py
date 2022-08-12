@@ -37,6 +37,104 @@ butter = None
 sosfilt = None
 
 
+def first_occurrence(series, value, equal=True):
+    """
+    desc:
+        Finds the first occurence of a value for each row of a series column
+        and returns the result as a float column of sample indices.
+        
+        *Version note:* New in 0.15.0
+        
+        __Example: __
+        
+        %--
+        python:
+         from datamatrix import DataMatrix, SeriesColumn, NAN
+        
+         dm = DataMatrix(length=3)
+         dm.s = SeriesColumn(depth=3)
+         dm.s[0] = 1, 2, 3
+         dm.s[1] = 1, 2, NAN
+         dm.s[2] = NAN, NAN, NAN
+         dm.first_nan = srs.first_occurrence(dm.s, value=NAN)
+         dm.first_non_1 = srs.first_occurrence(dm.s, value=1, equal=False)
+         print(dm)
+        --%
+        
+    arguments:
+        series:
+            desc: The series column to search
+            type: SeriesColumn
+        value:
+            desc: The value to find in the series column
+            type: [float, int]
+    
+    keywords:
+        equal:
+            desc:
+                If `True`, the index of the first matching sample is returned.
+                If `False`, the index of the first non-matching sample is
+                returned.
+            type: bool
+            
+    returns:
+        desc:
+            A float column with sample indices or `NAN` for cells in which
+            there was no match (or no mismatch if `equal=False`).
+        type: FloatColumn
+    """
+    return _occurrence(series, value, equal=equal, reverse=True)
+    
+    
+def last_occurrence(series, value, equal=True):
+    """
+    desc:
+        Finds the last occurence of a value for each row of a series column
+        and returns the result as a float column of sample indices.
+        
+        *Version note:* New in 0.15.0
+        
+        __Example: __
+        
+        %--
+        python:
+         from datamatrix import DataMatrix, SeriesColumn, NAN
+        
+         dm = DataMatrix(length=3)
+         dm.s = SeriesColumn(depth=3)
+         dm.s[0] = 1, 2, 3
+         dm.s[1] = 1, 2, NAN
+         dm.s[2] = NAN, NAN, NAN
+         dm.last_nan = srs.last_occurrence(dm.s, value=NAN)
+         dm.last_non_1 = srs.last_occurrence(dm.s, value=1, equal=False)
+         print(dm)
+        --%
+        
+    arguments:
+        series:
+            desc: The series column to search
+            type: SeriesColumn
+        value:
+            desc: The value to find in the series column
+            type: [float, int]
+    
+    keywords:
+        equal:
+            desc:
+                If `True`, the index of the last matching sample is returned.
+                If `False`, the index of the last non-matching sample is
+                returned.
+            type: bool
+            
+    returns:
+        desc:
+            A float column with sample indices or `NAN` for cells in which
+            there was no match (or no mismatch if `equal=False`).
+        type: FloatColumn
+    """    
+    return _occurrence(series, value, equal=equal)
+
+
 def nancount(series):
     """
     desc: |
@@ -1642,6 +1740,42 @@ def _interpolate(y):
     x = np.arange(len(y))
     y[inan] = np.interp(x=inan, xp=x[~xnan], fp=y[~xnan])
     return y
+
+
+def _occurrence(series, value, equal, reverse=False):
+    """
+    visible: False
+
+    desc:
+        The actual implement for the first_occurrence() and last_occurence()
+        functions.
+    """
+    # First rows and columns that match the value to search for. This goes
+    # slightly differently for nan values than for other values because nans
+    # are not equal to themselves
+    if np.isnan(value):
+        rows, cols = np.where(np.isnan(series) if equal else ~np.isnan(series))
+    else:
+        rows, cols = np.where(
+            (series._seq == value) if equal else (series._seq != value))
+    # Then create an empty array with a length equal to that of the series.
+    # It's initialized to nan, which indicates that the value does not occur
+    # at all in the row
+    a = np.empty(len(series), dtype=float)
+    a[:] = np.nan
+    # The columns are provided in incremental order, and the last pair wins,
+    # which means that highest matching col will be assigned to the row. When
+    # searching for the first occurence (as opposed to the last occurrence)
+    # this is not what we want. Rather, we want to lowest matching col to be
+    # assigned to the row. To accomplish this, we simply reverse the matches.
+    if reverse:
+        a[rows[::-1]] = cols[::-1]
+    else:
+        a[rows] = cols
+    # Turn the result into a float column
+    col = FloatColumn(series.dm)
+    col[:] = a
+    return col
 
 
 reduce_ = reduce  # Backwards compatibility

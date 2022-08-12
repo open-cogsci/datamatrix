@@ -24,6 +24,27 @@ from testcases.test_tools import check_col, check_series, check_integrity
 import numpy as np
 
 
+def test_occurrence():
+    
+    dm = DataMatrix(length=3)
+    dm.s = SeriesColumn(depth=4)
+    dm.s[0] = 1,   NAN, NAN, INF
+    dm.s[1] = 0,   INF, INF, 4
+    dm.s[2] = NAN, 1,   3,   1
+    check_col(series.first_occurrence(dm.s, NAN), [1, NAN, 0])
+    check_col(series.last_occurrence(dm.s, NAN), [2, NAN, 0])
+    check_col(series.first_occurrence(dm.s, NAN, equal=False), [0, 0, 1])
+    check_col(series.last_occurrence(dm.s, NAN, equal=False), [3, 3, 3])
+    check_col(series.first_occurrence(dm.s, INF), [3, 1, NAN])
+    check_col(series.last_occurrence(dm.s, INF), [3, 2, NAN])
+    check_col(series.first_occurrence(dm.s, INF, equal=False), [0, 0, 0])
+    check_col(series.last_occurrence(dm.s, INF, equal=False), [2, 3, 3])
+    check_col(series.first_occurrence(dm.s, 1), [0, NAN, 1])
+    check_col(series.last_occurrence(dm.s, 1), [0, NAN, 3])
+    check_col(series.first_occurrence(dm.s, 1, equal=False), [1, 0, 0])
+    check_col(series.last_occurrence(dm.s, 1, equal=False), [3, 3, 2])
+
+
 def test_nancount():
     dm = DataMatrix(length=2)
     dm.col1 = 'a', NAN
