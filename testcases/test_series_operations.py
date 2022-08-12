@@ -19,10 +19,24 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 import pytest
 from datamatrix.py3compat import *
-from datamatrix import DataMatrix, SeriesColumn
-from datamatrix import series
+from datamatrix import DataMatrix, SeriesColumn, series
 from testcases.test_tools import check_col, check_series, check_integrity
 import numpy as np
+
+
+def test_flatten():
+    
+    dm = DataMatrix(length=2)
+    dm.col = 'a', 'b'
+    dm.s1 = SeriesColumn(depth=3)
+    dm.s1[:] = 1,2,3
+    dm.s2 = SeriesColumn(depth=3)
+    dm.s2[:] = 3,2,1
+    flat_dm = series.flatten(dm)
+    check_col(flat_dm.col, ['a', 'a', 'a', 'b', 'b', 'b'])
+    check_col(flat_dm.s1, [1, 2, 3, 1, 2, 3])
+    check_col(flat_dm.s2, [3, 2, 1, 3, 2, 1])
+    check_integrity(flat_dm)
 
 
 def test_endlock():

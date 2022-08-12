@@ -24,7 +24,8 @@ desc:
 
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
-from datamatrix import FloatColumn, operations as ops, functional as fnc
+from datamatrix import FloatColumn, operations as ops, functional as fnc, \
+    DataMatrix
 import numpy as np
 from numpy import nanmean, nanmedian
 from scipy.interpolate import interp1d
@@ -33,6 +34,72 @@ from scipy.interpolate import interp1d
 # Placeholders for imports that will occur in _butter()
 butter = None
 sosfilt = None
+
+
+def flatten(dm):
+    """
+    desc: |
+        Flattens all series of a datamatrix to float columns. The result is a
+        new datamatrix where each row of the original datamatrix is repeated
+        for each sample of the series. The new datamatrix does not contain any
+        series.
+        
+        This function requires that all series in `dm` have the same depth, or
+        that `dm` doesn't contain any series, in which case a copy of `dm` is
+        returned.
+        
+        __Example: __
+        
+        %--
+        python: |
+         from datamatrix import DataMatrix, series as srs
+
+         dm = DataMatrix(length=2)
+         dm.col = 'a', 'b'
+         dm.s1 = SeriesColumn(depth=3)
+         dm.s1[:] = 1,2,3
+         dm.s2 = SeriesColumn(depth=3)
+         dm.s2[:] = 3,2,1
+         flat_dm = srs.flatten(dm)
+         print(dm)
+        --%
+    
+    arguments:
+        series:
+            desc: A DataMatrix
+            type: DataMatrix
+
+    returns:
+        desc: A 'flattened' DataMatrix without series
+        type: DataMatrix
+    """
+    # Check the depth of the seriescolumns in the datamatrix, and ensure that
+    # they are all of equal depth
+    depth = None
+    for colname, col in dm.columns:
+        if not isinstance(col, _SeriesColumn):
+            continue
+        if depth is None:
+            depth = col.depth
+        elif depth != col.depth:
+            raise ValueError('All SeriesColumns should have the same depth')
+    # If there are no seriescolumn in the datamatrix, simply return a copy of
+    # the datamatrix
+    if depth is None:
+        return dm[:]
+    long_dm = DataMatrix(length=len(dm) * depth)
+    for colname, col in dm.columns:
+        # SeriesColumns are flattened and then inserted into the datamatrix as
+        # a float column
+        if isinstance(col, _SeriesColumn):
+            long_dm[colname] = float
+            long_dm[colname] = col._seq.flatten()
+            continue
+        # Other columns are repeated and then inserted
+        long_dm[colname] = type(col)
+        for i, val in enumerate(col):
+            long_dm[colname][i * depth:(i + 1) * depth] = val
+    return long_dm
 
 
 def concatenate(*series):
