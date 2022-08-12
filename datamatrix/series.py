@@ -37,6 +37,57 @@ butter = None
 sosfilt = None
 
 
+def trim(series, value=NAN, start=False, end=True):
+    """
+    desc:
+        Trims trailing and/ or leading values from a series. This is useful,
+        for example, to discard the end (or beginning) of a series that
+        consists exclusively of invalid data, such as `NAN` or 0 values.
+        
+        *Version note:* New in 0.15.0
+        
+        __Example: __
+        
+        %--
+        python:
+         from datamatrix import DataMatrix, SeriesColumn, series as srs
+         
+         dm = DataMatrix(length=3)
+         dm.s = SeriesColumn(depth=4)
+         dm.s[0] = 0, 0, 2, 0, 0
+         dm.s[1] = 0, 0, 0, 3, 0
+         dm.s[2] = 0, 0, 2, 3, 0
+         dm.trimmed = srs.trim(dm.s, value=0, start=True, end=True)
+         print(dm)
+         
+    keywords:
+        value:
+            desc: The value to trim
+            type: [int, float]
+        start:
+            desc: Indicates whether the start of the series should be trimmed
+            type: bool
+        end:
+            desc: Indicates whether the end of the series should be trimmed
+            type: bool
+            
+    returns:
+        desc: A trimmed copy of the series column
+        type: SeriesColumn
+    """
+    if start:
+        start_index = int(
+            first_occurrence(series, value=value, equal=False).min)
+    else:
+        start_index = 0
+    if end:
+        end_index = int(
+            last_occurrence(series, value=value, equal=False).max + 1)
+    else:
+        end_index = series.depth
+    return series[:, start_index:end_index]
+
+
 def first_occurrence(series, value, equal=True):
     """
     desc:
@@ -49,7 +100,7 @@ def first_occurrence(series, value, equal=True):
         
         %--
         python:
-         from datamatrix import DataMatrix, SeriesColumn, NAN
+         from datamatrix import DataMatrix, SeriesColumn, NAN, series as srs
         
          dm = DataMatrix(length=3)
          dm.s = SeriesColumn(depth=3)

@@ -24,6 +24,36 @@ from testcases.test_tools import check_col, check_series, check_integrity
 import numpy as np
 
 
+def test_trim():
+    
+    dm = DataMatrix(length=3)
+    dm.s = SeriesColumn(depth=4)
+    dm.s[0] = NAN,NAN,NAN,NAN
+    dm.s[1] = NAN,INF,INF, NAN
+    dm.s[2] = NAN, 1, 3, NAN
+    check_series(
+        series.trim(dm.s, value=NAN, start=True, end=True),
+        [
+            [NAN, NAN],
+            [INF, INF],
+            [1, 3]
+        ])
+    check_series(
+        series.trim(dm.s, value=NAN, start=False, end=True),
+        [
+            [NAN, NAN, NAN],
+            [NAN, INF, INF],
+            [NAN, 1, 3]
+        ])
+    check_series(
+        series.trim(dm.s, value=NAN, start=True, end=False),
+        [
+            [NAN, NAN, NAN],
+            [INF, INF, NAN],
+            [1, 3, NAN]
+        ])
+
+
 def test_occurrence():
     
     dm = DataMatrix(length=3)
