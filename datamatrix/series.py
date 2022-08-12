@@ -39,26 +39,27 @@ sosfilt = None
 
 def trim(series, value=NAN, start=False, end=True):
     """
-    desc:
+    desc: |
         Trims trailing and/ or leading values from a series. This is useful,
         for example, to discard the end (or beginning) of a series that
         consists exclusively of invalid data, such as `NAN` or 0 values.
         
         *Version note:* New in 0.15.0
         
-        __Example: __
+        __Example:__
         
         %--
-        python:
+        python: |
          from datamatrix import DataMatrix, SeriesColumn, series as srs
          
          dm = DataMatrix(length=3)
-         dm.s = SeriesColumn(depth=4)
+         dm.s = SeriesColumn(depth=5)
          dm.s[0] = 0, 0, 2, 0, 0
          dm.s[1] = 0, 0, 0, 3, 0
          dm.s[2] = 0, 0, 2, 3, 0
          dm.trimmed = srs.trim(dm.s, value=0, start=True, end=True)
          print(dm)
+        --%
          
     keywords:
         value:
@@ -90,16 +91,16 @@ def trim(series, value=NAN, start=False, end=True):
 
 def first_occurrence(series, value, equal=True):
     """
-    desc:
+    desc: |
         Finds the first occurence of a value for each row of a series column
         and returns the result as a float column of sample indices.
         
         *Version note:* New in 0.15.0
         
-        __Example: __
+        __Example:__
         
         %--
-        python:
+        python: |
          from datamatrix import DataMatrix, SeriesColumn, NAN, series as srs
         
          dm = DataMatrix(length=3)
@@ -139,16 +140,16 @@ def first_occurrence(series, value, equal=True):
     
 def last_occurrence(series, value, equal=True):
     """
-    desc:
+    desc: |
         Finds the last occurence of a value for each row of a series column
         and returns the result as a float column of sample indices.
         
         *Version note:* New in 0.15.0
         
-        __Example: __
+        __Example:__
         
         %--
-        python:
+        python: |
          from datamatrix import DataMatrix, SeriesColumn, NAN
         
          dm = DataMatrix(length=3)
@@ -194,13 +195,13 @@ def nancount(series):
         
         *Version note:* New in 0.15.0
         
-        __Example: __
+        __Example:__
         
         %--
-        python:
-         from datamatrix import DataMatrix, series as srs, NAN
+        python: |
+         from datamatrix import DataMatrix, SeriesColumn, series as srs, NAN
 
-         dm = DataMatrix(length=2)
+         dm = DataMatrix(length=3)
          dm.s = SeriesColumn(depth=3)
          dm.s[0] = 1, 2, 3
          dm.s[1] = 1, 2, NAN
@@ -233,13 +234,13 @@ def infcount(series):
         
         *Version note:* New in 0.15.0
         
-        __Example: __
+        __Example:__
         
         %--
-        python:
-         from datamatrix import DataMatrix, series as srs, NAN
+        python: |
+         from datamatrix import DataMatrix, SeriesColumn, series as srs, INF
 
-         dm = DataMatrix(length=2)
+         dm = DataMatrix(length=3)
          dm.s = SeriesColumn(depth=3)
          dm.s[0] = 1, 2, 3
          dm.s[1] = 1, 2, INF
@@ -278,7 +279,7 @@ def flatten(dm):
         
         *Version note:* New in 0.15.0
         
-        __Example: __
+        __Example:__
         
         %--
         python: |
@@ -291,11 +292,14 @@ def flatten(dm):
          dm.s2 = SeriesColumn(depth=3)
          dm.s2[:] = 3,2,1
          flat_dm = srs.flatten(dm)
+         print('Original:')
          print(dm)
+         print('Flattened:')
+         print(flat_dm)
         --%
     
     arguments:
-        series:
+        dm:
             desc: A DataMatrix
             type: DataMatrix
 
