@@ -46,7 +46,7 @@ def main():
 		target='series.md', onlyContents=True,
 		types=['function', 'module'], cls=None, exclude=[
 			'_SeriesColumn', 'FloatColumn', 'ops', 'fnc', 'BaseColumn',
-			'DataMatrix'])
+			'DataMatrix', 'reduce_'])
 	createdoc('datamatrix/io/__init__.py',
 		target='io.md', onlyContents=True,
 		types=['function', 'module'], cls=None, exclude=[])
