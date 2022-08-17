@@ -24,6 +24,28 @@ from testcases.test_tools import check_col, check_series, check_integrity
 import numpy as np
 
 
+def test_roll():
+    dm = DataMatrix(length=3)
+    dm.s = SeriesColumn(depth=4)
+    dm.s = [
+        [1, 2, 3, 4],
+        [10, 20, 30, 40],
+        [100, 200, 300, 400]
+    ]
+    dm.t = series.roll(dm.s, 1)
+    dm.u = series.roll(dm.s, (-1, 0, 1))
+    check_series(dm.t, [
+        [4, 1, 2, 3],
+        [40, 10, 20, 30],
+        [400, 100, 200, 300],
+    ])
+    check_series(dm.u, [
+        [2, 3, 4, 1],
+        [10, 20, 30, 40],
+        [400, 100, 200, 300],
+    ])
+
+
 def test_trim():
     
     dm = DataMatrix(length=3)

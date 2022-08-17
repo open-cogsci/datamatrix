@@ -37,6 +37,61 @@ butter = None
 sosfilt = None
 
 
+def roll(series, shift):
+    """
+    desc: |
+        Rolls (or shifts) the elements along the depth of the series. Elements
+        that run off the last position are re-introduced at the first position
+        and vice versa.
+        
+        *Version note:* New in 0.15.0
+        
+        __Example:__
+        
+        %--
+        python: |
+         from datamatrix import DataMatrix, SeriesColumn, series as srs
+        
+         dm = DataMatrix(length=3)
+         dm.s = SeriesColumn(depth=4)
+         dm.s = [[1, 2, 3, 4],
+                 [10, 20, 30, 40],
+                 [100, 200, 300, 400]]
+         dm.t = srs.roll(dm.s, shift=1)
+         dm.u = srs.roll(dm.s, shift=[1, 0, -1])
+         print(dm)
+        --%
+        
+    arguments:
+        series:
+            desc: The series column to roll
+            type: SeriesColumn
+        shift:
+            desc: The number of places to roll by. If `shift` is an `int`, each
+                  row is shifted by the same amount. If `shift` is a sequence,
+                  which has to be of the same length as the series, then each
+                  row is shifted by the amounted indicated by the corresponding
+                  value in `shift`.
+            type: [int, Sequence]
+            
+    returns:
+        desc: The rolled series.
+        type: SeriesColumn
+    """
+    series = series[:]
+    if isinstance(shift, int):
+        series._seq = np.roll(series._seq, shift, axis=1)
+        return series
+    if len(shift) != len(series):
+        raise ValueError(
+            'shift must be int or a sequence of the same length as the series')
+    for i, s in enumerate(shift):
+        if not isinstance(s, int):
+            raise TypeError('shift values must be int')
+        series._seq[i] = np.roll(series._seq[i], s)
+    return series
+
+
 def trim(series, value=NAN, start=False, end=True):
     """
     desc: |
@@ -60,7 +115,12 @@ def trim(series, value=NAN, start=False, end=True):
          dm.trimmed = srs.trim(dm.s, value=0, start=True, end=True)
          print(dm)
         --%
-         
+
+    arguments:
+        series:
+            desc: The series column to trim
+            type: SeriesColumn
+
     keywords:
         value:
             desc: The value to trim
