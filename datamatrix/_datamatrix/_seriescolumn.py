@@ -180,7 +180,7 @@ class _SeriesColumn(NumericColumn):
             A string with an ellipsized representation.
         """
 
-        return u'%s ... %s' % (str(a[:2])[:-1], str(a[-2:])[1:])
+        return u'%s ... %s' % (str(a[:2])[:-1], str(a[-1:])[1:])
 
     def _printable_list(self):
 

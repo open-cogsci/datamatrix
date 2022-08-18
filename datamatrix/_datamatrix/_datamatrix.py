@@ -34,6 +34,10 @@ except ImportError:
 from collections import OrderedDict
 _id = 0
 
+PRINT_MAX_ROWS = 20
+PRINT_MAX_COLUMNS = 6
+PRINT_MAX_NUMBER = 999999
+
 
 def mimic_DataFrame(function_name):
     
@@ -747,23 +751,25 @@ class DataMatrix(OrderedState):
 
     def __str__(self):
 
-        if len(self) > 20:
-            return str(self[:20]) + u'\n(+ %d rows not shown)' % (len(self)-20)
+        if len(self) > PRINT_MAX_ROWS:
+            return str(self[:PRINT_MAX_ROWS]) + u'\n(+ %d rows not shown)' \
+                % (len(self) - PRINT_MAX_ROWS)
         import prettytable
         t = prettytable.PrettyTable()
         t.add_column('#', self._rowid)
-        for name, col in list(self.columns)[:6]:
+        for name, col in list(self.columns)[:PRINT_MAX_COLUMNS]:
             t.add_column(
                 name,
                 [
                     '%E' % i
-                    if isinstance(i, (int, float)) and i > 1000
+                    if isinstance(i, (int, float)) and i > PRINT_MAX_NUMBER
                     else i
                     for i in col._printable_list()
                 ]
             )
-        if len(self._cols) > 6:
-            return str(t) + u'\n(+ %d columns not shown)' % (len(self._cols)-5)
+        if len(self._cols) > PRINT_MAX_COLUMNS:
+            return str(t) + u'\n(+ %d columns not shown)' \
+                % (len(self._cols) - PRINT_MAX_COLUMNS)
         return str(t)
 
     def __repr__(self):
