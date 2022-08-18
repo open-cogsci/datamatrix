@@ -3,7 +3,7 @@ Tutorials:
     Basic use: basic
     Plotting: https://pythontutorials.eu/numerical/plotting
     Statistics: https://pythontutorials.eu/numerical/statistics
-    Working with series: series-tutorial
+    Working with series: https://pythontutorials.eu/numerical/time-series
     Memoization (caching): memoization
     Analyzing eye-movement data: eyelinkparser
 Modules:

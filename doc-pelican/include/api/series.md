@@ -174,7 +174,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7f9ca0a50430>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7fca649c8430>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times
 shorter. The depth of the downsampled series is the highest multiple of
@@ -219,7 +219,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7f9ca0a50430>
+	- Default: <function nanmean at 0x7fca649c8430>
 
 __Returns:__
 
@@ -597,8 +597,11 @@ __Arguments:__
 
 - `series` -- The series column to search
 	- Type: SeriesColumn
-- `value` -- The value to find in the series column
-	- Type: float, int
+- `value` -- The value to find in the series column. If `value` is a
+sequence, which has to be of the same length as the series,
+then each row is searched for the value indicated by the
+corresponding value in `value`.
+	- Type: float, int, Sequence
 
 __Keywords:__
 
@@ -776,8 +779,11 @@ __Arguments:__
 
 - `series` -- The series column to search
 	- Type: SeriesColumn
-- `value` -- The value to find in the series column
-	- Type: float, int
+- `value` -- The value to find in the series column. If `value` is a
+sequence, which has to be of the same length as the series,
+then each row is searched for the value indicated by the
+corresponding value in `value`.
+	- Type: float, int, Sequence
 
 __Keywords:__
 
@@ -953,7 +959,7 @@ A new series in which the data points are spread according to the timestamps.
 
 <div class="FunctionDoc YAMLDoc" id="reduce" markdown="1">
 
-## function __reduce__\(series, operation=<function nanmean at 0x7f9ca0a50430>\)
+## function __reduce__\(series, operation=<function nanmean at 0x7fca649c8430>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -987,13 +993,54 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7f9ca0a50430>
+	- Default: <function nanmean at 0x7fca649c8430>
 
 __Returns:__
 
 A reduction of the signal.
 
 - Type: FloatColumn
+
+</div>
+
+<div class="FunctionDoc YAMLDoc" id="roll" markdown="1">
+
+## function __roll__\(series, shift\)
+
+Rolls (or shifts) the elements along the depth of the series. Elements
+that run off the last position are re-introduced at the first position
+and vice versa.
+
+*Version note:* New in 0.15.0
+
+__Example:__
+
+%--
+python: |
+ from datamatrix import DataMatrix, SeriesColumn, series as srs
+
+ dm = DataMatrix(length=3)
+ dm.s = SeriesColumn(depth=4)
+ dm.s = [[1, 2, 3, 4],
+         [10, 20, 30, 40],
+         [100, 200, 300, 400]]
+ dm.t = srs.roll(dm.s, shift=1)
+ dm.u = srs.roll(dm.s, shift=[1, 0, -1])
+ print(dm)
+--%
+
+__Arguments:__
+
+- `series` -- The series column to roll
+	- Type: SeriesColumn
+- `shift` -- The number of places to roll by. If `shift` is an `int`, each row is shifted by the same amount. If `shift` is a sequence, which has to be of the same length as the series, then each row is shifted by the amounted indicated by the corresponding value in `shift`.
+	- Type: int, Sequence
+
+__Returns:__
+
+The rolled series.
+
+- Type: SeriesColumn
 
 </div>
 
@@ -1150,7 +1197,8 @@ python: |
 
 __Arguments:__
 
-- `series` -- No description
+- `series` -- The series column to trim
+	- Type: SeriesColumn
 
 __Keywords:__
 

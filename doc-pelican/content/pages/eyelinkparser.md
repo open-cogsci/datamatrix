@@ -115,7 +115,7 @@ def get_data():
 
 We now call this function to get the data as a a `DataMatrix`. If you want to clear the cache, you can call `get_data.clear()` first.
 
-Let's also print out the `DataMatrix` to get some idea of what our data structure looks like. As you can see, traces are stored as [series](%url:series-tutorial%), which is convenient for further analysis.
+Let's also print out the `DataMatrix` to get some idea of what our data structure looks like. As you can see, traces are stored as [series](https://pythontutorials.eu/numerical/time-series/), which is convenient for further analysis.
 
 ```python
 dm = get_data()

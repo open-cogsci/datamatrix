@@ -363,6 +363,22 @@ dm.col2 = dm.col @ (lambda x: x*2)
 print(dm)
 ```
 
+## Reading and writing files
+
+You can read and write files with functions from the `datamatrix.io` module. The main supported file types are `csv` and `xlsx`.
+
+```python
+from datamatrix import io
+
+dm = DataMatrix(length=3)
+dm.col = 1, 2, 3
+# Write to disk
+io.writetxt(dm, 'my_datamatrix.csv')
+io.writexlsx(dm, 'my_datamatrix.xlsx')
+# And read it back from disk!
+dm = io.readtxt('my_datamatrix.csv')
+dm = io.readxlsx('my_datamatrix.xlsx')
+```
 
 ## Column types
 
@@ -530,61 +546,117 @@ print('Non-NaN values')
 print(dm.f != np.nan)
 ```
 
-### SeriesColumn: Working with continuous data (requires numpy)
 
-The `SeriesColumn` is 2 dimensional; that is, each cell is by itself an array of values. Therefore, the `SeriesColumn` can be used to work with sets of continuous data, such as EEG or eye-position traces.
+## Working with continuous data (requires numpy)
 
-For more information about series, see:
+To work with continous (or time-series) data, datamatrix provides the `SeriesColumn` class. In a series column, each cell is itself a series of values.
 
-- %link:series%
+A more elaborate tutorial on working with time series can be found here:
+
+- <https://pythontutorials.eu/numerical/time-series/>
+
+### Mixing two- and three-dimensional data
+
+With column-based or tabular data, every cell is defined by two coordinates: the column name, and the row number; that is, column-based data is two dimensional. But for many kinds of data, two dimensions is not enough.
+
+To illustrate this, let's imagine that you want to store the population of cities over a period of three years. You could do this by simply adding a column for every year, `population2008`, `population2009`, `population2010`:
+
 
 ```python
-import numpy as np
-from matplotlib import pyplot as plt
-from datamatrix import SeriesColumn
+from datamatrix import DataMatrix
 
-length = 10 # Number of traces
-depth = 50 # Size of each trace
-
-x = np.linspace(0, 2*np.pi, depth)
-sinewave = np.sin(x)
-noise = np.random.random(depth)*2-1
-
-dm = DataMatrix(length=length)
-dm.series = SeriesColumn(depth=depth)
-dm.series[0] = noise
-dm.series[1:].setallrows(sinewave)
-dm.series[1:] *= np.linspace(-1, 1, 9)
-
-plt.xlim(x.min(), x.max())
-plt.plot(x, dm.series.plottable, color='green', linestyle=':')
-y1 = dm.series.mean-dm.series.std
-y2 = dm.series.mean+dm.series.std
-plt.fill_between(x, y1, y2, alpha=.2, color='blue')
-plt.plot(x, dm.series.mean, color='blue')
-plt.show()
+# Not very elegant!
+dm = DataMatrix(length=2)
+dm.city = 'Marseille', 'Lyon'
+dm.population2010 = 850726, 484344
+dm.population2009 = 850602, 479803
+dm.population2008 = 851420, 474946
+print(dm)
 ```
 
-You can also create a `SeriesColumn` by assigning a 2D numpy array to a new column, where one of the dimensions matches the length of the DataMatrix. The other dimension is then assumed to be the depth of the `SeriesColumn`:
+In this example, this naive approach is still feasible, because there are only three years, so you need only three columns. But imagine that you want to store the year-by-year population over several centuries. You would then end up with hundreds of columns! Not impossible, but not very elegant either.
+
+It would be much more elegant if you could have a single column for the population, and then give this column a third dimension (a *depth*) so that it can store the population over time. And that's where the `SeriesColumn` comes in.
+
 
 ```python
-dm = DataMatrix(length=3)
-dm.random_noise = np.random.random((3, 10))
+from datamatrix import DataMatrix, SeriesColumn
+
+# Pretty elegant, right?
+dm = DataMatrix(length=2)
+dm.city = 'Marseille', 'Lyon'
+dm.population = SeriesColumn(depth=3)
+dm.population[0] = 850726, 850602, 851420 # Marseille
+dm.population[1] = 484344, 479803, 474946 # Lyon
+dm.year = SeriesColumn(depth=3)
+dm.year = 2010, 2009, 2008
+print(dm)
 ```
 
-## Reading and writing files
 
-You can read and write files with functions from the `datamatrix.io` module. The main supported file types are `csv` and `xlsx`.
+### Basic properties of series
+
+Series columns have the same properties as regular columns: `mean`, `median`, `std`, `sum`, `min`, and `max`. But where these properties are single values for regular columns, they are one-dimensional numpy arrays for series columns. 
+
 
 ```python
-from datamatrix import io
+print(dm.population.mean)
+```
 
-dm = DataMatrix(length=3)
-dm.col = 1, 2, 3
-# Write to disk
-io.writetxt(dm, 'my_datamatrix.csv')
-io.writexlsx(dm, 'my_datamatrix.xlsx')
-# And read it back from disk!
-dm = io.readtxt('my_datamatrix.csv')
-dm = io.readxlsx('my_datamatrix.xlsx')
+
+### Indexing
+
+#### Accessing
+
+The first dimension of a series dimension refers to the row. So to get the population of Marseille (row 0) over time, you can do:
+
+
+```python
+print(dm.population[0])
+```
+
+The second dimension refers to the depth. So to get the population of both Marseille and Lyon in 2009 (the full slice `:`), you can do:
+
+
+```python
+print(dm.population[:, 1])
+```
+
+#### Assigning
+
+You can assign to a series columns as you would to a 2D numpy array:
+
+
+```python
+dm = DataMatrix(length=2)
+dm.s = SeriesColumn(depth=3)
+dm.s[0, 0] = 1
+dm.s[1:, 1:] = 2
+print(dm)
+```
+
+If you want to set all cells at once, you can directly assign a single value:
+
+
+```python
+dm.s = 10
+print(dm)
+```
+
+If you want to set all rows at once, you can directly assign a sequence with a length that is equal to the depth of the series:
+
+
+```python
+dm.s = 100, 200, 300 
+# Equal to: dm.s[:,:] = 100, 200, 300
+print(dm) 
+```
+
+If you want to set all columns at once, you can directly assing a sequence with a length that is equal to the length of the datamatrix:
+
+
+```python
+dm.s = 1000, 2000
+# Equal to: dm.s[:,:] = 1000, 2000
+print(dm)
 ```

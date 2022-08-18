@@ -8,6 +8,6 @@ A `SeriesColumn` is a column with a depth; that is, each cell contains multiple 
 
 For more information, see:
 
-- %link:series-tutorial%
+- <https://pythontutorials.eu/numerical/time-series/>
 
 %-- include: include/api/series.md --%
