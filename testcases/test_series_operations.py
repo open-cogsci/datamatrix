@@ -95,6 +95,10 @@ def test_occurrence():
     check_col(series.last_occurrence(dm.s, 1), [0, NAN, 3])
     check_col(series.first_occurrence(dm.s, 1, equal=False), [1, 0, 0])
     check_col(series.last_occurrence(dm.s, 1, equal=False), [3, 3, 2])
+    check_col(series.first_occurrence(dm.s, [1, INF, 0]), [0, 1, NAN])
+    check_col(series.last_occurrence(dm.s, [1, INF, 0]), [0, 2, NAN])
+    check_col(series.first_occurrence(dm.s, [1, INF, 0], equal=False), [1, 0, 0])
+    check_col(series.last_occurrence(dm.s, [1, INF, 1], equal=False), [3, 3, 2])
 
 
 def test_nancount():

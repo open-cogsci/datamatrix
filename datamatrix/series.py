@@ -86,9 +86,9 @@ def roll(series, shift):
         raise ValueError(
             'shift must be int or a sequence of the same length as the series')
     for i, s in enumerate(shift):
-        if not isinstance(s, int):
-            raise TypeError('shift values must be int')
-        series._seq[i] = np.roll(series._seq[i], s)
+        if not isinstance(s, (int, float)):
+            raise TypeError('shift values must be numeric')
+        series._seq[i] = np.roll(series._seq[i], int(s))
     return series
 
 
@@ -178,8 +178,12 @@ def first_occurrence(series, value, equal=True):
             desc: The series column to search
             type: SeriesColumn
         value:
-            desc: The value to find in the series column
-            type: [float, int]
+            desc: |
+                The value to find in the series column. If `value` is a
+                sequence, which has to be of the same length as the series,
+                then each row is searched for the value indicated by the
+                corresponding value in `value`.
+            type: [float, int, Sequence]
     
     keywords:
         equal:
@@ -227,8 +231,12 @@ def last_occurrence(series, value, equal=True):
             desc: The series column to search
             type: SeriesColumn
         value:
-            desc: The value to find in the series column
-            type: [float, int]
+            desc: |
+                The value to find in the series column. If `value` is a
+                sequence, which has to be of the same length as the series,
+                then each row is searched for the value indicated by the
+                corresponding value in `value`.
+            type: [float, int, Sequence]
     
     keywords:
         equal:
@@ -1865,14 +1873,37 @@ def _occurrence(series, value, equal, reverse=False):
         The actual implement for the first_occurrence() and last_occurence()
         functions.
     """
-    # First rows and columns that match the value to search for. This goes
-    # slightly differently for nan values than for other values because nans
-    # are not equal to themselves
-    if np.isnan(value):
-        rows, cols = np.where(np.isnan(series) if equal else ~np.isnan(series))
+    try:
+        len(value)
+    except (ValueError, TypeError):
+        # Value is a single value
+        # First rows and columns that match the value to search for. This goes
+        # slightly differently for nan values than for other values because nans
+        # are not equal to themselves
+        if np.isnan(value):
+            rows, cols = np.where(np.isnan(series) if equal else ~np.isnan(series))
+        else:
+            rows, cols = np.where(
+                (series._seq == value) if equal else (series._seq != value))
     else:
-        rows, cols = np.where(
-            (series._seq == value) if equal else (series._seq != value))
+        # Value is a sequence
+        if len(value) != len(series):
+            raise ValueError(
+                'value must be a single value or a sequence of the same length as the series')
+        rows = []
+        cols = []
+        for i, (haystack, needle) in enumerate(zip(series, value)):
+            if np.isnan(needle):
+                hits = np.where(np.isnan(haystack) if equal
+                                else ~np.isnan(haystack))
+            else:
+                hits = np.where(haystack == needle if equal
+                                else haystack != needle)
+            hits = list(hits[0])
+            rows += [i] * len(hits)
+            cols += hits
+        cols = np.array(cols)
+        rows = np.array(rows)
     # Then create an empty array with a length equal to that of the series.
     # It's initialized to nan, which indicates that the value does not occur
     # at all in the row
