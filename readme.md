@@ -6,8 +6,6 @@ Sebastiaan Mathôt  <br />
 Copyright 2015-2022  <br />
 <https://pydatamatrix.eu/>
 
-[![Build Status](https://travis-ci.com/open-cogsci/python-datamatrix.svg?branch=0.12)](https://travis-ci.com/open-cogsci/python-datamatrix)
-
 
 ## About
 
