@@ -31,6 +31,10 @@ except ImportError:
 from collections import OrderedDict
 import hashlib
 import pickle
+try:
+    import numpy as np
+except ImportError:
+    np = None
 
 
 ONE_GIGABYTE = 1024**3
@@ -325,6 +329,8 @@ class memoize(object):
 
         import json_tricks
 
+        if hasattr(obj, '__hash__') and callable(obj.__hash__):
+            return obj.__hash__()
         if callable(obj):
             return obj.__name__ if hasattr(obj, '__name__') else '__nameless__'
         if isinstance(obj, dict):
@@ -336,6 +342,8 @@ class memoize(object):
             return self._serialize_args(obj)
         if isinstance(obj, DataMatrix):
             return cnv.to_json(obj)
+        if np is not None and isinstance(obj, np.ndarray):
+            return str(obj.data.tobytes())
         return json_tricks.dumps(obj)
 
     def _serialize_args(self, args):
