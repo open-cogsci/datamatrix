@@ -329,8 +329,6 @@ class memoize(object):
 
         import json_tricks
 
-        if hasattr(obj, '__hash__') and callable(obj.__hash__):
-            return obj.__hash__()
         if callable(obj):
             return obj.__name__ if hasattr(obj, '__name__') else '__nameless__'
         if isinstance(obj, dict):
