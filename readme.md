@@ -7,6 +7,11 @@ Copyright 2015-2022  <br />
 <https://pydatamatrix.eu/>
 
 
+[![Publish to PyPi](https://github.com/open-cogsci/python-datamatrix/actions/workflows/publish-package.yaml/badge.svg)](https://github.com/open-cogsci/python-datamatrix/actions/workflows/publish-package.yaml)
+
+[![Tests](https://github.com/open-cogsci/python-datamatrix/actions/workflows/run-unittests.yaml/badge.svg)](https://github.com/open-cogsci/python-datamatrix/actions/workflows/run-unittests.yaml)
+
+
 ## About
 
 `DataMatrix` is an intuitive Python library for working with column-based and continuous data. It's a light-weight and easy-to-use alternative to `pandas`.
