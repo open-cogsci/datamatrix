@@ -344,7 +344,12 @@ class memoize(object):
             return cnv.to_json(obj)
         if np is not None and isinstance(obj, np.ndarray):
             return str(obj.data.tobytes())
-        return json_tricks.dumps(obj)
+        try:
+            return json_tricks.dumps(obj)
+        except BaseException as e:
+            if hasattr(obj, '__hash__') and callable(obj.__hash__):
+                return obj.__hash__()
+            raise e
 
     def _serialize_args(self, args):
 
