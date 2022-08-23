@@ -12,6 +12,18 @@ Copyright 2015-2022  <br />
 [![Tests](https://github.com/open-cogsci/python-datamatrix/actions/workflows/run-unittests.yaml/badge.svg)](https://github.com/open-cogsci/python-datamatrix/actions/workflows/run-unittests.yaml)
 
 
+## Contents
+
+- [About](#about)
+- [Features](#features)
+- [Ultra-short cheat sheet](#ultra-short-cheat-sheet)
+- [Documentation](#documentation)
+- [Dependencies](#dependencies)
+- [Installation](#installation)
+- [License](#license)
+
+
+
 ## About
 
 `DataMatrix` is an intuitive Python library for working with column-based and continuous data. It's a light-weight and easy-to-use alternative to `pandas`.
@@ -74,6 +86,11 @@ print(dm.column_names)
 ```
 
 
+## Documentation
+
+The basic documentation (including function and module references) is hosted on <https://pydatamatrix.eu/>. Additional tutorials can be found in the data-science course on <https://pythontutorials.eu/>.
+
+
 ## Dependencies
 
 - Python >= 3.7
@@ -109,11 +126,6 @@ sudo add-apt-repository ppa:smathot/cogscinl
 sudo apt-get update
 sudo apt install python3-datamatrix
 ~~~
-
-
-## Documentation
-
-See <https://pydatamatrix.eu/>
 
 
 ## License
