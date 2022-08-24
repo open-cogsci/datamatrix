@@ -345,9 +345,14 @@ class memoize(object):
         try:
             return json_tricks.dumps(obj)
         except BaseException as e:
-            if hasattr(obj, '__hash__') and callable(obj.__hash__):
-                return obj.__hash__()
-            raise e
+            pass
+        try:
+            return str(obj)
+        except BaseException as e:
+            pass
+        if hasattr(obj, '__hash__') and callable(obj.__hash__):
+            return obj.__hash__()
+        raise ValueError('Cannot serialize arguments')
 
     def _serialize_args(self, args):
 
