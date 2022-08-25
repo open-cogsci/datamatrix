@@ -174,7 +174,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7fca649c8430>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7f63b6fe79a0>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times
 shorter. The depth of the downsampled series is the highest multiple of
@@ -219,7 +219,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7fca649c8430>
+	- Default: <function nanmean at 0x7f63b6fe79a0>
 
 __Returns:__
 
@@ -959,7 +959,7 @@ A new series in which the data points are spread according to the timestamps.
 
 <div class="FunctionDoc YAMLDoc" id="reduce" markdown="1">
 
-## function __reduce__\(series, operation=<function nanmean at 0x7fca649c8430>\)
+## function __reduce__\(series, operation=<function nanmean at 0x7f63b6fe79a0>\)
 
 Transforms series to single values by applying an operation (typically
 a mean) to each series.
@@ -993,7 +993,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7fca649c8430>
+	- Default: <function nanmean at 0x7f63b6fe79a0>
 
 __Returns:__
 
@@ -1288,7 +1288,12 @@ A window of the signal.
 ## function __z__\(series\)
 
 Applies a *z*-transform to the signal such that each trace has a mean
-value of 0 and a standard deviation of 1.
+value of 0 and a standard deviation of 1. That is, each trace is
+*z*-transformed individually.
+
+*Note:* If you want to *z*-transform a series column such that the mean
+of the full series is 0 with a standard deviation of 1, then use
+`operations.z()`.
 
 __Example:__
 

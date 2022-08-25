@@ -530,11 +530,17 @@ No description
 
 ## function __z__\(col\)
 
-Transforms a column into z scores.
+Transforms a column into z scores such that the mean of all values is
+0 and the standard deviation is 1.
 
-*Version note:* As of 0.13.2, `z()` returns a `FloatColumn`. For
-non-numeric values, the z score is NAN. If the standard deviation is 0,
-z scores are also NAN.
+*Version note:* As of 0.13.2, `z()` returns a `FloatColumn` when a
+regular column is give. For non-numeric values, the z score is NAN. If
+the standard deviation is 0, z scores are also NAN.
+
+*Version note:* As of 0.15.3, `z()` also accepts series columns, in
+which case the series is z-transformed such that the grand mean of
+all samples is 0, and the grand standard deviation of all samples is
+1.
 
 __Example:__
 

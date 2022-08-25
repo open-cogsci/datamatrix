@@ -127,7 +127,7 @@ def z(col):
 
         __Example:__
 
-        %--·
+        %--
         python: |
          from datamatrix import DataMatrix, operations as ops
 
@@ -149,8 +149,6 @@ def z(col):
     if isinstance(col, _SeriesColumn):
         import numpy as np
         from datamatrix import series as srs
-        # mean = srs.reduce(col).mean
-        # std = srs.reduce(col, np.nanstd).mean
         zcol = col[:]
         zcol._seq = (zcol._seq - np.nanmean(zcol._seq)) / np.nanstd(zcol._seq)
         return zcol
