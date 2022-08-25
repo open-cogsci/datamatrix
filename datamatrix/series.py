@@ -1566,7 +1566,12 @@ def z(series):
     """
     desc: |
         Applies a *z*-transform to the signal such that each trace has a mean
-        value of 0 and a standard deviation of 1.
+        value of 0 and a standard deviation of 1. That is, each trace is
+        *z*-transformed individually.
+        
+        *Note:* If you want to *z*-transform a series column such that the mean
+        of the full series is 0 with a standard deviation of 1, then use
+        `operations.z()`.
 
         __Example:__
 

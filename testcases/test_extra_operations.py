@@ -73,6 +73,17 @@ def test_z():
     dm.a = 2
     dm.z = ops.z(dm.a)
     assert(all(ref != ref for ref in dm.z))
+    # Test series columns
+    dm = DataMatrix(length=3)
+    dm.s = SeriesColumn(depth=4)
+    dm.s = [
+        [1, 2, 3, np.nan],
+        [10, 20, 30, np.nan],
+        [100, 200, 300, np.nan]
+    ]
+    dm.z = ops.z(dm.s)
+    assert math.isclose(np.nanmean(dm.z._seq), 0, abs_tol=1e-10)
+    assert math.isclose(np.nanstd(dm.z._seq), 1, abs_tol=1e-10)
 
 
 def test_weight():
