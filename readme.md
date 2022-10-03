@@ -23,7 +23,6 @@ Copyright 2015-2022  <br />
 - [License](#license)
 
 
-
 ## About
 
 `DataMatrix` is an intuitive Python library for working with column-based and continuous data. It's a light-weight and easy-to-use alternative to `pandas`.
@@ -108,7 +107,14 @@ Optional:
 ### PyPi
 
 ~~~
-pip install python-datamatrix
+pip install datamatrix
+~~~
+
+
+*Historical note:* The DataMatrix project used to correspond to another package of the same name, which was discontinued in 2010. If you want to install this package, you can do still do so by providing an explicit version (0.9 is the latest version of this package), as shown below. With thanks to [dennogumi.org](https://www.dennogumi.org/) for handing over this project's entry on PyPi, thus avoiding much unnecessary confusion!
+
+~~~
+pip install datamatrix==0.9
 ~~~
 
 
