@@ -23,9 +23,11 @@ from datamatrix._datamatrix._row import Row
 from datamatrix._datamatrix._mixedcolumn import MixedColumn
 from datamatrix._datamatrix._numericcolumn import FloatColumn, IntColumn
 from datamatrix._datamatrix._seriescolumn import SeriesColumn
+from datamatrix._datamatrix._multidimensionalcolumn import \
+    MultiDimensionalColumn
 from datamatrix._datamatrix._nifticolumn import NiftiColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
 
-__version__ = '0.15.3'
+__version__ = '0.16.0a1'
 NAN = float('nan')
 INF = float('inf')
