@@ -18,7 +18,6 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
-# from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._numericcolumn import NumericColumn, FloatColumn
 try:
     from collections.abc import Sequence  # Python 3.3 and later
@@ -158,10 +157,11 @@ class _SeriesColumn(NumericColumn):
 
     def _init_seq(self):
 
-        self._seq = np.zeros(
-            (len(self._datamatrix), self._depth),
-            dtype=self.dtype
-        )
+        if isinstance(self._depth, int):
+            shape = (len(self._datamatrix), self._depth)
+        else:
+            shape = (len(self._datamatrix),) + self._depth
+        self._seq = np.zeros(shape, dtype=self.dtype)
         if self.defaultnan:
             self._seq[:] = np.nan
 
