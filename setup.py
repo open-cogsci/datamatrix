@@ -36,7 +36,7 @@ def get_readme():
 
 
 setup(
-    name=u'datamatrix' if u'bdist_deb' in sys.argv else u'python-datamatrix',
+    name=u'datamatrix',
     version=__version__,
     description= u'An intuitive, Pythonic way to work with tabular data',
     long_description=get_readme(),
