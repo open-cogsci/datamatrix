@@ -30,6 +30,8 @@ except ImportError:
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, FloatColumn, IntColumn, SeriesColumn, \
     MixedColumn, NAN
+from datamatrix._datamatrix._multidimensionalcolumn import \
+    _MultiDimensionalColumn
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._index import Index
@@ -146,7 +148,7 @@ def z(col):
         type: BaseColumn
     """
 
-    if isinstance(col, _SeriesColumn):
+    if isinstance(col, _MultiDimensionalColumn):
         import numpy as np
         from datamatrix import series as srs
         zcol = col[:]
