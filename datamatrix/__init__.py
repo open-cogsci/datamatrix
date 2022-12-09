@@ -28,6 +28,6 @@ from datamatrix._datamatrix._multidimensionalcolumn import \
 from datamatrix._datamatrix._nifticolumn import NiftiColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
 
-__version__ = '0.16.0a1'
+__version__ = '0.16.0a2'
 NAN = float('nan')
 INF = float('inf')
