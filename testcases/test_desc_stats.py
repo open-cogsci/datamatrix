@@ -26,12 +26,13 @@ import pytest
 
 def check_odd(dm):
 
-    assert dm.col.mean == pytest.approx(13./3)
+    assert np.mean(dm.col) == dm.col.mean == pytest.approx(13./3)
     assert dm.col.median == 2
-    assert dm.col.std  == pytest.approx(np.std( [1,2,10], ddof=1))
-    assert dm.col.min == 1
-    assert dm.col.max == 10
-    assert dm.col.sum == 13
+    assert np.std(dm.col, ddof=1) == dm.col.std  == \
+        pytest.approx(np.std( [1,2,10], ddof=1))
+    assert np.min(dm.col) == dm.col.min == 1
+    assert np.max(dm.col) == dm.col.max == 10
+    assert np.sum(dm.col) == dm.col.sum == 13
 
 
 def check_even(dm):
@@ -92,6 +93,20 @@ def check_desc_stats(col_type, invalid, assert_invalid):
         assert_invalid(dm.col.min)
         assert_invalid(dm.col.max)
         assert_invalid(dm.col.sum)
+    # NAN values
+    if col_type is not IntColumn:
+        dm.col = invalid
+        assert_nan(dm.col.mean)
+        assert_nan(dm.col.median)
+        assert_nan(dm.col.std)
+        assert_nan(dm.col.min)
+        assert_nan(dm.col.max)
+        assert_nan(dm.col.sum)
+        np.mean(dm.col) == dm.col.mean
+        np.std(dm.col) == dm.col.std
+        np.max(dm.col) == dm.col.max
+        np.min(dm.col) == dm.col.min
+        np.sum(dm.col) == dm.col.sum
 
 
 def assert_None(val):

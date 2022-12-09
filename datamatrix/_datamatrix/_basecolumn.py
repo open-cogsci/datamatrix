@@ -148,7 +148,7 @@ class BaseColumn(OrderedState):
 
         n = self._numbers
         if len(n) == 0:
-            return NAN
+            return CallableFloat(NAN)
         return CallableFloat(sum(n) / len(n))
 
     @property
@@ -165,10 +165,10 @@ class BaseColumn(OrderedState):
 
         n = sorted(self._numbers)
         if len(n) == 0:
-            return NAN
+            return CallableFloat(NAN)
         i = int(len(n)/2)
         if len(n) % 2 == 1:
-            return n[i]
+            return CallableFloat(n[i])
         return CallableFloat(.5*n[i]+.5*n[i-1])
 
     @property
@@ -186,7 +186,7 @@ class BaseColumn(OrderedState):
         m = self.mean
         n = self._numbers
         if len(n) <= 1:
-            return NAN
+            return CallableFloat(NAN)
         return CallableFloat(math.sqrt(sum((i-m)**2 for i in n)/(len(n)-1)))
 
     @property
@@ -202,7 +202,7 @@ class BaseColumn(OrderedState):
 
         n = self._numbers
         if not len(n):
-            return NAN
+            return CallableFloat(NAN)
         return CallableFloat(max(n))
 
     @property
@@ -234,7 +234,7 @@ class BaseColumn(OrderedState):
 
         n = self._numbers
         if not len(n):
-            return NAN
+            return CallableFloat(NAN)
         return CallableFloat(sum(n))
 
     @property
