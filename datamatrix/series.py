@@ -25,6 +25,8 @@ desc:
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix._datamatrix._basecolumn import BaseColumn
+from datamatrix._datamatrix._multidimensionalcolumn import \
+    _MultiDimensionalColumn
 from datamatrix import FloatColumn, operations as ops, functional as fnc, \
     DataMatrix, NAN, INF
 import numpy as np
@@ -703,11 +705,14 @@ def reduce(series, operation=nanmean):
 
     """
     desc: |
-        Transforms series to single values by applying an operation (typically
-        a mean) to each series.
+        Transforms multidimensional values to single values by applying an
+        operation (typically a mean) to each multidimensional value.
         
         *Version note:* As of 0.11.0, the function has been renamed to
         `reduce()`. The original `reduce_()` is deprecated.
+        
+        *Version note:* As of 0.16.0, `MultiDimensionalColumn` objects are
+        also supported.
 
         __Example:__
 
@@ -743,8 +748,8 @@ def reduce(series, operation=nanmean):
         type: FloatColumn
     """
 
-    if not isinstance(series, _SeriesColumn):
-        raise TypeError(u'Expecting a SeriesColumn object')
+    if not isinstance(series, _MultiDimensionalColumn):
+        raise TypeError(u'Expecting a MultiDimensionalColumn object')
     col = FloatColumn(series._datamatrix)
     try:
         a = operation(series, axis=1)

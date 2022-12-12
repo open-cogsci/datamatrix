@@ -516,8 +516,8 @@ def group(dm, by):
     nogroupcols = [(name, col) for name, col in dm.columns if name in bynames]
     cm = DataMatrix(length=len(keys))
     for name, col in groupcols:
-        if isinstance(col, _SeriesColumn):
-            warn(u'Failed to create series for SeriesColumn s%s' % name)
+        if isinstance(col, _MultiDimensionalColumn):
+            warn(u'Failed to create series for MultiDimensionalColumn s%s' % name)
             continue
         cm[name] = SeriesColumn(depth=0)
     for name, col in nogroupcols:

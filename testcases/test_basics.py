@@ -19,7 +19,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 from datamatrix import (
-    DataMatrix, MixedColumn, FloatColumn, IntColumn,
+    DataMatrix, MixedColumn, FloatColumn, IntColumn, MultiDimensionalColumn,
     SeriesColumn, NAN
 )
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
@@ -333,6 +333,337 @@ def test_seriescolumn():
     check_series(dm.s, a)
     check_series(dm.t, a)
 
+
+def test_multidimensional_assignment():
+    dm = DataMatrix(length=2)
+    dm.m = MultiDimensionalColumn(shape=(('x', 'y', 'z'),))
+    # Set all columns in one row
+    a = np.array([[1, 1, 1],
+                  [0, 0, 0]])
+    dm.m = 0
+    dm.m[0] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0] = 1, 1, 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, ...] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, (0, 1, 2)] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, ('x', 'y', 'z')] = 1
+    assert np.all(dm.m._seq == a)
+    # Set all columns in all rows
+    a = np.array([[1, 1, 1],
+                  [1, 1, 1]])
+    dm.m = 0
+    dm.m[:] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[...] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[..., :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, ...] = 1
+    assert np.all(dm.m._seq == a)
+    # Set one column in all rows
+    a = np.array([[0, 1, 0],
+                  [0, 1, 0]])
+    dm.m = 0
+    dm.m[:, 1] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, 'y'] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[..., 1] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[..., 'y'] = 1
+    assert np.all(dm.m._seq == a)
+    # Set two column in all rows
+    a = np.array([[1, 0, 1],
+                  [1, 0, 1]])
+    dm.m = 0
+    dm.m[:, (0, 2)] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, ('x', 'z')] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[..., (0, 2)] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[..., ('x', 'z')] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[(0, 1), (0, 2)] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[(0, 1), ('x', 'z')] = 1
+    assert np.all(dm.m._seq == a)
+    # Test a two-dimensional column (SurfaceColumn)
+    dm = DataMatrix(length=2)
+    dm.m = MultiDimensionalColumn(shape=(('x', 'y', 'z'),
+                                         ('a', 'b', 'c', 'd')))
+    # Set all dimensions
+    a = np.array([[[1, 1, 1, 1],
+                   [1, 1, 1, 1],
+                   [1, 1, 1, 1]],
+                  [[1, 1, 1, 1],
+                   [1, 1, 1, 1],
+                   [1, 1, 1, 1]]])
+    dm.m = a
+    assert np.all(dm.m._seq == a)
+    dm.m[:] = a
+    assert np.all(dm.m._seq == a)
+    dm.m[...] = a
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, :, :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[(0, 1), :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[(0, 1), (0, 1, 2)] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[(0, 1), (0, 1, 2), (0, 1, 2, 3)] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[...] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[..., :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[..., :, :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, ..., :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, ...] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, :, ...] = 1
+    assert np.all(dm.m._seq == a)
+    # Set first dimension
+    a = np.array([[[1, 1, 1, 1],
+                   [1, 1, 1, 1],
+                   [1, 1, 1, 1]],
+                  [[0, 0, 0, 0],
+                   [0, 0, 0, 0],
+                   [0, 0, 0, 0]]])
+    dm.m = 0
+    dm.m[0] = a[0]
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, :] = a[0]
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, ...] = a[0]
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, :, :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, ...] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, ..., :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, (0, 1, 2), :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, :, (0, 1, 2, 3)] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, (0, 1, 2), (0, 1, 2, 3)] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[(0,)] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[(0,), :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[(0,), :, :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[(0,), (0, 1, 2), :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[(0,), :, (0, 1, 2, 3)] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[(0,), (0, 1, 2), (0, 1, 2, 3)] = 1
+    assert np.all(dm.m._seq == a)
+    # Set second dimension
+    a = np.array([[[0, 0, 0, 0],
+                   [1, 1, 1, 1],
+                   [0, 0, 0, 0]],
+                  [[0, 0, 0, 0],
+                   [1, 1, 1, 1],
+                   [0, 0, 0, 0]]])
+    dm.m = 0
+    dm.m[:, 1] = a[:, 1]
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, 1, ...] = a[:, 1]
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, 1, :] = a[:, 1]
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, 1] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, 'y'] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, 1, :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, 'y', :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, 1, ...] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, 'y', ...] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[..., 1, :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[..., 'y', :] = 1
+    assert np.all(dm.m._seq == a)
+    a = np.array([[[1, 1, 1, 1],
+                   [0, 0, 0, 0],
+                   [1, 1, 1, 1]],
+                  [[1, 1, 1, 1],
+                   [0, 0, 0, 0],
+                   [1, 1, 1, 1]]])
+    dm.m = 0
+    dm.m[:, (0, 2)] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, ('x', 'z')] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, (0, 2), :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, ('x', 'z'), :] = 1
+    assert np.all(dm.m._seq == a)
+    # Set first and second dimension
+    a = np.array([[[0, 0, 0, 0],
+                   [1, 1, 1, 1],
+                   [0, 0, 0, 0]],
+                  [[0, 0, 0, 0],
+                   [0, 0, 0, 0],
+                   [0, 0, 0, 0]]])
+    dm.m = 0
+    dm.m[0, 1] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, 'y'] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, 1, :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, 'y', :] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, 1, ...] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, 'y', ...] = 1
+    assert np.all(dm.m._seq == a)
+    # Set third dimension
+    a = np.array([[[0, 1, 0, 0],
+                   [0, 1, 0, 0],
+                   [0, 1, 0, 0]],
+                  [[0, 1, 0, 0],
+                   [0, 1, 0, 0],
+                   [0, 1, 0, 0]]])
+    dm.m = 0
+    dm.m[:, :, 1] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[:, :, 'b'] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[..., 1] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[..., 'b'] = 1
+    assert np.all(dm.m._seq == a)
+    # Set first and third dimension
+    a = np.array([[[0, 1, 0, 0],
+                   [0, 1, 0, 0],
+                   [0, 1, 0, 0]],
+                  [[0, 0, 0, 0],
+                   [0, 0, 0, 0],
+                   [0, 0, 0, 0]]])
+    dm.m = 0
+    dm.m[0, :, 1] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, :, 'b'] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, ..., 1] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, ..., 'b'] = 1
+    assert np.all(dm.m._seq == a)
+    # Set first, second, and third dimension
+    a = np.array([[[0, 0, 0, 0],
+                   [0, 1, 0, 0],
+                   [0, 0, 0, 0]],
+                  [[0, 0, 0, 0],
+                   [0, 0, 0, 0],
+                   [0, 0, 0, 0]]])
+    dm.m = 0
+    dm.m[0, 1, 1] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, 1, 'b'] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, 'y', 1] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[0, 'y', 'b'] = 1
+    assert np.all(dm.m._seq == a)
+    
 
 def test_resize():
 

@@ -50,6 +50,10 @@ try:
     SEQUENCE = Sequence, np.ndarray
 except ImportError:
     SEQUENCE = Sequence
+try:
+    Ellipsis
+except NameError:
+    Ellipsis = None  # was introduced in Python 3.10
 
 
 class BaseColumn(OrderedState):
@@ -919,6 +923,8 @@ class BaseColumn(OrderedState):
             self._setintkey(key, value)
         elif isinstance(key, slice):
             self._setslicekey(key, value)
+        elif Ellipsis is not None and key == Ellipsis:
+            self._setslicekey(slice(None), value)
         elif isinstance(key, SEQUENCE):
             self._setsequencekey(key, value)
         elif isinstance(key, DataMatrix):

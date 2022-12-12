@@ -28,6 +28,10 @@ try:
     from numpy import nanmean, nanmedian, nanstd
 except ImportError:
     np = None
+try:
+    Ellipsis
+except NameError:
+    Ellipsis = None  # was introduced in Python 3.10
 
 
 class _MultiDimensionalColumn(NumericColumn):
@@ -38,6 +42,7 @@ class _MultiDimensionalColumn(NumericColumn):
     """
 
     dtype = float
+    printoptions = dict(precision=4, threshold=4, edgeitems=2)
 
     def __init__(self, datamatrix, shape, defaultnan=True):
 
@@ -51,14 +56,29 @@ class _MultiDimensionalColumn(NumericColumn):
                 desc: The DataMatrix to which this column belongs.
                 type: DataMatrix
             shape:
-                desc: The shape, ie. the number of values per cell.
+                desc: A tuple that specifies the number and size of the
+                      dimensions of each cell. Values can be integers, or 
+                      tuples of non-integer values that specify names of
+                      indices, e.g. `shape=(('x', 'y'), 10))
                 type: int
         """
 
         if np is None:
             raise Exception(
                 'NumPy and SciPy are required, but not installed.')
-        self._shape = shape
+        normshape = tuple()
+        if isinstance(shape, (int, str)):
+            shape = (shape, )
+        self._dim_names = []
+        for dim_size in shape:
+            # Dimension without named indices
+            if isinstance(dim_size, int):
+                normshape += (dim_size, )
+                self._dim_names.append(list(range(dim_size)))
+            else:
+                normshape += (len(dim_size), )
+                self._dim_names.append(dim_size)
+        self._shape = normshape
         self.defaultnan = defaultnan
         NumericColumn.__init__(self, datamatrix)
 
@@ -149,28 +169,9 @@ class _MultiDimensionalColumn(NumericColumn):
         if self.defaultnan:
             self._seq[:] = np.nan
 
-    def _ellipsize(self, a):
-
-        """
-        visible: False
-
-        desc:
-            Creates an ellipsized represenation of an array.
-
-        arguments:
-            a: An array.
-
-        returns:
-            A string with an ellipsized representation.
-        """
-
-        return '{} ... {}'.format(str(a[:2])[:-1], str(a[-1:])[1:])
-
     def _printable_list(self):
-
-        if sum(self._shape) <= 4:
-            return [str(cell.flatten()) for cell in self]
-        return [self._ellipsize(cell.flatten()) for cell in self]
+        with np.printoptions(**self.printoptions):
+            return [str(cell) for cell in self]
 
     def _operate(self, a, number_op, str_op=None, flip=False):
 
@@ -264,53 +265,112 @@ class _MultiDimensionalColumn(NumericColumn):
     # Implemented syntax
 
     def __getitem__(self, key):
-
-        if isinstance(key, tuple) and len(key) == 2:
-            row, smp = key
-            if isinstance(row, Sequence):
-                row = np.array(row)
-            if isinstance(smp, Sequence):
-                smp = np.array(smp)
-            if isinstance(row, int):
-                # dm.s[0, 0] -> float
-                if isinstance(smp, int):
-                    return float(self._seq[key])
-                # dm.s[0, :] -> array
-                # dm.s[0, (0, 1)] -> array
-                if isinstance(smp, (slice, np.ndarray)):
-                    return self._seq[row, smp].copy()
-            if isinstance(row, (slice, np.ndarray)):
-                # dm.s[:, 0] -> FloatColumn
-                # dm.s[(0, 1), 0] -> FloatColumn
-                if isinstance(smp, int):
-                    col = FloatColumn(self._datamatrix)
-                    col._rowid = self._rowid[row]
-                    col._seq = np.copy(self._seq[row, smp])
-                    return col
-                # dm.s[:, :] -> MultiDimensionalColumn
-                # dm.s[:, (0, 1)] -> MultiDimensionalColumn
-                # dm.s[(0, 1), :] -> MultiDimensionalColumn
-                # dm.s[(0, 1), (0, 1)] -> MultiDimensionalColumn
-                if isinstance(smp, (slice, np.ndarray)):
-                    if isinstance(smp, np.ndarray):
-                        _seq = np.copy(self._seq[row][:, smp])
-                    else:
-                        _seq = np.copy(self._seq[row, smp])
-                    col = self.__class__(self._datamatrix, shape=_seq.shape[1])
-                    col._rowid = self._rowid[row]
-                    col._seq = _seq
-                    return col
-            raise KeyError('Invalid key')
-        # dm[0] -> array
-        # dm[:] -> MultiDimensionalColumn
+        """TODO: make behavior consistent for all forms of nd-slicing!"""
+        if isinstance(key, tuple) and len(key) <= len(self._seq.shape):
+            indices = self._numindices(key)
+            value = self._seq[indices]
+            # If the index refers to exactly one value, then we return this
+            # value as a float.
+            if len(key) == len(self._seq.shape) and all(
+                    self._single_index(index) for index in key):
+                return float(value.squeeze())
+            # If the index refers to exactly one row, then we return the cell
+            # as an array
+            if self._single_index(key[0]):
+                return value[0]
+            # Otherwise we create a new MultiDimensionalColumn. The shape is
+            # squeezed such that all dimensions of size 1 are removed, except
+            # the first dimension (in case there is a single row).
+            squeeze_dims = tuple(dim + 1
+                                 for dim, size in enumerate(value.shape[1:])
+                                 if size == 1)
+            # print('squeeze', squeeze_dims)
+            value = value.squeeze(axis=squeeze_dims)
+            # If only one dimension remains, we return a FloatColumn, otherwise
+            # a MultiDimensionalColumn, SeriesColumn, SurfaceColumn, or
+            # VolumeColumn.
+            if len(value.shape) == 1:
+                col = FloatColumn(self._datamatrix)
+            else:
+                if len(value.shape) == 2:
+                    from datamatrix._datamatrix._seriescolumn import \
+                        _SeriesColumn
+                    cls = _SeriesColumn
+                else:
+                    cls = _MultiDimensionalColumn
+                col = cls(self._datamatrix, shape=value.shape[1:])
+            col._rowid = self._rowid[indices[0]]
+            col._seq = value
+            return col
         return super().__getitem__(key)
 
     def __setitem__(self, key, value):
-
-        if isinstance(key, tuple) and len(key) == 2:
-            self._seq[key] = value
+        if isinstance(key, tuple) and len(key) <= len(self._seq.shape):
+            indices = self._numindices(key)
+            # When assigning, the shape of the indexed array (target) and the
+            # to-be-assigned value either need to match, or the shape of the
+            # value needs to match the end of the shape of the target.
+            if isinstance(value, (Sequence, np.ndarray)):
+                if not isinstance(value, np.ndarray):
+                    value = np.array(value)
+                target_shape = self._seq[indices].shape
+                if target_shape[-len(value.shape):] != value.shape:
+                    value = value.reshape(target_shape)
+            self._seq[indices] = value
             return
-        return super().__setitem__(key, value)
+        super().__setitem__(key, value)
+        
+    def _single_index(self, index):
+        return not isinstance(index, (slice, Sequence, np.ndarray)) and not \
+            index == Ellipsis
+        
+    def _named_index(self, name, dim):
+        try:
+            return self._dim_names[dim - 1].index(name)
+        except ValueError as e:
+            raise ValueError('{} is not an index name'.format(name))
+        
+    def _numindices(self, indices):
+        """Takes a tuple of indices, which can be either named or numeric,
+        and converts it to a tuple of numeric indices that can be used to
+        slice the array.
+        """
+        # An ellipsis (...) is expanded to a full slice that covers all
+        # dimensions that weren't specified. In other words, say that col
+        # has 3 dimensions (+ 1 dimension for the rows), then
+        # dm.col[0, ..., 0] becomes dm.col[0, :, :, 0]
+        if Ellipsis is not None and Ellipsis in indices:
+            if indices.count(Ellipsis) > 1:
+                raise IndexError(
+                    'at most one ellipsis (...) allowed in indexing')
+            indices = indices[:indices.index(Ellipsis)] + \
+                (slice(None), ) * (1 + len(self._seq.shape) - len(indices)) + \
+                indices[indices.index(Ellipsis) + 1:]
+        # Indices can be specified as slices, integers, names, and sequences of
+        # integers and/ or names. These are all normalized to numpy arrays of
+        # indices. The result is a tuple of arrays, where each array indexes
+        # one dimension.
+        numindices = tuple()
+        for dim, index in enumerate(indices):
+            if isinstance(index, slice):
+                index = np.arange(*index.indices(self._seq.shape[dim]))
+            elif isinstance(index, int):
+                index = np.array([index])
+            elif isinstance(index, np.ndarray):
+                pass
+            elif isinstance(index, Sequence) and not isinstance(index, str):
+                index = np.array([
+                    name if isinstance(name, int)
+                    else self._named_index(name, dim)
+                    for name in index])
+            else:
+                index = np.array([self._named_index(index, dim)])
+            numindices += (index, )
+        # By default, NumPy interprets tuples of indexes in a zip-like way, so
+        # that a[(0, 2), (1, 3)] indexes two cells a[0, 1] and a[2, 3]. We want
+        # tuples to be interpreted such that they refer to rows 0 and 2 and
+        # columns 1 and 3. This is done with np.ix_().
+        return np.ix_(*numindices)
 
 
 def MultiDimensionalColumn(shape, defaultnan=True):
