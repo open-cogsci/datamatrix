@@ -337,6 +337,7 @@ def test_seriescolumn():
 def test_multidimensional_assignment():
     dm = DataMatrix(length=2)
     dm.m = MultiDimensionalColumn(shape=(('x', 'y', 'z'),))
+    dm.i = 1, 2
     # Set all columns in one row
     a = np.array([[1, 1, 1],
                   [0, 0, 0]])
@@ -344,7 +345,13 @@ def test_multidimensional_assignment():
     dm.m[0] = 1
     assert np.all(dm.m._seq == a)
     dm.m = 0
+    dm.m[dm.i == 1] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
     dm.m[0] = 1, 1, 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[dm.i == 1] = 1, 1, 1
     assert np.all(dm.m._seq == a)
     dm.m = 0
     dm.m[0, :] = 1
@@ -411,6 +418,12 @@ def test_multidimensional_assignment():
     assert np.all(dm.m._seq == a)
     dm.m = 0
     dm.m[(0, 1), ('x', 'z')] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[dm.i > 0, (0, 2)] = 1
+    assert np.all(dm.m._seq == a)
+    dm.m = 0
+    dm.m[dm.i > 0, ('x', 'z')] = 1
     assert np.all(dm.m._seq == a)
     # Test a two-dimensional column (SurfaceColumn)
     dm = DataMatrix(length=2)

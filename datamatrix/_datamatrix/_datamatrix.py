@@ -88,6 +88,12 @@ class DataMatrix(OrderedState):
             raise TypeError('length should be an integer')
         object.__setattr__(self, u'_cols', OrderedDict())
         object.__setattr__(self, u'_rowid', Index(length))
+        if default_col_type == float:
+            from datamatrix import FloatColumn
+            default_col_type = FloatColumn
+        elif default_col_type == int:
+            from datamatrix import IntColumn
+            default_col_type = IntColumn
         object.__setattr__(self, u'_default_col_type', default_col_type)
         object.__setattr__(self, u'_id', _id)
         object.__setattr__(self, u'_sorted', True)
@@ -790,7 +796,12 @@ class DataMatrix(OrderedState):
         return to_html(self)
 
     def __lshift__(self, other):
-
+        
+        from datamatrix._datamatrix._multidimensionalcolumn import \
+            _MultiDimensionalColumn
+        from datamatrix._datamatrix._seriescolumn import \
+            _SeriesColumn
+        
         if isinstance(other, dict):
             other = DataMatrix()._fromdict(other)
         elif isinstance(other, Row):
@@ -800,8 +811,9 @@ class DataMatrix(OrderedState):
         # self at the beginning of those columns.
         dm = DataMatrix(len(self)+len(other))
         for name, col in self._cols.items():
-            if hasattr(col, 'depth'):
-                dm[name] = col.__class__(dm, col.depth, col.defaultnan)
+            if isinstance(col, _MultiDimensionalColumn):
+                dm[name] = col.__class__(dm, shape=col._shape,
+                                         defaultnan=col.defaultnan)
             else:
                 dm[name] = col.__class__
             dm[name]._typechecking = False
@@ -812,20 +824,28 @@ class DataMatrix(OrderedState):
         # columns.
         for name, col in other._cols.items():
             if name not in dm._cols:
-                if hasattr(col, 'depth'):
-                    dm[name] = col.__class__(dm, col.depth, col.defaultnan)
+                if isinstance(col, _MultiDimensionalColumn):
+                    dm[name] = col.__class__(dm, shape=col._shape,
+                                             defaultnan=col.defaultnan)
                 else:
                     dm[name] = col.__class__
                 dm[name]._typechecking = False
             else:
                 # If the column already exists, check if the types match
                 if type(dm[name]) != type(other[name]):
-                    raise TypeError(u'Non-matching type for column %s' % name)
+                    raise TypeError(
+                        'Non-matching types for column {}'.format(name))
                 # If the column already exists and is a series, modify the
                 # depth to the longest column
-                if hasattr(col, 'depth'):
+                if isinstance(col, _SeriesColumn):
                     dm[name].depth = max(col.depth, dm[name].depth)
                     other[name].depth = max(col.depth, dm[name].depth)
+                # The length doesn't need to be the same, but other than that
+                # the shape of the columns needs to match
+                elif col.shape[1:] != dm[name].shape[1:]:
+                    print(col.shape, dm[name].shape)
+                    raise TypeError(
+                        'Non-matching shapes for column {}'.format(name))
             dm[name][len(self):] = other[name]
             dm[name]._datamatrix = dm
         for colname, col in dm.columns:

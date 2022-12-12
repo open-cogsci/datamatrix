@@ -39,6 +39,11 @@ class _SeriesColumn(_MultiDimensionalColumn):
         
     @property
     def depth(self):
+        try:
+            return self._shape[0]
+        # This can happen for pickled SeriesColumns from older versions.
+        except AttributeError:
+            self._shape = (self._depth, )
         return self._shape[0]
 
     @depth.setter

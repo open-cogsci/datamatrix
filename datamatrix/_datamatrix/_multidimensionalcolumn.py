@@ -117,7 +117,12 @@ class _MultiDimensionalColumn(NumericColumn):
             A property to access and change the shape of the column.
         """
 
-        return self._shape
+        try:
+            return (len(self), ) + self._shape
+        # This can happen for pickled SeriesColumns from older versions.
+        except AttributeError:
+            self._shape = (self._depth, )
+            return (len(self), ) + self._shape
 
     @property
     def plottable(self):
