@@ -67,7 +67,7 @@ class BaseColumn(OrderedState):
     default_value = u''
     ndim = 1
 
-    def __init__(self, datamatrix):
+    def __init__(self, datamatrix, rowid=None, seq=None):
 
         """
         desc:
@@ -75,6 +75,16 @@ class BaseColumn(OrderedState):
 
         arguments:
             datamatrix:	A DataMatrix object.
+            
+        keywords:
+            rowid:
+                type: [Index, None]
+                desc: A rowid index to initialize the column with. If None,
+                      a new index is created.
+            seq:
+                type: [Sequence, None]
+                desc: Data to initialize the column with. If None, a new
+                      sequence is created.
         """
 
         # Global import like this avoid cyclical imports
@@ -83,8 +93,14 @@ class BaseColumn(OrderedState):
 
         self._datamatrix = datamatrix
         self._typechecking = True
-        self._init_rowid()
-        self._init_seq()
+        if rowid is None:
+            self._init_rowid()
+        else:
+            self._rowid = rowid
+        if seq is None:
+            self._init_seq()
+        else:
+            self._seq = seq
 
     def equals(self, other):
         
@@ -402,9 +418,7 @@ class BaseColumn(OrderedState):
             type: BaseColumn
         """
 
-        col = self._empty_col()
-        col._rowid = Index(_rowid)
-        col._seq = [None] * len(_rowid)
+        col = self._empty_col(rowid=Index(_rowid), seq=[None] * len(_rowid))
         self_row_id = set(self._rowid)
         for i, row in enumerate(_rowid):
             col._seq[i] = (
@@ -484,10 +498,8 @@ class BaseColumn(OrderedState):
             BaseColunn
         """
 
-        col = self._empty_col()
-        col._rowid = self._rowid[key]
-        col._seq = self._seq[key]
-        return col
+        return self._empty_col(rowid=self._rowid[key], seq=self._seq[key])
+
 
     def _getsequencekey(self, key):
 
@@ -504,13 +516,12 @@ class BaseColumn(OrderedState):
             BaseColunn
         """
 
-        col = self._empty_col()
-        col._rowid = Index()
-        col._seq = []
+        rowid = Index()
+        seq = []
         for i in key:
-            col._rowid.append(self._rowid[i])
-            col._seq.append(self._seq[i])
-        return col
+            rowid.append(self._rowid[i])
+            seq.append(self._seq[i])
+        return self._empty_col(rowid=rowid, seq=seq)
 
     def _getdatamatrixkey(self, key):
 
@@ -543,10 +554,8 @@ class BaseColumn(OrderedState):
             BaseColunn
         """
 
-        col = self._empty_col()
-        col._rowid = key
-        col._seq = [self._seq[self._rowid.index(_rowid)] for _rowid in key]
-        return col
+        seq = [self._seq[self._rowid.index(_rowid)] for _rowid in key]
+        return self._empty_col(rowid=key, seq=seq)
 
     def _sortedrowid(self):
 
@@ -789,8 +798,7 @@ class BaseColumn(OrderedState):
             A modified column.
         """
 
-        col = self._empty_col()
-        col._rowid = self._rowid.copy()
+        col = self._empty_col(rowid=self._rowid.copy())
         for i, (_other, val) in enumerate(
             zip(self._seq, self._tosequence(other, len(self)))
             if flip else
@@ -807,12 +815,11 @@ class BaseColumn(OrderedState):
 
     def _map(self, fnc):
 
-        col = self._empty_col()
-        col._rowid = self._rowid.copy()
-        col._seq = [fnc(val) for val in self._seq]
-        return col
+        return self._empty_col(rowid=self._rowid.copy(),
+                               seq=[fnc(val) for val in self._seq])
 
-    def _empty_col(self, datamatrix=None):
+
+    def _empty_col(self, datamatrix=None, **kwargs):
 
         """
         visible: False
@@ -830,14 +837,14 @@ class BaseColumn(OrderedState):
             BaseColumn
         """
 
-        if datamatrix:
-            return self.__class__(datamatrix)
+        if datamatrix is not None:
+            return self.__class__(datamatrix, **kwargs)
         # If this column results from slicing from an original column, the
         # rowids do not match with the DataMatrix. In that case, create a new
         # DataMatrix for the empty column.
         if len(self) != len(self._datamatrix):
-            return self.__class__(DataMatrix(length=len(self)))
-        return self.__class__(self._datamatrix)
+            return self.__class__(DataMatrix(length=len(self)), **kwargs)
+        return self.__class__(self._datamatrix, **kwargs)
 
     def _nanorinf(self, val):
 

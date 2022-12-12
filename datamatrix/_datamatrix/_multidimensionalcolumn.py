@@ -44,7 +44,7 @@ class _MultiDimensionalColumn(NumericColumn):
     dtype = float
     printoptions = dict(precision=4, threshold=4, edgeitems=2)
 
-    def __init__(self, datamatrix, shape, defaultnan=True):
+    def __init__(self, datamatrix, shape, defaultnan=True, **kwargs):
 
         """
         desc:
@@ -61,6 +61,10 @@ class _MultiDimensionalColumn(NumericColumn):
                       tuples of non-integer values that specify names of
                       indices, e.g. `shape=(('x', 'y'), 10))
                 type: int
+            defaultnan:
+                desc: Indicates whether the column should be initialized with
+                      `nan` values (`True`) or 0s (`False`).
+                type: bool
         """
 
         if np is None:
@@ -80,7 +84,7 @@ class _MultiDimensionalColumn(NumericColumn):
                 self._dim_names.append(dim_size)
         self._shape = normshape
         self.defaultnan = defaultnan
-        NumericColumn.__init__(self, datamatrix)
+        NumericColumn.__init__(self, datamatrix, **kwargs)
 
     def setallrows(self, value):
 
@@ -161,13 +165,12 @@ class _MultiDimensionalColumn(NumericColumn):
 
     def _init_seq(self):
 
-        if isinstance(self._shape, int):
-            shape = (len(self._datamatrix), self._shape)
-        else:
-            shape = (len(self._datamatrix),) + self._shape
-        self._seq = np.zeros(shape, dtype=self.dtype)
+        shape = (len(self._datamatrix),) + self._shape
         if self.defaultnan:
+            self._seq = np.empty(shape, dtype=self.dtype)
             self._seq[:] = np.nan
+        else:
+            self._seq = np.zeros(shape, dtype=self.dtype)
 
     def _printable_list(self):
         with np.printoptions(**self.printoptions):
@@ -186,10 +189,9 @@ class _MultiDimensionalColumn(NumericColumn):
             a2 = np.empty((len(self),) + self._shape, dtype=self.dtype)
             np.swapaxes(a2, 0, -1)[:] = a
             a = a2
-        col = self._empty_col()
-        col._rowid = self._rowid.copy()
-        col._seq = number_op(a, self._seq) if flip else number_op(self._seq, a)
-        return col
+        rowid = self._rowid.copy()
+        seq = number_op(a, self._seq) if flip else number_op(self._seq, a)
+        return self._empty_col(rowid=rowid, seq=seq)
 
     def _map(self, fnc):
 
@@ -244,11 +246,11 @@ class _MultiDimensionalColumn(NumericColumn):
             return a
         raise Exception('Cannot convert to sequence: %s' % str(value))
 
-    def _empty_col(self, datamatrix=None):
+    def _empty_col(self, datamatrix=None, **kwargs):
 
         return self.__class__(datamatrix if datamatrix else self._datamatrix,
-                              shape=self._shape,
-                              defaultnan=self.defaultnan)
+                              shape=self._shape, defaultnan=self.defaultnan,
+                              **kwargs)
 
     def _addrowid(self, _rowid):
 
@@ -265,8 +267,9 @@ class _MultiDimensionalColumn(NumericColumn):
     # Implemented syntax
 
     def __getitem__(self, key):
-        """TODO: make behavior consistent for all forms of nd-slicing!"""
         if isinstance(key, tuple) and len(key) <= len(self._seq.shape):
+            # Advanced indexing always returns a copy, rather than a view, so
+            # there's no need to explicitly copy the result.
             indices = self._numindices(key)
             value = self._seq[indices]
             # If the index refers to exactly one value, then we return this
@@ -290,7 +293,9 @@ class _MultiDimensionalColumn(NumericColumn):
             # a MultiDimensionalColumn, SeriesColumn, SurfaceColumn, or
             # VolumeColumn.
             if len(value.shape) == 1:
-                col = FloatColumn(self._datamatrix)
+                col = FloatColumn(self._datamatrix,
+                                  rowid=self._rowid[indices[0]],
+                                  seq=value)
             else:
                 if len(value.shape) == 2:
                     from datamatrix._datamatrix._seriescolumn import \
@@ -298,9 +303,9 @@ class _MultiDimensionalColumn(NumericColumn):
                     cls = _SeriesColumn
                 else:
                     cls = _MultiDimensionalColumn
-                col = cls(self._datamatrix, shape=value.shape[1:])
-            col._rowid = self._rowid[indices[0]]
-            col._seq = value
+                col = cls(self._datamatrix, shape=value.shape[1:],
+                          rowid=self._rowid[indices[0]],
+                          seq=value)
             return col
         return super().__getitem__(key)
 

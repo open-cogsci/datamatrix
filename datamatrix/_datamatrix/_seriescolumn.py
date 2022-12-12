@@ -28,14 +28,14 @@ except ImportError:
 
 class _SeriesColumn(_MultiDimensionalColumn):
     
-    def __init__(self, datamatrix, depth=None, shape=None, defaultnan=True):
+    def __init__(self, datamatrix, depth=None, shape=None, **kwargs):
         if depth is not None:
             if shape is not None:
                 warn('both depth and shape provided (ignoring shape)')
             shape = (depth, )
         elif shape is None:
             raise ValueError('neither depth nor shape provided')
-        super().__init__(datamatrix, shape=shape, defaultnan=defaultnan)
+        super().__init__(datamatrix, shape=shape, **kwargs)
         
     @property
     def depth(self):

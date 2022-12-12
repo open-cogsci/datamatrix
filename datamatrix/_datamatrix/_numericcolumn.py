@@ -48,13 +48,14 @@ class NumericColumn(BaseColumn):
     dtype = float
     invalid = nan
 
-    def __init__(self, datamatrix):
+    def __init__(self, datamatrix, **kwargs):
 
         if np is None:
             raise Exception(
                 u'NumPy and SciPy are required, but not installed.'
             )
-        super(NumericColumn, self).__init__(datamatrix)
+        self._rowid_argsort_cache = None, None
+        super(NumericColumn, self).__init__(datamatrix,  **kwargs)
 
     @property
     def unique(self):
@@ -178,26 +179,17 @@ class NumericColumn(BaseColumn):
 
     def _operate(self, other, number_op, str_op=None, flip=False):
 
-        col = self._empty_col()
-        col._rowid = self._rowid
         if flip:
-            col._seq = number_op(
-                self._tosequence(other, len(self)),
-                self._seq
-            )
+            seq = number_op(self._tosequence(other, len(self)), self._seq)
         else:
-            col._seq = number_op(
-                self._seq,
-                self._tosequence(other, len(self))
-            )
-        return col
+            seq = number_op(self._seq, self._tosequence(other, len(self)))
+        return self._empty_col(rowid=self._rowid, seq=seq)
 
     def _map(self, fnc):
 
-        col = self._empty_col()
-        col._rowid = self._rowid.copy()
-        col._seq = np.array([fnc(val) for val in self._seq], dtype=self.dtype)
-        return col
+        return self._empty_col(rowid=self._rowid.copy(),
+                               seq=np.array([fnc(val) for val in self._seq],
+                                            dtype=self.dtype))
 
     def _addrowid(self, _rowid):
 
@@ -227,13 +219,11 @@ class NumericColumn(BaseColumn):
         #   back to a list of indices in the original, non-sorted array.
         # See also: http://stackoverflow.com/questions/9566592/\
         #  find-multiple-values-within-a-numpy-array
-        col = self._empty_col()
         orig_indices = self._rowid_argsort()
         matching_indices = np.searchsorted(self._rowid[orig_indices], key)
         selected_indices = orig_indices[matching_indices]
-        col._rowid = self._rowid[selected_indices]
-        col._seq = self._seq[selected_indices]
-        return col
+        return self._empty_col(rowid=self._rowid[selected_indices],
+                               seq=self._seq[selected_indices])
 
     def _getintkey(self, key):
 
@@ -262,10 +252,8 @@ class NumericColumn(BaseColumn):
 
         # We need to override the original get slice key so that we get a deep
         # copy of the numpy array.
-        col = self._empty_col()
-        col._rowid = self._rowid[key]
-        col._seq = np.copy(self._seq[key])
-        return col
+        return self._empty_col(rowid=self._rowid[key],
+                               seq=np.copy(self._seq[key]))
 
     def _getsequencekey(self, key):
 
@@ -277,13 +265,13 @@ class NumericColumn(BaseColumn):
 
     def _merge(self, other, _rowid):
 
-        col = self._empty_col()
         i_other = ~np.in1d(other._rowid, self._rowid) \
             & np.in1d(other._rowid, _rowid)
         i_self = np.in1d(self._rowid, _rowid)
-        col._rowid = np.concatenate(
+        rowid = np.concatenate(
             (self._rowid[i_self], other._rowid[i_other]))
-        col._seq = np.concatenate((self._seq[i_self], other._seq[i_other]))
+        seq = np.concatenate((self._seq[i_self], other._seq[i_other]))
+        col = self._empty_col(rowid=rowid, seq=seq)
         return col._getrowidkey(_rowid)
 
     def __array__(self, *args):
