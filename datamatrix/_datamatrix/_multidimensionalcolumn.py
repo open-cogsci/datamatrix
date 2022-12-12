@@ -19,6 +19,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._numericcolumn import NumericColumn, FloatColumn
+from datamatrix._datamatrix._datamatrix import DataMatrix
 try:
     from collections.abc import Sequence  # Python 3.3 and later
 except ImportError:
@@ -363,6 +364,10 @@ class _MultiDimensionalColumn(NumericColumn):
                 index = np.array([index])
             elif isinstance(index, np.ndarray):
                 pass
+            elif isinstance(index, DataMatrix):
+                if index != self._datamatrix:
+                    raise ValueError('Cannot slice column with a different DataMatrix')
+                index = np.searchsorted(self._rowid, index._rowid)
             elif isinstance(index, Sequence) and not isinstance(index, str):
                 index = np.array([
                     name if isinstance(name, int)
