@@ -372,6 +372,7 @@ class _MultiDimensionalColumn(NumericColumn):
             elif target_shape[-len(value.shape):] != value.shape:
                 value = value.reshape(target_shape)
         self._seq[indices] = value
+        self._datamatrix._mutate()
 
     def _single_index(self, index):
         return not isinstance(index, (slice, Sequence, np.ndarray)) and not \
