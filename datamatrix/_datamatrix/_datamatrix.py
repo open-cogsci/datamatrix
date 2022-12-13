@@ -544,8 +544,8 @@ class DataMatrix(OrderedState):
         if (
             isinstance(value, tuple) and
             len(value) == 2 and
-            isinstance(value[0], type) and
-            issubclass(value[0], BaseColumn)
+            ((isinstance(value[0], type) and issubclass(value[0], BaseColumn))
+             or callable(value[0]))
         ):
             cls, kwdict = value
             self._cols[name] = cls(self, **kwdict)
@@ -796,61 +796,9 @@ class DataMatrix(OrderedState):
         return to_html(self)
 
     def __lshift__(self, other):
-        
-        from datamatrix._datamatrix._multidimensionalcolumn import \
-            _MultiDimensionalColumn
-        from datamatrix._datamatrix._seriescolumn import \
-            _SeriesColumn
-        
-        if isinstance(other, dict):
-            other = DataMatrix()._fromdict(other)
-        elif isinstance(other, Row):
-            other = other.as_slice
-        # Create a new DataMatrix with the combined length of self and other.
-        # Add all columns from self into the new DataMatrix, and put data from
-        # self at the beginning of those columns.
-        dm = DataMatrix(len(self)+len(other))
-        for name, col in self._cols.items():
-            if isinstance(col, _MultiDimensionalColumn):
-                dm[name] = col.__class__(dm, shape=col._shape,
-                                         defaultnan=col.defaultnan)
-            else:
-                dm[name] = col.__class__
-            dm[name]._typechecking = False
-            dm[name][:len(self)] = self[name]
-            dm[name]._datamatrix = dm
-        # Now add all columns from other into the new DataMatrix (if they
-        # don't exist yet), and put data from other at the end of those 
-        # columns.
-        for name, col in other._cols.items():
-            if name not in dm._cols:
-                if isinstance(col, _MultiDimensionalColumn):
-                    dm[name] = col.__class__(dm, shape=col._shape,
-                                             defaultnan=col.defaultnan)
-                else:
-                    dm[name] = col.__class__
-                dm[name]._typechecking = False
-            else:
-                # If the column already exists, check if the types match
-                if type(dm[name]) != type(other[name]):
-                    raise TypeError(
-                        'Non-matching types for column {}'.format(name))
-                # If the column already exists and is a series, modify the
-                # depth to the longest column
-                if isinstance(col, _SeriesColumn):
-                    dm[name].depth = max(col.depth, dm[name].depth)
-                    other[name].depth = max(col.depth, dm[name].depth)
-                # The length doesn't need to be the same, but other than that
-                # the shape of the columns needs to match
-                elif col.shape[1:] != dm[name].shape[1:]:
-                    print(col.shape, dm[name].shape)
-                    raise TypeError(
-                        'Non-matching shapes for column {}'.format(name))
-            dm[name][len(self):] = other[name]
-            dm[name]._datamatrix = dm
-        for colname, col in dm.columns:
-            col._typechecking = True
-        return dm
+
+        from datamatrix import operations as ops
+        return ops.stack(self, other)
 
     def __iter__(self):
 

@@ -74,7 +74,7 @@ def check_getrow(col_type):
     _()
 
 
-def check_concat(col_type, invalid):
+def check_stack(col_type, invalid):
 
     dm1 = DataMatrix(length=2, default_col_type=col_type)
     dm1.col1 = 1, 2
@@ -98,7 +98,7 @@ def test_mixedcolumn():
 
     check_getrow(MixedColumn)
     check_select(MixedColumn)
-    check_concat(MixedColumn, invalid=u'')
+    check_stack(MixedColumn, invalid=u'')
     # Check type selectors
     dm = DataMatrix(length=6)
     dm.col = 1, 2, 3, 1.1, 2.1, 'a'
@@ -114,7 +114,7 @@ def test_floatcolumn():
 
     check_getrow(FloatColumn)
     check_select(FloatColumn)
-    check_concat(FloatColumn, invalid=np.nan)
+    check_stack(FloatColumn, invalid=np.nan)
     # Check selections with non-int types
     dm = DataMatrix(length=4, default_col_type=FloatColumn)
     dm.col = 1, 2, np.nan, np.inf
@@ -152,7 +152,7 @@ def test_intcolumn():
 
     check_getrow(IntColumn)
     check_select(IntColumn)
-    check_concat(IntColumn, invalid=0)
+    check_stack(IntColumn, invalid=0)
     # Check selections with non-int types
     dm = DataMatrix(length=2, default_col_type=IntColumn)
     dm.col = 1, 2

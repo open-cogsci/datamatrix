@@ -29,7 +29,7 @@ except ImportError:
     from collections import Sequence  # Python 2
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, FloatColumn, IntColumn, SeriesColumn, \
-    MixedColumn, NAN
+    MixedColumn, NAN, Row
 from datamatrix._datamatrix._multidimensionalcolumn import \
     _MultiDimensionalColumn
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
@@ -37,6 +37,101 @@ from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._index import Index
 # For backwards compatibility
 from datamatrix.functional import map_, filter_, setcol
+
+
+def stack(*dms):
+    """
+    desc: |
+        *Version note:* New in 0.16.0
+
+        Stacks multiple DataMatrix objects such that the resulting DataMatrix
+        has a length that is equal to the sum of all the stacked DataMatrix
+        objects. Phrased differently, this function vertically concatenates
+        DataMatrix objects.
+
+        Stacking two DataMatrix objects can also be done with the `<<`
+        operator. However, when stacking more than two DataMatrix objects,
+        using `stack()` is much faster than iteratively stacking with `<<`.
+
+        __Example:__
+
+        %--
+        python: |
+         from datamatrix import operations as ops
+
+         dm1 = DataMatrix(length=2)
+         dm1.col = 'A'
+         dm2 = DataMatrix(length=2)
+         dm2.col = 'B'
+         dm3 = DataMatrix(length=2)
+         dm3.col = 'C'
+         dm = ops.stack(dm1, dm2, dm3)
+         print(dm)
+        --%
+        
+    arguments:
+        dms:
+            desc: A list of DataMatrix objects.
+            type: list
+    
+    returns:
+        type: DataMatrix
+    """
+    from datamatrix._datamatrix._multidimensionalcolumn import \
+        _MultiDimensionalColumn
+    from datamatrix._datamatrix._seriescolumn import \
+        _SeriesColumn
+
+    # Also allow all dms to be passed as a single argument in a list
+    if len(dms) == 1 and isinstance(dms[0], list):
+        dms = dms[0]
+    if isinstance(dms, tuple):
+        dms = list(dms)
+    # Make sure that all arguments are really datamatrix objects
+    new_length = 0
+    for i, dm in enumerate(dms):
+        if isinstance(dm, dict):
+            dms[i] = DataMatrix()._fromdict(dm)
+        elif isinstance(dm, Row):
+            dms[i] = dm.as_slice
+        elif not isinstance(dm, DataMatrix):
+            raise TypeError(
+                'Expecting DataMatrix, dict, or Row, not {}'.format(type(dm)))
+        new_length += len(dms[i])
+        print(new_length)
+    start_index = 0
+    dm = DataMatrix(length=new_length)
+    for stackdm in dms:
+        for name, col in stackdm._cols.items():
+            if name not in dm._cols:
+                if isinstance(col, _MultiDimensionalColumn):
+                    dm[name] = col.__class__(dm, shape=col._shape,
+                                             defaultnan=col.defaultnan)
+                else:
+                    dm[name] = col.__class__
+                dm[name]._typechecking = False
+            else:
+                # If the column already exists, check if the types match
+                if type(dm[name]) != type(stackdm[name]):
+                    raise TypeError(
+                        'Non-matching types for column {}'.format(name))
+                # If the column already exists and is a series, modify the
+                # depth to the longest column
+                if isinstance(col, _SeriesColumn):
+                    dm[name].depth = max(col.depth, dm[name].depth)
+                    stackdm[name].depth = max(col.depth, dm[name].depth)
+                # The length doesn't need to be the same, but other than that
+                # the shape of the columns needs to match
+                elif col.shape[1:] != dm[name].shape[1:]:
+                    print(col.shape, dm[name].shape)
+                    raise TypeError(
+                        'Non-matching shapes for column {}'.format(name))
+            dm[name][start_index:start_index + len(stackdm)] = stackdm[name]
+            dm[name]._datamatrix = dm
+        start_index += len(stackdm)
+    for colname, col in dm.columns:
+        col._typechecking = True
+    return dm
 
 
 def pivot_table(dm, values, index, columns, *args, **kwargs):
