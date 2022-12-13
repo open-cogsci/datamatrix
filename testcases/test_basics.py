@@ -313,6 +313,12 @@ def test_seriescolumn():
         [7, 8, 9],
         [17, 18, 19],
     ])
+    val = dm.col[(1, 3), -1:]
+    assert isinstance(val, _SeriesColumn)
+    check_series(val, [
+        [10],
+        [20],
+    ])
     # ((int, int), (int int)) -> SeriesColumn
     val = dm.col[(1, 3), (1, 3)]
     assert isinstance(val, _SeriesColumn)

@@ -203,7 +203,7 @@ class _MultiDimensionalColumn(NumericColumn):
         if isinstance(a, NumericColumn):
             a = np.array(a._seq)
         if isinstance(a, np.ndarray) and a.shape == (len(self), ):
-            a2 = np.empty((len(self),) + self._shape, dtype=self.dtype)
+            a2 = np.empty(self.shape, dtype=self.dtype)
             np.swapaxes(a2, 0, -1)[:] = a
             a = a2
         rowid = self._rowid.copy()
@@ -225,7 +225,7 @@ class _MultiDimensionalColumn(NumericColumn):
     def _checktype(self, value):
 
         try:
-            a = np.empty(self._shape, dtype=self.dtype)
+            a = np.empty(self.shape[1:], dtype=self.dtype)
             a[:] = value
         except:
             raise Exception('Invalid type: %s' % str(value))
@@ -238,7 +238,7 @@ class _MultiDimensionalColumn(NumericColumn):
 
     def _tosequence(self, value, length):
         
-        full_shape = (length, ) + self._shape
+        full_shape = (length, ) + self.shape[1:]
         # For float and integers, we simply create a new (length, shape) array
         # with only this value
         if isinstance(value, (float, int)):
@@ -259,21 +259,21 @@ class _MultiDimensionalColumn(NumericColumn):
         if a.shape == full_shape:
             return a
         # Set all rows at once
-        if a.shape == self._shape:
+        if a.shape == self.shape[1:]:
             return a
         raise TypeError('Cannot convert to sequence: %s' % str(value))
 
     def _empty_col(self, datamatrix=None, **kwargs):
 
         return self.__class__(datamatrix if datamatrix else self._datamatrix,
-                              shape=self._shape, defaultnan=self.defaultnan,
+                              shape=self.shape[1:], defaultnan=self.defaultnan,
                               **kwargs)
 
     def _addrowid(self, _rowid):
 
         old_length = len(self)
         self._rowid = np.concatenate((self._rowid, _rowid.asarray))
-        a = np.zeros((len(self._rowid), ) + self._shape, dtype=self.dtype)
+        a = np.zeros((len(self._rowid), ) + self.shape[1:], dtype=self.dtype)
         a[:old_length] = self._seq
         self._seq = a
 
@@ -308,12 +308,21 @@ class _MultiDimensionalColumn(NumericColumn):
             value = value.squeeze(axis=squeeze_dims)
             # If only one dimension remains, we return a FloatColumn, otherwise
             # a MultiDimensionalColumn, SeriesColumn, SurfaceColumn, or
-            # VolumeColumn.
-            if len(value.shape) == 1:
+            # VolumeColumn. However, we don't do this if any of the dimensions
+            # was specified as a slice or ellipsis, because in that case it's
+            # a coincidence.
+            if len(value.shape) == 1 and not any(
+                    isinstance(index, slice) or index == Ellipsis
+                    for index in key[1:]):
                 col = FloatColumn(self._datamatrix,
                                   rowid=self._rowid[indices[0]],
                                   seq=value)
             else:
+                # This captures the edge case in which a slice happened to
+                # result in a one-dimensional column. In this case, we expand
+                # it back to two dimensions.
+                if len(value.shape) == 1:
+                    value = value.reshape(value.shape[0], 1)
                 if len(value.shape) == 2:
                     from datamatrix._datamatrix._seriescolumn import \
                         _SeriesColumn
