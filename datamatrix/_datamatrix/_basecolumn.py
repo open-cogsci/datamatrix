@@ -907,7 +907,7 @@ class BaseColumn(OrderedState):
 
     def __len__(self):
 
-        return len(self._seq)
+        return len(self._rowid)
 
     def __getitem__(self, key):
 

@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
+import os
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._numericcolumn import NumericColumn, FloatColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
@@ -33,7 +34,17 @@ try:
     Ellipsis
 except NameError:
     Ellipsis = None  # was introduced in Python 3.10
+try:
+    import psutil
+except ImportError:
+    psutil = None
 logger = logging.getLogger('datamatrix')
+
+# When the size of a multidimensional column exceeds this proportion of the
+# available memory, a memmap column is created instead
+MAX_AVAILABLE_MEM_SIZE = .5
+MB = 1048576
+
 
 class _MultiDimensionalColumn(NumericColumn):
 
@@ -118,12 +129,12 @@ class _MultiDimensionalColumn(NumericColumn):
         """
 
         try:
-            return (len(self._datamatrix), ) + self._shape
+            return (len(self), ) + self._shape
         # This can happen for pickled SeriesColumns from older versions.
         except AttributeError:
             logger.warning('No shape set. Is this an old pickle?')
             self._shape = (self._depth, )
-            return (len(self._datamatrix), ) + self._shape
+            return (len(self), ) + self._shape
 
     @property
     def plottable(self):
@@ -237,7 +248,7 @@ class _MultiDimensionalColumn(NumericColumn):
         try:
             a = np.array(value, dtype=self.dtype)
         except:
-            raise Exception('Cannot convert to sequence: %s' % str(value))
+            raise TypeError('Cannot convert to sequence: %s' % str(value))
         # For a 1D array with the length of the datamatrix, we create an array
         # in which the second dimension (i.e. the shape) is constant.
         if a.shape == (length, ):
@@ -250,7 +261,7 @@ class _MultiDimensionalColumn(NumericColumn):
         # Set all rows at once
         if a.shape == self._shape:
             return a
-        raise Exception('Cannot convert to sequence: %s' % str(value))
+        raise TypeError('Cannot convert to sequence: %s' % str(value))
 
     def _empty_col(self, datamatrix=None, **kwargs):
 
@@ -316,21 +327,42 @@ class _MultiDimensionalColumn(NumericColumn):
         return super().__getitem__(key)
 
     def __setitem__(self, key, value):
-        if isinstance(key, tuple) and len(key) <= len(self._seq.shape):
-            indices = self._numindices(key)
-            # When assigning, the shape of the indexed array (target) and the
-            # to-be-assigned value either need to match, or the shape of the
-            # value needs to match the end of the shape of the target.
-            if isinstance(value, (Sequence, np.ndarray)):
-                if not isinstance(value, np.ndarray):
-                    value = np.array(value)
-                target_shape = self._seq[indices].shape
-                if target_shape[-len(value.shape):] != value.shape:
-                    value = value.reshape(target_shape)
-            self._seq[indices] = value
-            return
-        super().__setitem__(key, value)
-        
+        if not isinstance(key, tuple):
+            key = (key, )
+            key_was_tuple = False
+        else:
+            key_was_tuple = True
+        indices = self._numindices(key)
+        # When assigning, the shape of the indexed array (target) and the
+        # to-be-assigned value either need to match, or the shape of the
+        # value needs to match the end of the shape of the target.
+        if isinstance(value, (Sequence, np.ndarray)):
+            if not isinstance(value, np.ndarray):
+                value = np.array(value)
+            target_shape = self._seq[indices].shape
+            # This is an edge case that is preserved for backwards
+            # compatibility: for a 2D column, and only if a single key is
+            # provided (not a tuple), then values that match the length of the
+            # datamatrix are used to set all values in each row to a constant
+            # value, like so:
+            #
+            # dm = DataMatrix(length=2)
+            # dm.col = SeriesColumn(depth=2)
+            # dm.col = 1, 2
+            # print(dm)
+            # +---+---------+
+            #| # |   col   |
+            #+---+---------+
+            #| 0 | [1. 1.] |
+            #| 1 | [2. 2.] |
+            if len(self.shape) == 2 and value.shape == (target_shape[0], ) \
+                    and not key_was_tuple:
+                np.rot90(self._seq)[:] = value
+                return
+            elif target_shape[-len(value.shape):] != value.shape:
+                value = value.reshape(target_shape)
+        self._seq[indices] = value
+
     def _single_index(self, index):
         return not isinstance(index, (slice, Sequence, np.ndarray)) and not \
             index == Ellipsis
@@ -387,7 +419,50 @@ class _MultiDimensionalColumn(NumericColumn):
         # columns 1 and 3. This is done with np.ix_().
         return np.ix_(*numindices)
 
+        
+class _MemMapColumn(_MultiDimensionalColumn):
+
+    def _init_seq(self):
+        import tempfile
+        
+        logger.debug('creating memmap column')
+        fd = tempfile.NamedTemporaryFile(dir=os.getcwd())
+        self._seq = np.memmap(fd, shape=self.shape, dtype=self.dtype)
+        self._seq[:] = np.nan if self.defaultnan else 0
+        
+    def __setattr__(self, key, val):
+        if key == '_seq' and not isinstance(val, np.memmap):
+            logger.debug('converting _seq to memmap')
+            self._init_seq()
+            self._seq[:] = val
+            return
+        super().__setattr__(key, val)
+
+
+def array_size(shape, dtype):
+    """Gets the size of an array in memory based on a shape and a dtype."""
+    size = np.empty(1, dtype=dtype).nbytes
+    for dim_size in shape:
+        if isinstance(dim_size, Sequence):
+            dim_size = len(dim_size)
+        size *= dim_size
+    return size // MB
+
 
 def MultiDimensionalColumn(shape, defaultnan=True):
+    
+    def inner(dm, shape, defaultnan):
+        memsize = array_size(shape=(len(dm), ) + shape,
+                             dtype=_MultiDimensionalColumn.dtype)
+        mem = psutil.virtual_memory()
+        max_memsize = int(mem.available * MAX_AVAILABLE_MEM_SIZE) // MB
+        logger.debug(f'{memsize} MB required, maximum is {max_memsize} MB')
+        if memsize > max_memsize:
+            cls = _MemMapColumn
+        else:
+            cls = _MultiDimensionalColumn
+        return cls(dm, shape, defaultnan)
 
-    return _MultiDimensionalColumn, {'shape': shape, 'defaultnan': defaultnan}
+    if psutil is None:
+        _MultiDimensionalColumn, {'shape': shape, 'defaultnan': defaultnan}
+    return inner, {'shape': shape, 'defaultnan': defaultnan}
