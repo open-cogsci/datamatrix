@@ -474,5 +474,6 @@ def MultiDimensionalColumn(shape, defaultnan=True):
         return cls(dm, shape, defaultnan)
 
     if psutil is None:
-        _MultiDimensionalColumn, {'shape': shape, 'defaultnan': defaultnan}
+        return _MultiDimensionalColumn, {'shape': shape, 
+                                         'defaultnan': defaultnan}
     return inner, {'shape': shape, 'defaultnan': defaultnan}
