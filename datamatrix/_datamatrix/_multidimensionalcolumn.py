@@ -311,11 +311,12 @@ class _MultiDimensionalColumn(NumericColumn):
             # VolumeColumn. However, we don't do this if any of the dimensions
             # was specified as a slice or ellipsis, because in that case it's
             # a coincidence.
+            row_indices = indices[0].flatten()
             if len(value.shape) == 1 and not any(
                     isinstance(index, slice) or index == Ellipsis
                     for index in key[1:]):
                 col = FloatColumn(self._datamatrix,
-                                  rowid=self._rowid[indices[0]],
+                                  rowid=self._rowid[row_indices],
                                   seq=value)
             else:
                 # This captures the edge case in which a slice happened to
@@ -330,7 +331,7 @@ class _MultiDimensionalColumn(NumericColumn):
                 else:
                     cls = _MultiDimensionalColumn
                 col = cls(self._datamatrix, shape=value.shape[1:],
-                          rowid=self._rowid[indices[0]],
+                          rowid=self._rowid[row_indices],
                           seq=value)
             return col
         return super().__getitem__(key)
