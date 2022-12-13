@@ -16,7 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
-
+import logging
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._numericcolumn import NumericColumn, FloatColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
@@ -33,7 +33,7 @@ try:
     Ellipsis
 except NameError:
     Ellipsis = None  # was introduced in Python 3.10
-
+logger = logging.getLogger('datamatrix')
 
 class _MultiDimensionalColumn(NumericColumn):
 
@@ -118,11 +118,12 @@ class _MultiDimensionalColumn(NumericColumn):
         """
 
         try:
-            return (len(self), ) + self._shape
+            return (len(self._datamatrix), ) + self._shape
         # This can happen for pickled SeriesColumns from older versions.
         except AttributeError:
+            logger.warning('No shape set. Is this an old pickle?')
             self._shape = (self._depth, )
-            return (len(self), ) + self._shape
+            return (len(self._datamatrix), ) + self._shape
 
     @property
     def plottable(self):
@@ -170,13 +171,12 @@ class _MultiDimensionalColumn(NumericColumn):
     # Private functions
 
     def _init_seq(self):
-
-        shape = (len(self._datamatrix),) + self._shape
+        
         if self.defaultnan:
-            self._seq = np.empty(shape, dtype=self.dtype)
+            self._seq = np.empty(self.shape, dtype=self.dtype)
             self._seq[:] = np.nan
         else:
-            self._seq = np.zeros(shape, dtype=self.dtype)
+            self._seq = np.zeros(self.shape, dtype=self.dtype)
 
     def _printable_list(self):
         with np.printoptions(**self.printoptions):

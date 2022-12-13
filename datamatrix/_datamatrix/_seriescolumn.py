@@ -16,7 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
-
+import logging
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._multidimensionalcolumn import \
     _MultiDimensionalColumn
@@ -24,6 +24,7 @@ try:
     import numpy as np
 except ImportError:
     np = None
+logger = logging.getLogger('datamatrix')
 
 
 class _SeriesColumn(_MultiDimensionalColumn):
@@ -31,7 +32,8 @@ class _SeriesColumn(_MultiDimensionalColumn):
     def __init__(self, datamatrix, depth=None, shape=None, **kwargs):
         if depth is not None:
             if shape is not None:
-                warn('both depth and shape provided (ignoring shape)')
+                logger.warning(
+                    'both depth and shape provided (ignoring shape)')
             shape = (depth, )
         elif shape is None:
             raise ValueError('neither depth nor shape provided')
@@ -43,6 +45,7 @@ class _SeriesColumn(_MultiDimensionalColumn):
             return self._shape[0]
         # This can happen for pickled SeriesColumns from older versions.
         except AttributeError:
+            logger.warning('No shape set. Is this an old pickle?')
             self._shape = (self._depth, )
         return self._shape[0]
 
