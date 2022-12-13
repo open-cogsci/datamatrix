@@ -23,9 +23,13 @@ from datamatrix import (
     MixedColumn,
     IntColumn,
     FloatColumn,
-    SeriesColumn
+    SeriesColumn,
+    MultiDimensionalColumn
 )
 from datamatrix import operations as ops
+from datamatrix._datamatrix._seriescolumn import _SeriesColumn
+from datamatrix._datamatrix._multidimensionalcolumn import \
+    _MultiDimensionalColumn
 from testcases.test_tools import check_col, check_row, check_series
 import numpy as np
 import itertools
@@ -345,7 +349,11 @@ def test_auto_type():
     dm.a = 'a', 1
     dm.b = 0.1, 1
     dm.c = 0, 1
+    dm.s = SeriesColumn(depth=2)
+    dm.m = MultiDimensionalColumn(shape=(2, 2))
     dm = ops.auto_type(dm)
     assert isinstance(dm.a, MixedColumn)
     assert isinstance(dm.b, FloatColumn)
     assert isinstance(dm.c, IntColumn)
+    assert isinstance(dm.s, _SeriesColumn)
+    assert isinstance(dm.m, _MultiDimensionalColumn)

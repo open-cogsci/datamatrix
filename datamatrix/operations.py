@@ -29,7 +29,7 @@ except ImportError:
     from collections import Sequence  # Python 2
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, FloatColumn, IntColumn, SeriesColumn, \
-    MixedColumn, NAN, Row
+    MixedColumn, MultiDimensionalColumn, NAN, Row
 from datamatrix._datamatrix._multidimensionalcolumn import \
     _MultiDimensionalColumn
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
@@ -953,6 +953,8 @@ def _best_fitting_col_type(col):
 
     if isinstance(col, _SeriesColumn):
         return SeriesColumn(depth=col.depth)
+    if isinstance(col, _MultiDimensionalColumn):
+        return MultiDimensionalColumn(shape=col.shape[1:])
     if isinstance(col, (FloatColumn, IntColumn)):
         return type(col)
     if not all(isreal(val, allow_inf=True, allow_nan=True) for val in col):
