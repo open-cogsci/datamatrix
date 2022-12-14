@@ -26,3 +26,4 @@ from datamatrix.py3compat import *
 from datamatrix.io._text import readtxt, writetxt
 from datamatrix.io._pickle import readpickle, writepickle
 from datamatrix.io._excel import readxlsx, writexlsx
+from datamatrix.io._bin import readbin, writebin

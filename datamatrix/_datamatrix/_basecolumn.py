@@ -67,7 +67,7 @@ class BaseColumn(OrderedState):
     default_value = u''
     ndim = 1
 
-    def __init__(self, datamatrix, rowid=None, seq=None):
+    def __init__(self, datamatrix, rowid=None, seq=None, metadata=None):
 
         """
         desc:
@@ -85,6 +85,9 @@ class BaseColumn(OrderedState):
                 type: [Sequence, None]
                 desc: Data to initialize the column with. If None, a new
                       sequence is created.
+            metadata:
+                desc: Any Python object that should be associated with this
+                      column as metadata.
         """
 
         # Global import like this avoid cyclical imports
@@ -93,6 +96,7 @@ class BaseColumn(OrderedState):
 
         self._datamatrix = datamatrix
         self._typechecking = True
+        self.metadata = metadata
         if rowid is None:
             self._init_rowid()
         else:

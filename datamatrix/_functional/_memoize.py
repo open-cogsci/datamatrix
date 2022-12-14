@@ -18,11 +18,12 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
-from datamatrix import DataMatrix, convert as cnv
+from datamatrix import DataMatrix, convert as cnv, io
 from functools import partial
 import tarfile
 import sys
 import os
+import logging
 import warnings
 try:
     from collections.abc import Sequence  # Python 3.3 and later
@@ -35,6 +36,7 @@ try:
     import numpy as np
 except ImportError:
     np = None
+logger = logging.getLogger('datamatrix')
 
 
 ONE_GIGABYTE = 1024**3
@@ -287,8 +289,18 @@ class memoize(object):
             self._uncompress_cache(cache_path)
             if os.path.exists(cache_path):
                 self._latest_source = 'disk'
-                with open(cache_path, u'rb') as fd:
-                    obj = pickle.load(fd)
+                try:
+                    with open(cache_path, u'rb') as fd:
+                        obj = pickle.load(fd)
+                    logger.debug('read pickle from memoization cache: {}'
+                                 .format(cache_path))
+                except pickle.UnpicklingError as e:
+                    # DataMatrix objects are stored as binary files, because
+                    # this allows memmaped columns to be included
+                    obj = io.readbin(cache_path)
+                    logger.debug(
+                        'read binary datamatrix from memoization cache {}'
+                        .format(cache_path))
                 # Old-style datamatrix objects need to be upgraded so that
                 # memoization keeps working for previously executed functions.
                 if obj.__class__.__name__ == u'DataMatrix':
@@ -306,8 +318,18 @@ class memoize(object):
         if self._persistent:
             cache_path = os.path.join(self._folder, memkey)
             if not os.path.exists(cache_path):
-                with open(cache_path, u'wb') as fd:
-                    pickle.dump(retval, fd)
+                # DataMatrix objects are stored as binary files, because
+                # this allows memmaped columns to be included.
+                if isinstance(retval, DataMatrix):
+                    io.writebin(retval, cache_path)
+                    logger.debug(
+                        'wrote binary datamatrix to memoization cache: {}'
+                        .format(cache_path))
+                else:
+                    with open(cache_path, u'wb') as fd:
+                        pickle.dump(retval, fd)
+                    logger.debug('wrote pickle to memoization cache: {}'
+                                 .format(cache_path))
         else:
             self._cache[memkey] = pickle.dumps(retval)
             while self.cache_size > self._max_size:

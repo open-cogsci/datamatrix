@@ -63,7 +63,8 @@ class DataMatrix(OrderedState):
         A DataMatrix is a tabular data structure.
     """
 
-    def __init__(self, length=0, default_col_type=MixedColumn, **columns):
+    def __init__(self, length=0, default_col_type=MixedColumn, metadata=None,
+                 **columns):
 
         """
         desc:
@@ -71,8 +72,14 @@ class DataMatrix(OrderedState):
 
         keywords:
             length:
-                desc:	The starting length of the DataMatrix.
-                type:	int
+                desc: The starting length of the DataMatrix.
+                type: int
+            default_col_type:
+                desc: The default type for newly created columns.
+                type: [int, float, BaseColumn]
+            metadata:
+                desc: Any Python object that should be associated with this
+                      column as metadata
 
         keyword-dict:
             columns:
@@ -97,6 +104,7 @@ class DataMatrix(OrderedState):
         object.__setattr__(self, u'_default_col_type', default_col_type)
         object.__setattr__(self, u'_id', _id)
         object.__setattr__(self, u'_sorted', True)
+        object.__setattr__(self, u'metadata', metadata)
         _id += 1
         for column_name, val in columns.items():
             self[column_name] = val

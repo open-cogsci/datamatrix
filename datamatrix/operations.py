@@ -104,8 +104,9 @@ def stack(*dms):
         for name, col in stackdm._cols.items():
             if name not in dm._cols:
                 if isinstance(col, _MultiDimensionalColumn):
-                    dm[name] = col.__class__(dm, shape=col._shape,
-                                             defaultnan=col.defaultnan)
+                    dm[name] = col.__class__(dm, shape=col._orig_shape,
+                                             defaultnan=col.defaultnan,
+                                             metadata=col.metadata)
                 else:
                     dm[name] = col.__class__
                 dm[name]._typechecking = False

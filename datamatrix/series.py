@@ -18,11 +18,15 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 ---
 desc:
-    A set of operations to apply to `SeriesColumn` objects.
+    A set of operations to apply to `SeriesColumn` objects. These operations
+    can also be applied to `MultiDimensionalColumn` objects with two
+    dimensions, but *not* to `MultiDimensionalColumn` objects with three or more
+    dimensions.
 ---
 """
 
 from datamatrix.py3compat import *
+from datamatrix.multidimensional import nancount, infcount, flatten, reduce
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._multidimensionalcolumn import \
@@ -257,153 +261,7 @@ def last_occurrence(series, value, equal=True):
     return _occurrence(series, value, equal=equal)
 
 
-def nancount(series):
-    """
-    desc: |
-        Counts the number of `NAN` values for each cell in a series column, and
-        returns this as an int column.
-        
-        *Version note:* New in 0.15.0
-        
-        __Example:__
-        
-        %--
-        python: |
-         from datamatrix import DataMatrix, SeriesColumn, series as srs, NAN
 
-         dm = DataMatrix(length=3)
-         dm.s = SeriesColumn(depth=3)
-         dm.s[0] = 1, 2, 3
-         dm.s[1] = 1, 2, NAN
-         dm.s[2] = NAN, NAN, NAN
-         dm.nr_of_nan = srs.nancount(dm.s)
-         print(dm)
-        --%
-        
-    arguments:
-        series:
-            desc: A series column to count the `NAN` values is.
-            type: SeriesColumn
-            
-    returns:
-        desc: An int column with the number of `NAN` values in each cell.
-        type: IntColumn
-    """
-    if isinstance(series, _SeriesColumn):
-        return reduce(series, operation=nancount)
-    if isinstance(series, BaseColumn):
-        return len(series == NAN)
-    return np.sum(np.isnan(np.array(series)))
-
-
-def infcount(series):
-    """
-    desc: |
-        Counts the number of `INF` values for each cell in a series column, and
-        returns this as an int column.
-        
-        *Version note:* New in 0.15.0
-        
-        __Example:__
-        
-        %--
-        python: |
-         from datamatrix import DataMatrix, SeriesColumn, series as srs, INF
-
-         dm = DataMatrix(length=3)
-         dm.s = SeriesColumn(depth=3)
-         dm.s[0] = 1, 2, 3
-         dm.s[1] = 1, 2, INF
-         dm.s[2] = INF, INF, INF
-         dm.nr_of_inf = srs.infcount(dm.s)
-         print(dm)
-        --%
-        
-    arguments:
-        series:
-            desc: A series column to count the `INF` values in.
-            type: SeriesColumn
-            
-    returns:
-        desc: An int column with the number of `INF` values in each cell.
-        type: IntColumn
-    """
-    if isinstance(series, _SeriesColumn):
-        return reduce(series, operation=infcount)
-    if isinstance(series, BaseColumn):
-        return len(series == INF)
-    return np.sum(np.isinf(series))
-
-
-def flatten(dm):
-    """
-    desc: |
-        Flattens all series of a datamatrix to float columns. The result is a
-        new datamatrix where each row of the original datamatrix is repeated
-        for each sample of the series. The new datamatrix does not contain any
-        series.
-        
-        This function requires that all series in `dm` have the same depth, or
-        that `dm` doesn't contain any series, in which case a copy of `dm` is
-        returned.
-        
-        *Version note:* New in 0.15.0
-        
-        __Example:__
-        
-        %--
-        python: |
-         from datamatrix import DataMatrix, series as srs
-
-         dm = DataMatrix(length=2)
-         dm.col = 'a', 'b'
-         dm.s1 = SeriesColumn(depth=3)
-         dm.s1[:] = 1,2,3
-         dm.s2 = SeriesColumn(depth=3)
-         dm.s2[:] = 3,2,1
-         flat_dm = srs.flatten(dm)
-         print('Original:')
-         print(dm)
-         print('Flattened:')
-         print(flat_dm)
-        --%
-    
-    arguments:
-        dm:
-            desc: A DataMatrix
-            type: DataMatrix
-
-    returns:
-        desc: A 'flattened' DataMatrix without series
-        type: DataMatrix
-    """
-    # Check the depth of the seriescolumns in the datamatrix, and ensure that
-    # they are all of equal depth
-    depth = None
-    for colname, col in dm.columns:
-        if not isinstance(col, _SeriesColumn):
-            continue
-        if depth is None:
-            depth = col.depth
-        elif depth != col.depth:
-            raise ValueError('All SeriesColumns should have the same depth')
-    # If there are no seriescolumn in the datamatrix, simply return a copy of
-    # the datamatrix
-    if depth is None:
-        return dm[:]
-    long_dm = DataMatrix(length=len(dm) * depth)
-    for colname, col in dm.columns:
-        # SeriesColumns are flattened and then inserted into the datamatrix as
-        # a float column
-        if isinstance(col, _SeriesColumn):
-            long_dm[colname] = float
-            long_dm[colname] = col._seq.flatten()
-            continue
-        # Other columns are repeated and then inserted
-        long_dm[colname] = type(col)
-        for i, val in enumerate(col):
-            long_dm[colname][i * depth:(i + 1) * depth] = val
-    return long_dm
 
 
 def concatenate(*series):
@@ -701,66 +559,6 @@ def normalize_time(dataseries, timeseries):
     return series
 
 
-def reduce(series, operation=nanmean):
-
-    """
-    desc: |
-        Transforms multidimensional values to single values by applying an
-        operation (typically a mean) to each multidimensional value.
-        
-        *Version note:* As of 0.11.0, the function has been renamed to
-        `reduce()`. The original `reduce_()` is deprecated.
-        
-        *Version note:* As of 0.16.0, `MultiDimensionalColumn` objects are
-        also supported.
-
-        __Example:__
-
-        %--
-        python: |
-         import numpy as np
-         from datamatrix import DataMatrix, SeriesColumn, series as srs
-
-         LENGTH = 5 # Number of rows
-         DEPTH = 10 # Depth (or length) of SeriesColumns
-
-         dm = DataMatrix(length=LENGTH)
-         dm.y = SeriesColumn(depth=DEPTH)
-         dm.y = np.random.random( (LENGTH, DEPTH) )
-         dm.mean_y = srs.reduce(dm.y)
-
-         print(dm)
-        --%
-
-    arguments:
-        series:
-            desc: The signal to reduce.
-            type: SeriesColumn
-
-    keywords:
-        operation:
-            desc:   The operation function to use for the reduction. This
-                    function should accept `series` as first argument, and
-                    `axis=1` as keyword argument.
-
-    returns:
-        desc: A reduction of the signal.
-        type: FloatColumn
-    """
-
-    if not isinstance(series, _MultiDimensionalColumn):
-        raise TypeError(u'Expecting a MultiDimensionalColumn object')
-    col = FloatColumn(series._datamatrix)
-    try:
-        a = operation(series, axis=1)
-    except TypeError:
-        for i, val in enumerate(series):
-            col[i] = operation(val)
-    else:
-        col[:] = a
-    return col
-
-
 def window(series, start=0, end=None):
 
     """
@@ -933,8 +731,10 @@ def blinkreconstruct(series, vt=5, vt_start=10, vt_end=5, maxdur=500,
 
         __Source:__
 
-        - Mathot, S. (2013). A simple way to reconstruct pupil size during eye
-          blinks. <http://doi.org/10.6084/m9.figshare.688002>
+        - Mathot, S., & Vilotijević, A. (2022). Methods in cognitive 
+          pupillometry: Design, preprocessing, and statitical analysis.
+          *Behavior Research Methods*.
+          <https://doi.org/10.3758/s13428-022-01957-7>
 
     arguments:
         series:

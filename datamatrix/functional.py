@@ -27,12 +27,14 @@ try:
 except ImportError:
     from inspect import getargspec
 import functools
+import logging
 from contextlib import contextmanager
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._index import Index
 from datamatrix._functional._memoize import memoize
+logger = logging.getLogger('datamatrix')
 
 
 @contextmanager
@@ -75,6 +77,79 @@ def profile(path=u'profile.txt', sortby=u'cumulative'):
     ps.print_stats()
     with open(path, 'w') as fd:
         fd.write(s.getvalue())
+
+
+def stack_multiprocess(fnc, args, processes=None):
+    """
+    desc: |
+        Facilitates multiprocessing for functions that return `DataMatrix`
+        objects.
+    
+        Specifically, `stack_multiprocess()`, calls `fnc()` in separate
+        processes, each time passing a different argument. Arguments are
+        specified in `args`, which should be a list (or other iterable) of
+        arguments that are passed to `fnc()` for each call separately. In other
+        words, as many processes are launched as there are elements in `args`.
+        `fnc()` should be a function that accepts a single argument and returns
+        a `DataMatrix` object. The resulting `DataMatrix` objects are stacked
+        together (similar to `ops.stack()`) and returned as a single 
+        `DataMatrix`.
+        
+        See also:
+        
+        - <https://docs.python.org/3/library/multiprocessing.html>
+        - %link:operations%#function-stack
+        
+        *Version note:* New in 0.16.0.
+
+        __Example:__
+
+        %--
+        python: |
+         def get_dm(i):
+             dm = DataMatrix(length=1)
+             dm.s = i
+             return dm
+        
+         # This will launch five separate processes
+         dm = fnc.stack_multiprocess(get_dm, [1, 2, 3, 4, 5])
+         print(dm)
+        --%
+        
+        arguments:
+            fnc:
+                desc: A function to call. This function should accept a single
+                      argument and return a single `DataMatrix`.
+                type: callable
+            args:
+                desc: A `list` of arguments that are passes separately to
+                      `fnc()`.
+    
+        keywords:
+            processes:
+                desc: The number of processes that are launched simultaneously
+                      or `None` to launch one process for each core on the
+                      system.
+                type: [None, int]
+    
+        returns:
+            type: `DataMatrix`
+    """
+    import multiprocessing as mp
+    from datamatrix import io, operations as ops
+    
+    logger.debug('starting multiprocessing')
+    with mp.Pool(processes) as pool:
+        results = pool.map(functools.partial(_stack_multiprocess_inner, fnc),
+                           args)
+        logger.debug('received {} DataMatrix objects'.format(len(results)))
+    # The return values consist of path objects that refer to temporary
+    # binary datamatrix files. We read these files, stack them, and then
+    # delete them.
+    dm = ops.stack([io.readbin(path) for path in results])
+    for path in results:
+        path.unlink()
+    return dm
 
 
 def curry(fnc):
@@ -325,3 +400,20 @@ def _count_unbound_arguments(fnc):
         nbound += len(fnc.args)
         fnc = fnc.func
     return len(getargspec(fnc).args) - nbound
+
+
+def _stack_multiprocess_inner(fnc, arg):
+    """A helper function for stack_multiprocess that calls another function,
+    ensures that the result value is a DataMatrix, saves the DataMatrix to 
+    disk, and then returns the path to the saved file.
+    """
+    from pathlib import Path
+    from datamatrix import io
+    
+    dm = fnc(arg)
+    if not isinstance(dm, DataMatrix):
+        raise ValueError('function should return DataMatrix, not {}'
+                         .format(type(dm)))
+    path = Path('.{}.dm'.format(id(dm)))
+    io.writebin(dm, path)
+    return path

@@ -42,12 +42,15 @@ except ImportError:
     psutil = None
 logger = logging.getLogger('datamatrix')
 
+MB = 1048576
 # Memory consumption should be kept below either the relative or absolute
 # minimum. Beyond these limits, memmap will be used.
 MIN_MEM_FREE_REL = .5
-MIN_MEM_FREE_ABS = 4294967296
-MB = 1048576
-
+MIN_MEM_FREE_ABS = 4096 * MB
+# Arrays smaller than this will never be memmapped.
+MAX_ARRAY_SIZE = 128 * MB
+# The size of chunks that are written to disk during saving
+SAVE_CHUNK_SIZE = 128 * MB
 
 class _MultiDimensionalColumn(NumericColumn):
 
@@ -90,18 +93,19 @@ class _MultiDimensionalColumn(NumericColumn):
         if np is None:
             raise Exception(
                 'NumPy and SciPy are required, but not installed.')
+        self._orig_shape = shape
         normshape = tuple()
         if isinstance(shape, (int, str)):
             shape = (shape, )
-        self._dim_names = []
+        self.index_names = []
         for dim_size in shape:
             # Dimension without named indices
             if isinstance(dim_size, int):
                 normshape += (dim_size, )
-                self._dim_names.append(list(range(dim_size)))
+                self.index_names.append(list(range(dim_size)))
             else:
                 normshape += (len(dim_size), )
-                self._dim_names.append(dim_size)
+                self.index_names.append(list(dim_size))
         self._shape = normshape
         self.defaultnan = defaultnan
         self._fd = None
@@ -267,11 +271,14 @@ class _MultiDimensionalColumn(NumericColumn):
         column to be loaded into memory based on the MIN_MEM_FREE_ABS and
         MIN_MEM_FREE_REL constants.
         """
+        memory_size = self._memory_size()
+        if memory_size < MAX_ARRAY_SIZE:
+            return True
         vm = psutil.virtual_memory()
-        mem_free_abs = vm.available - self._memory_size()
+        mem_free_abs = vm.available - memory_size
         mem_free_rel = mem_free_abs / vm.total
-        logger.debug('{} MB available ({:.2f}%)'.format(mem_free_abs // MB,
-                                                        100 * mem_free_rel))
+        logger.debug('{} MB {:.1f}% will be available after loading column'
+                     .format(mem_free_abs // MB, 100 * mem_free_rel))
         return mem_free_abs > MIN_MEM_FREE_ABS or \
             mem_free_rel > MIN_MEM_FREE_REL
     
@@ -301,7 +308,7 @@ class _MultiDimensionalColumn(NumericColumn):
             if self._fd is not None and not self._fd.closed:
                 self._fd.close()
                 self._fd = None
-            logger.debug('initializing loaded array')
+            logger.debug('initializing loaded column')
             if self.defaultnan:
                 self._seq = np.empty(self.shape, dtype=self.dtype)
                 self._seq[:] = np.nan
@@ -310,11 +317,18 @@ class _MultiDimensionalColumn(NumericColumn):
             return
         # Use memory-mapped array
         import tempfile
-        logger.debug('initializing unloaded array (memmap)')
-        self._fd = tempfile.NamedTemporaryFile(dir=os.getcwd())
+        logger.debug('initializing unloaded column (memmap)')
+        memory_size = self._memory_size()
+        if memory_size >= psutil.virtual_memory().total:
+            logger.warning('the size of this column exceeds system memory. '
+                           'The column will be created, but operations that '
+                           'require data to be loaded into memory will fail.')
+        self._fd = tempfile.NamedTemporaryFile(dir=os.getcwd(), prefix='.',
+                                               suffix='.memmap')
         self._seq = np.memmap(self._fd, shape=self.shape, dtype=self.dtype)
+        chunk_slice = int(SAVE_CHUNK_SIZE / memory_size * len(self))
         self._seq[:] = np.nan if self.defaultnan else 0
-            
+
     def __setattr__(self, key, val):
         """Catches assignments to the _seq attribute, which may need to be
         converted to memmap or a regular array depending on the loaded status.
@@ -405,8 +419,8 @@ class _MultiDimensionalColumn(NumericColumn):
     def _empty_col(self, datamatrix=None, **kwargs):
 
         return self.__class__(datamatrix if datamatrix else self._datamatrix,
-                              shape=self.shape[1:], defaultnan=self.defaultnan,
-                              **kwargs)
+                              shape=self._orig_shape,
+                              defaultnan=self.defaultnan, **kwargs)
 
     def _addrowid(self, _rowid):
 
@@ -428,6 +442,8 @@ class _MultiDimensionalColumn(NumericColumn):
             # Advanced indexing always returns a copy, rather than a view, so
             # there's no need to explicitly copy the result.
             indices = self._numindices(key)
+            if indices is None:
+                return
             value = self._seq[indices]
             # If the index refers to exactly one value, then we return this
             # value as a float.
@@ -484,6 +500,8 @@ class _MultiDimensionalColumn(NumericColumn):
         else:
             key_was_tuple = True
         indices = self._numindices(key)
+        if indices is None:
+            return
         # When assigning, the shape of the indexed array (target) and the
         # to-be-assigned value either need to match, or the shape of the
         # value needs to match the end of the shape of the target.
@@ -514,6 +532,18 @@ class _MultiDimensionalColumn(NumericColumn):
                 value = value.reshape(target_shape)
         self._seq[indices] = value
         self._datamatrix._mutate()
+        
+    def __getstate__(self):
+        # When pickling the column, we need to load the column into memory.
+        # However, when this is done in the context of writebin(), we actually
+        # should load to memory, because the contents are written to disk and
+        # replaced by a path that points towards this file.
+        if self._fd is not None:
+            logger.warning('loading column into memory for pickling. Use '
+                           'io.writebin() and io.readbin() for reading and '
+                           'writing columns that don\'t fit in memory.')
+            self.loaded = True
+        return super().__getstate__()
 
     def _single_index(self, index):
         return not isinstance(index, (slice, Sequence, np.ndarray)) and not \
@@ -521,7 +551,7 @@ class _MultiDimensionalColumn(NumericColumn):
         
     def _named_index(self, name, dim):
         try:
-            return self._dim_names[dim - 1].index(name)
+            return self.index_names[dim - 1].index(name)
         except ValueError as e:
             raise ValueError('{} is not an index name'.format(name))
         
@@ -564,6 +594,8 @@ class _MultiDimensionalColumn(NumericColumn):
                     for name in index])
             else:
                 index = np.array([self._named_index(index, dim)])
+            if 0 in index.shape:
+                return None
             numindices += (index, )
         # By default, NumPy interprets tuples of indexes in a zip-like way, so
         # that a[(0, 2), (1, 3)] indexes two cells a[0, 1] and a[2, 3]. We want
