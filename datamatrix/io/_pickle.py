@@ -20,6 +20,8 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 import pickle
 import os
+import logging
+logger = logging.getLogger('datamatrix')
 
 
 def readpickle(path):
@@ -43,8 +45,7 @@ def readpickle(path):
 
     with open(path, 'rb') as picklefile:
         dm = pickle.load(picklefile)
-    if not hasattr(dm._rowid, '_a'):
-        dm = _upgrade_datamatrix_index(dm)
+    dm = _upgrade_datamatrix(dm)
     return dm
 
 
@@ -77,15 +78,21 @@ def writepickle(dm, path, protocol=-1):
         pickle.dump(dm, picklefile, protocol)
 
 
-def _upgrade_datamatrix_index(dm):
+def _upgrade_datamatrix(dm):
 
     """Fixes the Index object of deprecated versions of DataMatrix."""
 
     from datamatrix._datamatrix._index import Index
-    object.__setattr__(dm, '_rowid', Index(dm._rowid._l))
+    if not hasattr(dm._rowid, '_a'):
+        object.__setattr__(dm, '_rowid', Index(dm._rowid._l))
+        logger.warning('upgrading Index')
     for colname, col in dm.columns:
-        if hasattr(col._rowid, '_l'):
-            object.__setattr__(col, '_rowid', Index(col._rowid._l))
-        else:
-            object.__setattr__(col, '_rowid', Index(col._rowid))
+        if not hasattr(dm._rowid, '_a'):
+            if hasattr(col._rowid, '_l'):
+                object.__setattr__(col, '_rowid', Index(col._rowid._l))
+            else:
+                object.__setattr__(col, '_rowid', Index(col._rowid))
+        if hasattr(col, '_depth') and not hasattr(col, '_shape'):
+            logger.warning('upgrading shapeless SeriesColumn')
+            col._shape = (col._depth, )
     return dm

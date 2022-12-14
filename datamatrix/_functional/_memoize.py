@@ -291,12 +291,9 @@ class memoize(object):
                     obj = pickle.load(fd)
                 # Old-style datamatrix objects need to be upgraded so that
                 # memoization keeps working for previously executed functions.
-                if (
-                    obj.__class__.__name__ == u'DataMatrix'
-                    and not hasattr(obj._rowid, '_a')
-                ):
-                    from datamatrix.io._pickle import _upgrade_datamatrix_index
-                    obj = _upgrade_datamatrix_index(obj)
+                if obj.__class__.__name__ == u'DataMatrix':
+                    from datamatrix.io._pickle import _upgrade_datamatrix
+                    obj = _upgrade_datamatrix(obj)
                 return True, obj
         elif memkey in self._cache:
             self._latest_source = 'memory'

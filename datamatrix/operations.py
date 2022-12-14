@@ -98,7 +98,6 @@ def stack(*dms):
             raise TypeError(
                 'Expecting DataMatrix, dict, or Row, not {}'.format(type(dm)))
         new_length += len(dms[i])
-        print(new_length)
     start_index = 0
     dm = DataMatrix(length=new_length)
     for stackdm in dms:
@@ -123,7 +122,6 @@ def stack(*dms):
                 # The length doesn't need to be the same, but other than that
                 # the shape of the columns needs to match
                 elif col.shape[1:] != dm[name].shape[1:]:
-                    print(col.shape, dm[name].shape)
                     raise TypeError(
                         'Non-matching shapes for column {}'.format(name))
             dm[name][start_index:start_index + len(stackdm)] = stackdm[name]
