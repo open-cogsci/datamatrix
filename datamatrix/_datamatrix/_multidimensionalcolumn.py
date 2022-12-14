@@ -284,7 +284,7 @@ class _MultiDimensionalColumn(NumericColumn):
             self.touch_history.move_to_end(id_)
         else:
             self.touch_history[id_] = weakref.ref(self)
-        for col in self.touch_history.values():
+        for col in list(self.touch_history.values()):
             col = col()
             if col is None or col is self or not col.loaded:
                 continue
