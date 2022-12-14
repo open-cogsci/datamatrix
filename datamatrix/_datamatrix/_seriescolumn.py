@@ -20,16 +20,13 @@ import logging
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._multidimensionalcolumn import \
     _MultiDimensionalColumn
-try:
-    import numpy as np
-except ImportError:
-    np = None
 logger = logging.getLogger('datamatrix')
 
 
 class _SeriesColumn(_MultiDimensionalColumn):
     
-    def __init__(self, datamatrix, depth=None, shape=None, **kwargs):
+    def __init__(self, datamatrix, depth=None, shape=None, defaultnan=True,
+                 **kwargs):
         if depth is not None:
             if shape is not None:
                 logger.warning(
@@ -38,33 +35,9 @@ class _SeriesColumn(_MultiDimensionalColumn):
         elif shape is None:
             raise ValueError('neither depth nor shape provided')
         super().__init__(datamatrix, shape=shape, **kwargs)
-        
-    @property
-    def depth(self):
-        try:
-            return self._shape[0]
-        # This can happen for pickled SeriesColumns from older versions.
-        except AttributeError:
-            logger.warning('No shape set. Is this an old pickle?')
-            self._shape = (self._depth, )
-        return self._shape[0]
-
-    @depth.setter
-    def depth(self, depth):
-        if depth == self.depth:
-            return
-        if depth > self.depth:
-            seq = np.zeros((len(self), depth), dtype=self.dtype)
-            if self.defaultnan:
-                seq[:] = np.nan
-            seq[:, :self.depth] = self._seq
-            self._seq = seq
-            self._shape = (depth, )
-            return
-        self._shape = (depth, )
-        self._seq = self._seq[:, :depth]
 
 
-def SeriesColumn(depth, defaultnan=True):
+def SeriesColumn(depth=None, shape=None, defaultnan=True, **kwargs):
 
-    return _SeriesColumn, {'depth': depth, u'defaultnan': defaultnan}
+    return _SeriesColumn, dict(depth=depth, shape=shape, defaultnan=defaultnan,
+                               **kwargs)

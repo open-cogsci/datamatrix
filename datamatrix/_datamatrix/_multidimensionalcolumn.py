@@ -18,6 +18,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 import logging
 import os
+import weakref
 from datamatrix.py3compat import *
 from datamatrix._datamatrix._numericcolumn import NumericColumn, FloatColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
@@ -25,6 +26,7 @@ try:
     from collections.abc import Sequence  # Python 3.3 and later
 except ImportError:
     from collections import Sequence
+from collections import OrderedDict
 try:
     import numpy as np
     from numpy import nanmean, nanmedian, nanstd
@@ -40,9 +42,10 @@ except ImportError:
     psutil = None
 logger = logging.getLogger('datamatrix')
 
-# When the size of a multidimensional column exceeds this proportion of the
-# available memory, a memmap column is created instead
-MAX_AVAILABLE_MEM_SIZE = .5
+# Memory consumption should be kept below either the relative or absolute
+# minimum. Beyond these limits, memmap will be used.
+MIN_MEM_FREE_REL = .5
+MIN_MEM_FREE_ABS = 4294967296
 MB = 1048576
 
 
@@ -55,6 +58,7 @@ class _MultiDimensionalColumn(NumericColumn):
 
     dtype = float
     printoptions = dict(precision=4, threshold=4, edgeitems=2)
+    touch_history = OrderedDict()
 
     def __init__(self, datamatrix, shape, defaultnan=True, **kwargs):
 
@@ -71,7 +75,11 @@ class _MultiDimensionalColumn(NumericColumn):
                 desc: A tuple that specifies the number and size of the
                       dimensions of each cell. Values can be integers, or 
                       tuples of non-integer values that specify names of
-                      indices, e.g. `shape=(('x', 'y'), 10))
+                      indices, e.g. `shape=(('x', 'y'), 10)). Importantly,
+                      the length of the column (the number of rows) is
+                      implicitly used as the first dimension. That, if you
+                      specify a two-dimensional shape, then the resulting
+                      column has three dimensions.
                 type: int
             defaultnan:
                 desc: Indicates whether the column should be initialized with
@@ -96,7 +104,15 @@ class _MultiDimensionalColumn(NumericColumn):
                 self._dim_names.append(dim_size)
         self._shape = normshape
         self.defaultnan = defaultnan
+        self._fd = None
+        self._loaded = kwargs.get('loaded', None)
         NumericColumn.__init__(self, datamatrix, **kwargs)
+        
+    def __del__(self):
+        """Clean up weak references on destruction."""
+        id_ = id(self)
+        if id_ in self.touch_history:
+            self.touch_history.pop(id_)
 
     def setallrows(self, value):
 
@@ -125,16 +141,44 @@ class _MultiDimensionalColumn(NumericColumn):
         name: shape
 
         desc:
-            A property to access and change the shape of the column.
+            A property to access and change the shape of the column. The shape
+            includes the length of the column (the number of rows) as the first
+            dimension.
         """
 
-        try:
-            return (len(self), ) + self._shape
-        # This can happen for pickled SeriesColumns from older versions.
-        except AttributeError:
-            logger.warning('No shape set. Is this an old pickle?')
-            self._shape = (self._depth, )
-            return (len(self), ) + self._shape
+        return (len(self), ) + self._shape
+    
+    @property
+    def depth(self):
+        
+        """
+        name: depth
+
+        desc:
+            A property to access and change the depth of the column. The depth
+            is the second dimension of the column, where the length of the
+            column (the number of rows) is the first dimension.
+        """
+        
+        return self._shape[0]
+
+    @depth.setter
+    def depth(self, depth):
+        if depth == self.depth:
+            return
+        if len(self._shape) > 2:
+            raise TypeError('Can only change the depth of two-dimensional '
+                            'MultiDimensionalColumns/ SeriesColumns')
+        if depth > self.depth:
+            seq = np.zeros((len(self), depth), dtype=self.dtype)
+            if self.defaultnan:
+                seq[:] = np.nan
+            seq[:, :self.depth] = self._seq
+            self._seq = seq
+            self._shape = (depth, )
+            return
+        self._shape = (depth, )
+        self._seq = self._seq[:, :depth]
 
     @property
     def plottable(self):
@@ -178,16 +222,110 @@ class _MultiDimensionalColumn(NumericColumn):
     def sum(self):
 
         return np.nansum(self._seq, axis=0)
+        
+    @property
+    def loaded(self):
+        """
+        name: loaded
+
+        desc:
+            A property to unloaded the column to disk (by assigning `False`)
+            and load the column from disk (by assigning `True`). You don't
+            usually change this property manually, but rather let the built-in
+            memory management decide when and columns need to be (un)loaded.
+        """
+        if self._loaded is None:
+            self._loaded = self._sufficient_free_memory()
+        return self._loaded
+    
+    @loaded.setter
+    def loaded(self, val):
+        if val == self._loaded:
+            return
+        logger.debug('{} column {}'.format('loading' if val else 'unloading',
+                                           id(self)))
+        self._loaded = val
+        # Simply assigning self._seq will trigger a conversion to/ from
+        # np.memmap based on the self._loaded
+        self._seq = self._seq
 
     # Private functions
+    
+    def _memory_size(self):
+        """Returns the size of the column in bytes if it were loaded into
+        memory.
+        """
+        size = np.empty(1, dtype=self.dtype).nbytes
+        for dim_size in self.shape:
+            if isinstance(dim_size, Sequence):
+                dim_size = len(dim_size)
+            size *= dim_size
+        return size
+    
+    def _sufficient_free_memory(self):
+        """Returns whether there is sufficient free memory for the current
+        column to be loaded into memory based on the MIN_MEM_FREE_ABS and
+        MIN_MEM_FREE_REL constants.
+        """
+        vm = psutil.virtual_memory()
+        mem_free_abs = vm.available - self._memory_size()
+        mem_free_rel = mem_free_abs / vm.total
+        logger.debug('{} MB available ({:.2f}%)'.format(mem_free_abs // MB,
+                                                        100 * mem_free_rel))
+        return mem_free_abs > MIN_MEM_FREE_ABS or \
+            mem_free_rel > MIN_MEM_FREE_REL
+    
+    def _touch(self):
+        """Moves the current column to the end of the touch history to indicate
+        that it was used last.
+        """
+        id_ = id(self)
+        if id_ in self.touch_history:
+            self.touch_history.move_to_end(id_)
+        else:
+            self.touch_history[id_] = weakref.ref(self)
+        for col in self.touch_history.values():
+            col = col()
+            if col is None or col is self or not col.loaded:
+                continue
+            if not self._sufficient_free_memory():
+                logger.debug('insufficient free memory')
+                col.loaded = False
+        if not self.loaded and self._sufficient_free_memory():
+            logger.debug('loading currently touched column')
+            self.loaded = True
 
     def _init_seq(self):
-        
-        if self.defaultnan:
-            self._seq = np.empty(self.shape, dtype=self.dtype)
-            self._seq[:] = np.nan
-        else:
-            self._seq = np.zeros(self.shape, dtype=self.dtype)
+        if self.loaded:
+            # Close previous memmap object
+            if self._fd is not None and not self._fd.closed:
+                self._fd.close()
+                self._fd = None
+            logger.debug('initializing loaded array')
+            if self.defaultnan:
+                self._seq = np.empty(self.shape, dtype=self.dtype)
+                self._seq[:] = np.nan
+            else:
+                self._seq = np.zeros(self.shape, dtype=self.dtype)
+            return
+        # Use memory-mapped array
+        import tempfile
+        logger.debug('initializing unloaded array (memmap)')
+        self._fd = tempfile.NamedTemporaryFile(dir=os.getcwd())
+        self._seq = np.memmap(self._fd, shape=self.shape, dtype=self.dtype)
+        self._seq[:] = np.nan if self.defaultnan else 0
+            
+    def __setattr__(self, key, val):
+        """Catches assignments to the _seq attribute, which may need to be
+        converted to memmap or a regular array depending on the loaded status.
+        """
+        if key != '_seq' or (isinstance(val, np.memmap) and not self.loaded) \
+                or (not isinstance(val, np.memmap) and self.loaded):
+            super().__setattr__(key, val)
+            return
+        # Convert to memory-mapped array
+        self._init_seq()
+        self._seq[:] = val
 
     def _printable_list(self):
         with np.printoptions(**self.printoptions):
@@ -195,6 +333,7 @@ class _MultiDimensionalColumn(NumericColumn):
 
     def _operate(self, a, number_op, str_op=None, flip=False):
 
+        self._touch()
         # For a 1D array with the length of the datamatrix, we create an array
         # in which the second dimension (i.e. the shape) is constant. This
         # allows us to do by-row operations.
@@ -284,6 +423,7 @@ class _MultiDimensionalColumn(NumericColumn):
     # Implemented syntax
 
     def __getitem__(self, key):
+        self._touch()
         if isinstance(key, tuple) and len(key) <= len(self._seq.shape):
             # Advanced indexing always returns a copy, rather than a view, so
             # there's no need to explicitly copy the result.
@@ -337,6 +477,7 @@ class _MultiDimensionalColumn(NumericColumn):
         return super().__getitem__(key)
 
     def __setitem__(self, key, value):
+        self._touch()
         if not isinstance(key, tuple):
             key = (key, )
             key_was_tuple = False
@@ -430,51 +571,8 @@ class _MultiDimensionalColumn(NumericColumn):
         # columns 1 and 3. This is done with np.ix_().
         return np.ix_(*numindices)
 
-        
-class _MemMapColumn(_MultiDimensionalColumn):
 
-    def _init_seq(self):
-        import tempfile
-        
-        logger.debug('creating memmap column')
-        fd = tempfile.NamedTemporaryFile(dir=os.getcwd())
-        self._seq = np.memmap(fd, shape=self.shape, dtype=self.dtype)
-        self._seq[:] = np.nan if self.defaultnan else 0
-        
-    def __setattr__(self, key, val):
-        if key == '_seq' and not isinstance(val, np.memmap):
-            logger.debug('converting _seq to memmap')
-            self._init_seq()
-            self._seq[:] = val
-            return
-        super().__setattr__(key, val)
-
-
-def array_size(shape, dtype):
-    """Gets the size of an array in memory based on a shape and a dtype."""
-    size = np.empty(1, dtype=dtype).nbytes
-    for dim_size in shape:
-        if isinstance(dim_size, Sequence):
-            dim_size = len(dim_size)
-        size *= dim_size
-    return size // MB
-
-
-def MultiDimensionalColumn(shape, defaultnan=True):
+def MultiDimensionalColumn(shape, defaultnan=True, **kwargs):
     
-    def inner(dm, shape, defaultnan):
-        memsize = array_size(shape=(len(dm), ) + shape,
-                             dtype=_MultiDimensionalColumn.dtype)
-        mem = psutil.virtual_memory()
-        max_memsize = int(mem.available * MAX_AVAILABLE_MEM_SIZE) // MB
-        logger.debug(f'{memsize} MB required, maximum is {max_memsize} MB')
-        if memsize > max_memsize:
-            cls = _MemMapColumn
-        else:
-            cls = _MultiDimensionalColumn
-        return cls(dm, shape, defaultnan)
-
-    if psutil is None:
-        return _MultiDimensionalColumn, {'shape': shape, 
-                                         'defaultnan': defaultnan}
-    return inner, {'shape': shape, 'defaultnan': defaultnan}
+    return _MultiDimensionalColumn, dict(shape=shape, defaultnan=defaultnan,
+                                         **kwargs)
