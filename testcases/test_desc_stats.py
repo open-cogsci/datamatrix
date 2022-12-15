@@ -20,13 +20,15 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
     SeriesColumn
+from testcases.test_tools import check_series
 import numpy as np
 import pytest
 
 
 def check_odd(dm):
 
-    assert np.mean(dm.col) == dm.col.mean == pytest.approx(13./3)
+    assert dm.col[...] == np.mean(dm.col) == dm.col.mean == \
+        pytest.approx(13./3)
     assert dm.col.median == 2
     assert np.std(dm.col, ddof=1) == dm.col.std  == \
         pytest.approx(np.std( [1,2,10], ddof=1))
@@ -37,7 +39,7 @@ def check_odd(dm):
 
 def check_even(dm):
 
-    assert dm.col.mean == pytest.approx(4)
+    assert dm.col[...] == dm.col.mean == pytest.approx(4)
     assert dm.col.median == 2.5
     assert dm.col.std == pytest.approx(np.std( [1,2,3,10], ddof=1))
     assert dm.col.min == 1
@@ -66,7 +68,7 @@ def check_desc_stats(col_type, invalid, assert_invalid):
     # One lengths
     dm.length = 1
     dm.col = 1
-    assert dm.col.mean == 1
+    assert dm.col[...] == dm.col.mean == 1
     assert dm.col.median == 1
     if col_type in (IntColumn, FloatColumn):
         with pytest.warns(RuntimeWarning):
@@ -80,6 +82,7 @@ def check_desc_stats(col_type, invalid, assert_invalid):
     dm.length = 0
     if col_type in (IntColumn, FloatColumn):
         with pytest.warns(RuntimeWarning):
+            assert_invalid(dm.col[...])
             assert_invalid(dm.col.mean)
             assert_invalid(dm.col.median)
             assert_invalid(dm.col.std)
@@ -87,6 +90,7 @@ def check_desc_stats(col_type, invalid, assert_invalid):
             assert_invalid(dm.col.max)
             assert_invalid(dm.col.sum)
     else:
+        assert_invalid(dm.col[...])
         assert_invalid(dm.col.mean)
         assert_invalid(dm.col.median)
         assert_invalid(dm.col.std)
@@ -96,6 +100,7 @@ def check_desc_stats(col_type, invalid, assert_invalid):
     # NAN values
     if col_type is not IntColumn:
         dm.col = invalid
+        assert_nan(dm.col[...])
         assert_nan(dm.col.mean)
         assert_nan(dm.col.median)
         assert_nan(dm.col.std)
@@ -126,6 +131,8 @@ def test_seriescolumn():
     dm.col[0] = [1,2,3]
     dm.col[1] = [3,3,3]
     dm.col[2] = [4,4,4]
+    assert all(dm.col[:, ...] == [2, 3, 4])
+    assert all(dm.col[...] == [8./3, 9./3, 10/3.])
     assert all(dm.col.mean == [8./3, 9./3, 10/3.])
     assert all(dm.col.median == [3,3,3])
     assert all(dm.col.max == [4,4,4])

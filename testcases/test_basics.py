@@ -340,6 +340,35 @@ def test_seriescolumn():
     check_series(dm.t, a)
 
 
+def test_multidimensional_slicing():
+    dm = DataMatrix(length=2)
+    dm.m = MultiDimensionalColumn(shape=(('x', 'y', 'z'),
+                                         ('a', 'b', 'c', 'd')))
+    dm.m[0] = np.array([[ 1,  2,  3,  4],
+                        [ 5,  6,  7,  8],
+                        [ 9, 10, 11, 12]])
+    dm.m[1] = np.array([[13, 14, 15, 16],
+                        [17, 18, 19, 20],
+                        [21, 22, 23, 24]])
+    a = np.array([[ 7.,  8.,  9., 10.],
+                  [11., 12., 13., 14.],
+                  [15., 16., 17., 18.]])
+    # Averaging over the first dimension gives an array
+    assert np.all(dm.m[...] == a)
+    assert np.all(dm.m[..., 0] == a[0])
+    assert np.all(dm.m[..., ...] == a.mean(axis=0))
+    assert np.all(dm.m[..., :, ...] == a.mean(axis=1))
+    assert np.all(dm.m[..., 0, ...] == a[0].mean())
+    # Averaging over all dimensions except the first gives a floatcolumn
+    assert dm.m[:, ..., ...] == [6.5, 18.5]
+    a = np.array([[ 5,  6,  7,  8],
+                  [17, 18, 19, 20]])
+    assert np.all(dm.m[:, ...]._seq == a)
+    a = np.array([[ 2.5,  6.5, 10.5],
+                  [14.5, 18.5, 22.5]])
+    assert np.all(dm.m[:, :, ...]._seq == a)
+
+
 def test_multidimensional_assignment():
     dm = DataMatrix(length=2)
     dm.m = MultiDimensionalColumn(shape=(('x', 'y', 'z'),))
@@ -363,9 +392,6 @@ def test_multidimensional_assignment():
     dm.m[0, :] = 1
     assert np.all(dm.m._seq == a)
     dm.m = 0
-    dm.m[0, ...] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
     dm.m[0, (0, 1, 2)] = 1
     assert np.all(dm.m._seq == a)
     dm.m = 0
@@ -380,14 +406,6 @@ def test_multidimensional_assignment():
     dm.m = 0
     dm.m[:, :] = 1
     assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[...] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[..., :] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[:, ...] = 1
     assert np.all(dm.m._seq == a)
     # Set one column in all rows
     a = np.array([[0, 1, 0],
@@ -398,12 +416,6 @@ def test_multidimensional_assignment():
     dm.m = 0
     dm.m[:, 'y'] = 1
     assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[..., 1] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[..., 'y'] = 1
-    assert np.all(dm.m._seq == a)
     # Set two column in all rows
     a = np.array([[1, 0, 1],
                   [1, 0, 1]])
@@ -412,12 +424,6 @@ def test_multidimensional_assignment():
     assert np.all(dm.m._seq == a)
     dm.m = 0
     dm.m[:, ('x', 'z')] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[..., (0, 2)] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[..., ('x', 'z')] = 1
     assert np.all(dm.m._seq == a)
     dm.m = 0
     dm.m[(0, 1), (0, 2)] = 1
@@ -446,8 +452,6 @@ def test_multidimensional_assignment():
     assert np.all(dm.m._seq == a)
     dm.m[:] = a
     assert np.all(dm.m._seq == a)
-    dm.m[...] = a
-    assert np.all(dm.m._seq == a)
     dm.m = 0
     dm.m[:] = 1
     assert np.all(dm.m._seq == a)
@@ -466,24 +470,6 @@ def test_multidimensional_assignment():
     dm.m = 0
     dm.m[(0, 1), (0, 1, 2), (0, 1, 2, 3)] = 1
     assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[...] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[..., :] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[..., :, :] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[:, ..., :] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[:, ...] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[:, :, ...] = 1
-    assert np.all(dm.m._seq == a)
     # Set first dimension
     a = np.array([[[1, 1, 1, 1],
                    [1, 1, 1, 1],
@@ -498,9 +484,6 @@ def test_multidimensional_assignment():
     dm.m[0, :] = a[0]
     assert np.all(dm.m._seq == a)
     dm.m = 0
-    dm.m[0, ...] = a[0]
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
     dm.m[0] = 1
     assert np.all(dm.m._seq == a)
     dm.m = 0
@@ -508,12 +491,6 @@ def test_multidimensional_assignment():
     assert np.all(dm.m._seq == a)
     dm.m = 0
     dm.m[0, :, :] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[0, ...] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[0, ..., :] = 1
     assert np.all(dm.m._seq == a)
     dm.m = 0
     dm.m[0, (0, 1, 2), :] = 1
@@ -553,9 +530,6 @@ def test_multidimensional_assignment():
     dm.m[:, 1] = a[:, 1]
     assert np.all(dm.m._seq == a)
     dm.m = 0
-    dm.m[:, 1, ...] = a[:, 1]
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
     dm.m[:, 1, :] = a[:, 1]
     assert np.all(dm.m._seq == a)
     dm.m = 0
@@ -569,18 +543,6 @@ def test_multidimensional_assignment():
     assert np.all(dm.m._seq == a)
     dm.m = 0
     dm.m[:, 'y', :] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[:, 1, ...] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[:, 'y', ...] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[..., 1, :] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[..., 'y', :] = 1
     assert np.all(dm.m._seq == a)
     a = np.array([[[1, 1, 1, 1],
                    [0, 0, 0, 0],
@@ -619,12 +581,6 @@ def test_multidimensional_assignment():
     dm.m = 0
     dm.m[0, 'y', :] = 1
     assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[0, 1, ...] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[0, 'y', ...] = 1
-    assert np.all(dm.m._seq == a)
     # Set third dimension
     a = np.array([[[0, 1, 0, 0],
                    [0, 1, 0, 0],
@@ -638,12 +594,6 @@ def test_multidimensional_assignment():
     dm.m = 0
     dm.m[:, :, 'b'] = 1
     assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[..., 1] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[..., 'b'] = 1
-    assert np.all(dm.m._seq == a)
     # Set first and third dimension
     a = np.array([[[0, 1, 0, 0],
                    [0, 1, 0, 0],
@@ -656,12 +606,6 @@ def test_multidimensional_assignment():
     assert np.all(dm.m._seq == a)
     dm.m = 0
     dm.m[0, :, 'b'] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[0, ..., 1] = 1
-    assert np.all(dm.m._seq == a)
-    dm.m = 0
-    dm.m[0, ..., 'b'] = 1
     assert np.all(dm.m._seq == a)
     # Set first, second, and third dimension
     a = np.array([[[0, 0, 0, 0],
