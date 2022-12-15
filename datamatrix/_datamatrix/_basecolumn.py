@@ -35,6 +35,10 @@ try:
     from inspect import getfullargspec as getargspec  # Python 3.0 and later
 except ImportError:
     from inspect import getargspec
+try:
+    Ellipsis
+except NameError:
+    Ellipsis = None  # was introduced in Python 3.10
 
 
 INF = float('inf')
@@ -504,6 +508,23 @@ class BaseColumn(OrderedState):
 
         return self._empty_col(rowid=self._rowid[key], seq=self._seq[key])
 
+    def _getellipsiskey(self, key):
+
+        """
+        visible: False
+
+        desc:
+            Gets the average.
+
+        arguments:
+            key:	A slice object.
+
+        returns:
+            BaseColunn
+        """
+
+        return self.mean
+
 
     def _getsequencekey(self, key):
 
@@ -919,6 +940,8 @@ class BaseColumn(OrderedState):
             return self._getintkey(key)
         if isinstance(key, slice):
             return self._getslicekey(key)
+        if Ellipsis is not None and key == Ellipsis:
+            return self._getellipsiskey(key)
         if isinstance(key, SEQUENCE):
             # Hack for matplotlib
             if self._requests_new_axis(key):

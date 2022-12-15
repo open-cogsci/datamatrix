@@ -441,10 +441,17 @@ class _MultiDimensionalColumn(NumericColumn):
         if isinstance(key, tuple) and len(key) <= len(self._seq.shape):
             # Advanced indexing always returns a copy, rather than a view, so
             # there's no need to explicitly copy the result.
-            indices = self._numindices(key)
+            indices = self._numindices(key, accept_ellipsis=True)
             if indices is None:
                 return
             value = self._seq[indices]
+            # Averaging axes allows the slice to be reduced as part of the
+            # slice. dm.s[:, ...] wil average axis 1, wheras dm.s[...] will
+            # average axis 0.
+            averaging_axes = self._averaging_axes(key)
+            if averaging_axes:
+                logger.debug('averaging over axes {}'.format(averaging_axes))
+                value = np.nanmean(value, axis=averaging_axes)
             # If the index refers to exactly one value, then we return this
             # value as a float.
             if len(key) == len(self._seq.shape) and all(
@@ -460,8 +467,14 @@ class _MultiDimensionalColumn(NumericColumn):
             squeeze_dims = tuple(dim + 1
                                  for dim, size in enumerate(value.shape[1:])
                                  if size == 1)
-            # print('squeeze', squeeze_dims)
-            value = value.squeeze(axis=squeeze_dims)
+            if squeeze_dims:
+                logger.debug('squeezing dimensions {}'.format(squeeze_dims))
+                value = value.squeeze(axis=squeeze_dims)
+            # If we're averaging across the first dimension, then we cannot
+            # create column from the result because it changes the rows. In
+            # this case we return an array.
+            if 0 in averaging_axes:
+                return value
             # If only one dimension remains, we return a FloatColumn, otherwise
             # a MultiDimensionalColumn, SeriesColumn, SurfaceColumn, or
             # VolumeColumn. However, we don't do this if any of the dimensions
@@ -469,8 +482,7 @@ class _MultiDimensionalColumn(NumericColumn):
             # a coincidence.
             row_indices = indices[0].flatten()
             if len(value.shape) == 1 and not any(
-                    isinstance(index, slice) or index == Ellipsis
-                    for index in key[1:]):
+                    isinstance(index, slice) for index in key[1:]):
                 col = FloatColumn(self._datamatrix,
                                   rowid=self._rowid[row_indices],
                                   seq=value)
@@ -554,23 +566,19 @@ class _MultiDimensionalColumn(NumericColumn):
             return self.index_names[dim - 1].index(name)
         except ValueError as e:
             raise ValueError('{} is not an index name'.format(name))
+            
+    def _averaging_axes(self, indices):
+        """Returns the axes that should be averaged when getting a slice, as
+        specified by Ellipsis (...).
+        """
+        return tuple(dim for dim, index in enumerate(indices)
+                     if Ellipsis is not None and index == Ellipsis)
         
-    def _numindices(self, indices):
+    def _numindices(self, indices, accept_ellipsis=False):
         """Takes a tuple of indices, which can be either named or numeric,
         and converts it to a tuple of numeric indices that can be used to
         slice the array.
         """
-        # An ellipsis (...) is expanded to a full slice that covers all
-        # dimensions that weren't specified. In other words, say that col
-        # has 3 dimensions (+ 1 dimension for the rows), then
-        # dm.col[0, ..., 0] becomes dm.col[0, :, :, 0]
-        if Ellipsis is not None and Ellipsis in indices:
-            if indices.count(Ellipsis) > 1:
-                raise IndexError(
-                    'at most one ellipsis (...) allowed in indexing')
-            indices = indices[:indices.index(Ellipsis)] + \
-                (slice(None), ) * (1 + len(self._seq.shape) - len(indices)) + \
-                indices[indices.index(Ellipsis) + 1:]
         # Indices can be specified as slices, integers, names, and sequences of
         # integers and/ or names. These are all normalized to numpy arrays of
         # indices. The result is a tuple of arrays, where each array indexes
@@ -579,6 +587,9 @@ class _MultiDimensionalColumn(NumericColumn):
         for dim, index in enumerate(indices):
             if isinstance(index, slice):
                 index = np.arange(*index.indices(self._seq.shape[dim]))
+            elif accept_ellipsis and Ellipsis is not None and \
+                    index == Ellipsis:
+                index = np.arange(self._seq.shape[dim])
             elif isinstance(index, int):
                 index = np.array([index])
             elif isinstance(index, np.ndarray):
