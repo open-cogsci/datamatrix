@@ -146,9 +146,13 @@ def stack_multiprocess(fnc, args, processes=None):
     # The return values consist of path objects that refer to temporary
     # binary datamatrix files. We read these files, stack them, and then
     # delete them.
-    dm = ops.stack([io.readbin(path) for path in results])
-    for path in results:
-        path.unlink()
+    try:
+        dm = ops.stack([io.readbin(path) for path in results])
+    except Exception as e:
+        raise
+    finally:
+        for path in results:
+            path.unlink()
     return dm
 
 
