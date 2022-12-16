@@ -18,8 +18,9 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
+from datamatrix import cfg
 from datamatrix._datamatrix._multidimensionalcolumn import \
-    _MultiDimensionalColumn, SAVE_CHUNK_SIZE
+    _MultiDimensionalColumn
 from datamatrix.io._pickle import readpickle, writepickle
 import logging
 import tarfile
@@ -76,7 +77,7 @@ def readbin(path):
         logger.debug('reading auxiliary file: {}'.format(aux_path))
         tar.extract(tar.getmember(str(aux_path)))
         col._init_seq()
-        chunk_slice = int(SAVE_CHUNK_SIZE / col._memory_size() * len(col))
+        chunk_slice = int(cfg.save_chunk_size / col._memory_size() * len(col))
         with aux_path.open('rb+') as fd:
             a = np.memmap(fd, mode='r', shape=col.shape, dtype=col.dtype)
             for i in range(0, len(col), chunk_slice):
@@ -121,7 +122,7 @@ def writebin(dm, path):
             continue
         aux_path = path.parent / Path('.{}.memmap'.format(id(col)))
         logger.debug('writing auxiliary file: {}'.format(aux_path))
-        chunk_slice = int(SAVE_CHUNK_SIZE / col._memory_size() * len(col))
+        chunk_slice = int(cfg.save_chunk_size / col._memory_size() * len(col))
         with aux_path.open('wb+') as fd:
             a = np.memmap(fd, mode='w+', shape=col.shape, dtype=col.dtype)
             for i in range(0, len(col), chunk_slice):

@@ -28,8 +28,8 @@ class Config:
     """
     min_mem_free_rel = .5
     min_mem_free_abs = 4294967296
-    never_load_max_size = 134217728
-    always_load_min_size = float('inf')
+    always_load_max_size = 134217728
+    never_load_min_size = float('inf')
     save_chunk_size = 134217728
     
     def __init__(self):

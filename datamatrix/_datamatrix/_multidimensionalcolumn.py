@@ -54,6 +54,7 @@ class _MultiDimensionalColumn(NumericColumn):
     dtype = float
     printoptions = dict(precision=4, threshold=4, edgeitems=2)
     touch_history = OrderedDict()
+    suspend_touch = False
 
     def __init__(self, datamatrix, shape, defaultnan=True, **kwargs):
 
@@ -264,45 +265,56 @@ class _MultiDimensionalColumn(NumericColumn):
         MIN_MEM_FREE_REL constants.
         """
         memory_size = self._memory_size()
-        if memory_size < cfg.always_load_min_size:
+        if memory_size < cfg.always_load_max_size:
             return True
-        if memory_size > cfg.never_load_max_size:
+        if memory_size > cfg.never_load_min_size:
             return False
         vm = psutil.virtual_memory()
-        mem_free_abs = vm.available - memory_size
+        mem_free_abs =  vm.available - memory_size
         mem_free_rel = mem_free_abs / vm.total
         logger.debug('{} MB {:.1f}% will be available after loading column'
-                     .format(mem_free_abs // MB, 100 * mem_free_rel))
-        return mem_free_abs > cfg.min_mem_free_rel or \
-            mem_free_rel > cfg.min_mem_free_abs
+                     .format(mem_free_abs // 1024 ** 2, 100 * mem_free_rel))
+        return mem_free_abs > cfg.min_mem_free_abs or \
+            mem_free_rel > cfg.min_mem_free_rel
     
-    def _touch(self):
+    def _touch(self, try_to_load=False):
         """Moves the current column to the end of the touch history to indicate
-        that it was used last.
+        that it was used last. Frees up memory by unloading other columns,
+        starting with the least recently used ones.
         """
-        id_ = id(self)
-        if id_ in self.touch_history:
-            self.touch_history.move_to_end(id_)
+        # Avoid recursive touching. This is a class property so that other
+        # columns can also see it.
+        if self.__class__.suspend_touch:
+            return
+        self_id = id(self)
+        if self_id in self.touch_history:
+            self.touch_history.move_to_end(self_id)
         else:
-            self.touch_history[id_] = weakref.ref(self)
-        for col in list(self.touch_history.values()):
+            self.touch_history[self_id] = weakref.ref(self)
+        self.__class__.suspend_touch = True
+        for other_id, col in self.touch_history.items():
             col = col()
             if col is None or col is self or not col.loaded:
                 continue
             if not self._sufficient_free_memory():
                 logger.debug('insufficient free memory')
                 col.loaded = False
-        if not self.loaded and self._sufficient_free_memory():
-            logger.debug('loading currently touched column')
+            else:
+                break
+        if try_to_load and not self.loaded and self._sufficient_free_memory():
+            logger.debug(
+                'loading previously unloaded column {}'.format(self_id))
             self.loaded = True
+        self.__class__.suspend_touch = False
 
     def _init_seq(self):
+        self._touch()
         if self.loaded:
             # Close previous memmap object
             if self._fd is not None and not self._fd.closed:
                 self._fd.close()
                 self._fd = None
-            logger.debug('initializing loaded column')
+            logger.debug('initializing loaded column {}'.format(id(self)))
             if self.defaultnan:
                 self._seq = np.empty(self.shape, dtype=self.dtype)
                 self._seq[:] = np.nan
@@ -311,7 +323,7 @@ class _MultiDimensionalColumn(NumericColumn):
             return
         # Use memory-mapped array
         import tempfile
-        logger.debug('initializing unloaded column (memmap)')
+        logger.debug('initializing unloaded column {}'.format(id(self)))
         memory_size = self._memory_size()
         if memory_size >= psutil.virtual_memory().total:
             logger.warning('the size of this column exceeds system memory. '
@@ -341,7 +353,7 @@ class _MultiDimensionalColumn(NumericColumn):
 
     def _operate(self, a, number_op, str_op=None, flip=False):
 
-        self._touch()
+        self._touch(try_to_load=True)
         # For a 1D array with the length of the datamatrix, we create an array
         # in which the second dimension (i.e. the shape) is constant. This
         # allows us to do by-row operations.
@@ -431,7 +443,7 @@ class _MultiDimensionalColumn(NumericColumn):
     # Implemented syntax
 
     def __getitem__(self, key):
-        self._touch()
+        self._touch(try_to_load=True)
         if isinstance(key, tuple) and len(key) <= len(self._seq.shape):
             # Advanced indexing always returns a copy, rather than a view, so
             # there's no need to explicitly copy the result.
@@ -499,7 +511,7 @@ class _MultiDimensionalColumn(NumericColumn):
         return super().__getitem__(key)
 
     def __setitem__(self, key, value):
-        self._touch()
+        self._touch(try_to_load=True)
         if not isinstance(key, tuple):
             key = (key, )
             key_was_tuple = False
