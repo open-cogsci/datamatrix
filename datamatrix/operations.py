@@ -953,7 +953,7 @@ def _best_fitting_col_type(col):
     if isinstance(col, _SeriesColumn):
         return SeriesColumn(depth=col.depth)
     if isinstance(col, _MultiDimensionalColumn):
-        return MultiDimensionalColumn(shape=col.shape[1:])
+        return MultiDimensionalColumn(shape=col._orig_shape)
     if isinstance(col, (FloatColumn, IntColumn)):
         return type(col)
     if not all(isreal(val, allow_inf=True, allow_nan=True) for val in col):

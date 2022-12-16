@@ -42,6 +42,7 @@ try:
 except ImportError:
     psutil = None
 logger = logging.getLogger('datamatrix')
+suspend_touch = False
 
 
 class _MultiDimensionalColumn(NumericColumn):
@@ -54,7 +55,6 @@ class _MultiDimensionalColumn(NumericColumn):
     dtype = float
     printoptions = dict(precision=4, threshold=4, edgeitems=2)
     touch_history = OrderedDict()
-    suspend_touch = False
 
     def __init__(self, datamatrix, shape, defaultnan=True, **kwargs):
 
@@ -282,16 +282,17 @@ class _MultiDimensionalColumn(NumericColumn):
         that it was used last. Frees up memory by unloading other columns,
         starting with the least recently used ones.
         """
-        # Avoid recursive touching. This is a class property so that other
-        # columns can also see it.
-        if self.__class__.suspend_touch:
+        # Avoid recursive touching. This is a global so that other columns can
+        # also see it.
+        global suspend_touch
+        if suspend_touch:
             return
         self_id = id(self)
         if self_id in self.touch_history:
             self.touch_history.move_to_end(self_id)
         else:
             self.touch_history[self_id] = weakref.ref(self)
-        self.__class__.suspend_touch = True
+        suspend_touch = True
         for other_id, col in self.touch_history.items():
             col = col()
             if col is None or col is self or not col.loaded:
@@ -305,7 +306,7 @@ class _MultiDimensionalColumn(NumericColumn):
             logger.debug(
                 'loading previously unloaded column {}'.format(self_id))
             self.loaded = True
-        self.__class__.suspend_touch = False
+        suspend_touch = False
 
     def _init_seq(self):
         self._touch()

@@ -70,6 +70,7 @@ class BaseColumn(OrderedState):
 
     default_value = u''
     ndim = 1
+    loaded = True
 
     def __init__(self, datamatrix, rowid=None, seq=None, metadata=None):
 
