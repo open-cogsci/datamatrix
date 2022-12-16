@@ -20,6 +20,7 @@ import logging
 import os
 import weakref
 from datamatrix.py3compat import *
+from datamatrix import cfg
 from datamatrix._datamatrix._numericcolumn import NumericColumn, FloatColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
 try:
@@ -42,15 +43,6 @@ except ImportError:
     psutil = None
 logger = logging.getLogger('datamatrix')
 
-MB = 1048576
-# Memory consumption should be kept below either the relative or absolute
-# minimum. Beyond these limits, memmap will be used.
-MIN_MEM_FREE_REL = .5
-MIN_MEM_FREE_ABS = 4096 * MB
-# Arrays smaller than this will never be memmapped.
-MAX_ARRAY_SIZE = 128 * MB
-# The size of chunks that are written to disk during saving
-SAVE_CHUNK_SIZE = 128 * MB
 
 class _MultiDimensionalColumn(NumericColumn):
 
@@ -272,15 +264,17 @@ class _MultiDimensionalColumn(NumericColumn):
         MIN_MEM_FREE_REL constants.
         """
         memory_size = self._memory_size()
-        if memory_size < MAX_ARRAY_SIZE:
+        if memory_size < cfg.always_load_min_size:
             return True
+        if memory_size > cfg.never_load_max_size:
+            return False
         vm = psutil.virtual_memory()
         mem_free_abs = vm.available - memory_size
         mem_free_rel = mem_free_abs / vm.total
         logger.debug('{} MB {:.1f}% will be available after loading column'
                      .format(mem_free_abs // MB, 100 * mem_free_rel))
-        return mem_free_abs > MIN_MEM_FREE_ABS or \
-            mem_free_rel > MIN_MEM_FREE_REL
+        return mem_free_abs > cfg.min_mem_free_rel or \
+            mem_free_rel > cfg.min_mem_free_abs
     
     def _touch(self):
         """Moves the current column to the end of the touch history to indicate
@@ -326,7 +320,7 @@ class _MultiDimensionalColumn(NumericColumn):
         self._fd = tempfile.NamedTemporaryFile(dir=os.getcwd(), prefix='.',
                                                suffix='.memmap')
         self._seq = np.memmap(self._fd, shape=self.shape, dtype=self.dtype)
-        chunk_slice = int(SAVE_CHUNK_SIZE / memory_size * len(self))
+        chunk_slice = int(cfg.save_chunk_size / memory_size * len(self))
         self._seq[:] = np.nan if self.defaultnan else 0
 
     def __setattr__(self, key, val):
