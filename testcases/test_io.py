@@ -45,6 +45,10 @@ def test_io():
     io.writepickle(testdm, 'tmp.pickle')
     testdm = io.readpickle('tmp.pickle')
     check_dm(refdm, testdm)
+        
+    io.writebin(testdm, 'tmp.dm')
+    testdm = io.readbin('tmp.dm')
+    check_dm(refdm, testdm)
 
     io.writexlsx(testdm, 'tmp.xlsx')
     with pytest.warns(UserWarning):  # Not all rows have column C

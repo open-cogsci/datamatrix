@@ -46,6 +46,14 @@ def check_col(col, ref):
 
     check_integrity(col._datamatrix)
     assert len(col) == len(ref)
+    if hasattr(col, '_seq') and hasattr(ref, '_seq') and \
+            isinstance(col._seq, np.ndarray) and \
+            isinstance(ref._seq, np.ndarray) and \
+            len(col.shape) > 1 and len(ref.shape) > 1:
+        col._seq[np.isnan(col._seq)] = 0
+        ref._seq[np.isnan(ref._seq)] = 0
+        assert np.all(col._seq == ref._seq)
+        return
     for x, y in zip(col, ref):
         if x != y:
             if not (x is None or y is None) and np.isnan(x) and np.isnan(y):
