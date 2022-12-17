@@ -126,3 +126,14 @@ def test_memoize_chain():
         chain()
     l = out.getvalue().strip().split('\n')
     assert len(l) == 1
+
+
+def get_dm(i):
+    dm = DataMatrix(length=1)
+    dm.s = i
+    return dm
+
+
+def test_stack_multiprocess():
+    dm = fnc.stack_multiprocess(get_dm, [1, 2, 3, 4, 5])
+    assert dm.s == [1, 2, 3, 4, 5]

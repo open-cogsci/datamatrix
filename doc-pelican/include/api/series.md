@@ -89,8 +89,10 @@ the default in future releases.
 
 __Source:__
 
-- Mathot, S. (2013). A simple way to reconstruct pupil size during eye
-  blinks. <http://doi.org/10.6084/m9.figshare.688002>
+- Mathot, S., & Vilotijević, A. (2022). Methods in cognitive 
+  pupillometry: Design, preprocessing, and statitical analysis.
+  *Behavior Research Methods*.
+  <https://doi.org/10.3758/s13428-022-01957-7>
 
 __Arguments:__
 
@@ -174,7 +176,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7f63b6fe79a0>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7f0ffbf8b370>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times
 shorter. The depth of the downsampled series is the highest multiple of
@@ -219,7 +221,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7f63b6fe79a0>
+	- Default: <function nanmean at 0x7f0ffbf8b370>
 
 __Returns:__
 
@@ -617,90 +619,6 @@ A float column with sample indices or `NAN` for cells in which there was no matc
 
 </div>
 
-<div class="FunctionDoc YAMLDoc" id="flatten" markdown="1">
-
-## function __flatten__\(dm\)
-
-Flattens all series of a datamatrix to float columns. The result is a
-new datamatrix where each row of the original datamatrix is repeated
-for each sample of the series. The new datamatrix does not contain any
-series.
-
-This function requires that all series in `dm` have the same depth, or
-that `dm` doesn't contain any series, in which case a copy of `dm` is
-returned.
-
-*Version note:* New in 0.15.0
-
-__Example:__
-
-%--
-python: |
- from datamatrix import DataMatrix, series as srs
-
- dm = DataMatrix(length=2)
- dm.col = 'a', 'b'
- dm.s1 = SeriesColumn(depth=3)
- dm.s1[:] = 1,2,3
- dm.s2 = SeriesColumn(depth=3)
- dm.s2[:] = 3,2,1
- flat_dm = srs.flatten(dm)
- print('Original:')
- print(dm)
- print('Flattened:')
- print(flat_dm)
---%
-
-__Arguments:__
-
-- `dm` -- A DataMatrix
-	- Type: DataMatrix
-
-__Returns:__
-
-A 'flattened' DataMatrix without series
-
-- Type: DataMatrix
-
-</div>
-
-<div class="FunctionDoc YAMLDoc" id="infcount" markdown="1">
-
-## function __infcount__\(series\)
-
-Counts the number of `INF` values for each cell in a series column, and
-returns this as an int column.
-
-*Version note:* New in 0.15.0
-
-__Example:__
-
-%--
-python: |
- from datamatrix import DataMatrix, SeriesColumn, series as srs, INF
-
- dm = DataMatrix(length=3)
- dm.s = SeriesColumn(depth=3)
- dm.s[0] = 1, 2, 3
- dm.s[1] = 1, 2, INF
- dm.s[2] = INF, INF, INF
- dm.nr_of_inf = srs.infcount(dm.s)
- print(dm)
---%
-
-__Arguments:__
-
-- `series` -- A series column to count the `INF` values in.
-	- Type: SeriesColumn
-
-__Returns:__
-
-An int column with the number of `INF` values in each cell.
-
-- Type: IntColumn
-
-</div>
-
 <div class="FunctionDoc YAMLDoc" id="interpolate" markdown="1">
 
 ## function __interpolate__\(series\)
@@ -858,43 +776,6 @@ A `(series, zero_point)` tuple, in which `series` is a `SeriesColumn` and `zero_
 
 </div>
 
-<div class="FunctionDoc YAMLDoc" id="nancount" markdown="1">
-
-## function __nancount__\(series\)
-
-Counts the number of `NAN` values for each cell in a series column, and
-returns this as an int column.
-
-*Version note:* New in 0.15.0
-
-__Example:__
-
-%--
-python: |
- from datamatrix import DataMatrix, SeriesColumn, series as srs, NAN
-
- dm = DataMatrix(length=3)
- dm.s = SeriesColumn(depth=3)
- dm.s[0] = 1, 2, 3
- dm.s[1] = 1, 2, NAN
- dm.s[2] = NAN, NAN, NAN
- dm.nr_of_nan = srs.nancount(dm.s)
- print(dm)
---%
-
-__Arguments:__
-
-- `series` -- A series column to count the `NAN` values is.
-	- Type: SeriesColumn
-
-__Returns:__
-
-An int column with the number of `NAN` values in each cell.
-
-- Type: IntColumn
-
-</div>
-
 <div class="FunctionDoc YAMLDoc" id="normalize_time" markdown="1">
 
 ## function __normalize\_time__\(dataseries, timeseries\)
@@ -954,52 +835,6 @@ __Returns:__
 A new series in which the data points are spread according to the timestamps.
 
 - Type: SeriesColumn
-
-</div>
-
-<div class="FunctionDoc YAMLDoc" id="reduce" markdown="1">
-
-## function __reduce__\(series, operation=<function nanmean at 0x7f63b6fe79a0>\)
-
-Transforms series to single values by applying an operation (typically
-a mean) to each series.
-
-*Version note:* As of 0.11.0, the function has been renamed to
-`reduce()`. The original `reduce_()` is deprecated.
-
-__Example:__
-
-%--
-python: |
- import numpy as np
- from datamatrix import DataMatrix, SeriesColumn, series as srs
-
- LENGTH = 5 # Number of rows
- DEPTH = 10 # Depth (or length) of SeriesColumns
-
- dm = DataMatrix(length=LENGTH)
- dm.y = SeriesColumn(depth=DEPTH)
- dm.y = np.random.random( (LENGTH, DEPTH) )
- dm.mean_y = srs.reduce(dm.y)
-
- print(dm)
---%
-
-__Arguments:__
-
-- `series` -- The signal to reduce.
-	- Type: SeriesColumn
-
-__Keywords:__
-
-- `operation` -- The operation function to use for the reduction. This function should accept `series` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7f63b6fe79a0>
-
-__Returns:__
-
-A reduction of the signal.
-
-- Type: FloatColumn
 
 </div>
 

@@ -382,19 +382,17 @@ dm = io.readxlsx('my_datamatrix.xlsx')
 
 ## Column types
 
-When you create a `DataMatrix`, you can indicate a default column type. If you do not specify a default column type, a `MixedColumn` is used by default.
+When you create a `DataMatrix`, you can indicate a default column. If you do not specify a default column type, a `MixedColumn` is used by default.
 
 ```python
-from datamatrix import DataMatrix, IntColumn
-dm = DataMatrix(length=2, default_col_type=IntColumn)
-dm.i = 1, 2 # This is an IntColumn
+dm = DataMatrix(length=2, default_col_type=int)
+dm.i = 1, 2  # This is an IntColumn
 ```
 
-You can also explicitly indicate the column type when creating a new column:
+You can also explicitly indicate the column type when creating a new column. 
 
 ```python
-from datamatrix import FloatColumn
-dm.f = FloatColumn
+dm.f = float  # This creates a FloatColumn
 ```
 
 ### MixedColumn (default)

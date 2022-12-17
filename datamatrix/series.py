@@ -705,7 +705,7 @@ def baseline(
 
     if reduce_fnc is None:
         reduce_fnc = nanmedian
-    baseline = reduce_(
+    baseline = reduce(
         window(baseline, start=bl_start, end=bl_end),
         operation=reduce_fnc
     )

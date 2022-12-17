@@ -100,6 +100,7 @@ Optional:
 - `prettytable` for creating a text representation of a DataMatrix (e.g. to print it out)
 - `openpyxl` for reading and writing `.xlsx` files
 - `fastnumbers` for improved performance
+- `tomlkit` for reading settings from `pyproject.toml`
 
 ## Installation
 

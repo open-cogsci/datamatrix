@@ -134,13 +134,14 @@ def flatten(dm):
         
         %--
         python: |
-         from datamatrix import DataMatrix, multidimensional as mdim
+         from datamatrix import DataMatrix, MultiDimensionalColumn, \
+             multidimensional as mdim
 
          dm = DataMatrix(length=2)
          dm.col = 'a', 'b'
          dm.m1 = MultiDimensionalColumn(shape=(3,))
          dm.m1[:] = 1,2,3
-         dm.m2 = MultiDimensionalColumn(depth=(3,))
+         dm.m2 = MultiDimensionalColumn(shape=(3,))
          dm.m2[:] = 3,2,1
          flat_dm = mdim.flatten(dm)
          print('Original:')
@@ -215,7 +216,7 @@ def reduce(col, operation=nanmean):
          dm = DataMatrix(length=5)
          dm.m = MultiDimensionalColumn(shape=(3, 3))
          dm.m = np.random.random((5, 3, 3))
-         dm.mean_y = srs.reduce(dm.m)
+         dm.mean_y = mdim.reduce(dm.m)
          print(dm)
         --%
 
@@ -239,7 +240,7 @@ def reduce(col, operation=nanmean):
         raise TypeError(u'Expecting a MultiDimensionalColumn object')
     reduced_col = FloatColumn(col._datamatrix)
     try:
-        a = operation(col, axis=1)
+        a = operation(col, axis=np.arange(1, len(col.shape)))
     except TypeError:
         for i, val in enumerate(col):
             reduced_col[i] = operation(val)

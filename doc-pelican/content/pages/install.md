@@ -6,12 +6,14 @@ title: Install
 
 The following packages are required for extra functionality:
 
+- `numpy` and `scipy` for using the `FloatColumn`, `IntColumn`, `SeriesColumn`, `MultiDimensionalColumn` objects
+- `pandas` for conversion to and from `pandas.DataFrame`.
+- `mne` for conversion to and from `mne.Epochs` and `mne.TFR`.
 - `fastnumbers` for improved performance
-- `numpy` and `scipy` for using the `FloatColumn`, `IntColumn`, and `SeriesColumn` objects
 - `prettytable` for creating a text representation of a DataMatrix (e.g. to print it out)
 - `openpyxl` for reading and writing `.xlsx` files
 - `json_tricks` for hashing, serialization to and from `json`, and memoization (caching).
-- `pandas` for conversion to and from `pandas.DataFrame`.
+- `tomlkit` for reading configuration from `pyproject.toml`.
 
 ## Installation
 
@@ -24,7 +26,7 @@ pip install python-datamatrix
 Optional dependencies:
 
 ~~~bash
-pip install fastnumbers numpy scipy prettytable openpyxl pandas json_tricks
+pip install fastnumbers numpy scipy prettytable openpyxl pandas json_tricks tomlkit mne
 ~~~
 
 
@@ -38,7 +40,7 @@ Optional dependencies:
 
 
 ~~~bash
-conda install -c conda-forge scipy pandas json_tricks
+conda install -c conda-forge scipy pandas json_tricks tomlkit mne
 ~~~
 
 

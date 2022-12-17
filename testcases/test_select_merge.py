@@ -74,31 +74,10 @@ def check_getrow(col_type):
     _()
 
 
-def check_stack(col_type, invalid):
-
-    dm1 = DataMatrix(length=2, default_col_type=col_type)
-    dm1.col1 = 1, 2
-    dm1.col_shared = 3, 4
-    dm2 = DataMatrix(length=2, default_col_type=col_type)
-    dm2.col2 = 5, 6
-    dm2.col_shared = 7, 8
-    dm3 = dm1 << dm2
-    check_col(dm3.col1, [1,2,invalid,invalid])
-    check_col(dm3.col_shared, [3,4,7,8])
-    check_col(dm3.col2, [invalid, invalid, 5, 6])
-    dm4 = DataMatrix(default_col_type=col_type)
-    for row in dm1:
-        dm4 <<= row
-    for row in dm2:
-        dm4 <<= row
-    check_dm(dm3, dm4)
-
-
 def test_mixedcolumn():
 
     check_getrow(MixedColumn)
     check_select(MixedColumn)
-    check_stack(MixedColumn, invalid=u'')
     # Check type selectors
     dm = DataMatrix(length=6)
     dm.col = 1, 2, 3, 1.1, 2.1, 'a'
@@ -114,7 +93,6 @@ def test_floatcolumn():
 
     check_getrow(FloatColumn)
     check_select(FloatColumn)
-    check_stack(FloatColumn, invalid=np.nan)
     # Check selections with non-int types
     dm = DataMatrix(length=4, default_col_type=FloatColumn)
     dm.col = 1, 2, np.nan, np.inf
@@ -152,7 +130,6 @@ def test_intcolumn():
 
     check_getrow(IntColumn)
     check_select(IntColumn)
-    check_stack(IntColumn, invalid=0)
     # Check selections with non-int types
     dm = DataMatrix(length=2, default_col_type=IntColumn)
     dm.col = 1, 2

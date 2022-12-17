@@ -2,6 +2,32 @@
 
  
 
+<div class="FunctionDoc YAMLDoc" id="readbin" markdown="1">
+
+## function __readbin__\(path\)
+
+Reads a DataMatrix from a binary file. This format allows you to read
+and write DataMatrix objects with unloaded columns, i.e. columns that
+are too large to fit in memory.
+
+__Example:__
+
+~~~.python
+dm = io.readbin('data.dm')
+~~~
+
+*Version note:* New in 0.16.0.
+
+__Arguments:__
+
+- `path` -- The path to the binary file.
+
+__Returns:__
+
+A DataMatrix.
+
+</div>
+
 <div class="FunctionDoc YAMLDoc" id="readpickle" markdown="1">
 
 ## function __readpickle__\(path\)
@@ -84,6 +110,29 @@ __Keywords:__
 __Returns:__
 
 A DataMatrix.
+
+</div>
+
+<div class="FunctionDoc YAMLDoc" id="writebin" markdown="1">
+
+## function __writebin__\(dm, path\)
+
+Reads a DataMatrix to a binary file. This format allows you to read
+and write DataMatrix objects with unloaded columns, i.e. columns that
+are too large to fit in memory.
+
+__Example:__
+
+~~~ .python
+io.writebin(dm, 'data.dm')
+~~~
+
+*Version note:* New in 0.16.0.
+
+__Arguments:__
+
+- `dm` -- The DataMatrix to write.
+- `path` -- The path to the binary file.
 
 </div>
 

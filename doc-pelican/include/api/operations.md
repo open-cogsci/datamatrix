@@ -2,6 +2,184 @@
 
  
 
+<div class="ClassDoc YAMLDoc" id="Row" markdown="1">
+
+## class __Row__
+
+A single row from a DataMatrix.
+
+<div class="FunctionDoc YAMLDoc" id="Row-__init__" markdown="1">
+
+### function __Row\.\_\_init\_\___\(datamatrix, index\)
+
+Constructor.
+
+__Arguments:__
+
+- `datamatrix` -- A DataMatrix object.
+- `index` -- The row index.
+
+</div>
+
+</div>
+
+<div class="ClassDoc YAMLDoc" id="_MultiDimensionalColumn" markdown="1">
+
+## class ___MultiDimensionalColumn__
+
+A column in which each cell is a float array.
+
+<div class="FunctionDoc YAMLDoc" id="_MultiDimensionalColumn-__init__" markdown="1">
+
+### function __\_MultiDimensionalColumn\.\_\_init\_\___\(datamatrix, shape, defaultnan=True, \*\*kwargs\)
+
+Constructor. You generally don't call this constructor correctly, but use the MultiDimensional helper function.
+
+__Arguments:__
+
+- `datamatrix` -- The DataMatrix to which this column belongs.
+	- Type: DataMatrix
+- `shape` -- A tuple that specifies the number and size of the dimensions of each cell. Values can be integers, or tuples of non-integer values that specify names of indices, e.g. `shape=(('x', 'y'), 10)). Importantly, the length of the column (the number of rows) is implicitly used as the first dimension. That, if you specify a two-dimensional shape, then the resulting column has three dimensions.
+	- Type: int
+
+__Keywords:__
+
+- `defaultnan` -- Indicates whether the column should be initialized with `nan` values (`True`) or 0s (`False`).
+	- Type: bool
+	- Default: True
+
+__Keyword dict:__
+
+- `**kwargs`: keywords that are passed on to the parent constructor.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-count" markdown="1">
+
+### property ___MultiDimensionalColumn.count__
+
+The number of unique values that occur in the column.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-depth" markdown="1">
+
+### property ___MultiDimensionalColumn.depth__
+
+A property to access and change the depth of the column. The depth is the second dimension of the column, where the length of the column (the number of rows) is the first dimension.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-dm" markdown="1">
+
+### property ___MultiDimensionalColumn.dm__
+
+The associated DataMatrix.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-loaded" markdown="1">
+
+### property ___MultiDimensionalColumn.loaded__
+
+A property to unloaded the column to disk (by assigning `False`) and load the column from disk (by assigning `True`). You don't usually change this property manually, but rather let the built-in memory management decide when and columns need to be (un)loaded.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-max" markdown="1">
+
+### property ___MultiDimensionalColumn.max__
+
+The highest numeric value in the column, or NAN if there are no numeric values.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-mean" markdown="1">
+
+### property ___MultiDimensionalColumn.mean__
+
+Arithmetic mean of all values. If there are non-numeric values, these are ignored. If there are no numeric values, NAN is returned.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-median" markdown="1">
+
+### property ___MultiDimensionalColumn.median__
+
+The median of all values. If there are non-numeric values, these are ignored. If there are no numeric values, NAN is returned.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-min" markdown="1">
+
+### property ___MultiDimensionalColumn.min__
+
+The lowest numeric value in the column, or NAN if there are no numeric values.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-name" markdown="1">
+
+### property ___MultiDimensionalColumn.name__
+
+The name of the column in the associated DataMatrix, or a list of names if the column occurs multiple times in the DataMatrix.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-plottable" markdown="1">
+
+### property ___MultiDimensionalColumn.plottable__
+
+Gives a view of the traces where the axes have been swapped. This is the format that matplotlib.pyplot.plot() expects.
+
+</div>
+
+<div class="FunctionDoc YAMLDoc" id="_MultiDimensionalColumn-setallrows" markdown="1">
+
+### function __\_MultiDimensionalColumn\.setallrows__\(value\)
+
+Sets all rows to a value, or array of values.
+
+__Arguments:__
+
+- `value` -- A value, or array of values that has the same length as the shape of the column.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-shape" markdown="1">
+
+### property ___MultiDimensionalColumn.shape__
+
+A property to access and change the shape of the column. The shape includes the length of the column (the number of rows) as the first dimension.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-std" markdown="1">
+
+### property ___MultiDimensionalColumn.std__
+
+The standard deviation of all values. If there are non-numeric values, these are ignored. If there are 0 or 1 numeric values, NAN is returned. The degrees of freedom are N-1.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-sum" markdown="1">
+
+### property ___MultiDimensionalColumn.sum__
+
+The sum of all values in the column, or NAN if there are no numeric values.
+
+</div>
+
+<div class="PropertyDoc YAMLDoc" id="_MultiDimensionalColumn-unique" markdown="1">
+
+### property ___MultiDimensionalColumn.unique__
+
+An interator for all unique values that occur in the column.
+
+</div>
+
+</div>
+
 <div class="FunctionDoc YAMLDoc" id="auto_type" markdown="1">
 
 ## function __auto\_type__\(dm\)
@@ -487,6 +665,49 @@ __Returns:__
 A iterator over (value, DataMatrix) tuples if no values are provided; an iterator over DataMatrix objects if values are provided.
 
 - Type: Iterator
+
+</div>
+
+<div class="FunctionDoc YAMLDoc" id="stack" markdown="1">
+
+## function __stack__\(\*dms\)
+
+*Version note:* New in 0.16.0
+
+Stacks multiple DataMatrix objects such that the resulting DataMatrix
+has a length that is equal to the sum of all the stacked DataMatrix
+objects. Phrased differently, this function vertically concatenates
+DataMatrix objects.
+
+Stacking two DataMatrix objects can also be done with the `<<`
+operator. However, when stacking more than two DataMatrix objects,
+using `stack()` is much faster than iteratively stacking with `<<`.
+
+__Example:__
+
+%--
+python: |
+ from datamatrix import operations as ops
+
+ dm1 = DataMatrix(length=2)
+ dm1.col = 'A'
+ dm2 = DataMatrix(length=2)
+ dm2.col = 'B'
+ dm3 = DataMatrix(length=2)
+ dm3.col = 'C'
+ dm = ops.stack(dm1, dm2, dm3)
+ print(dm)
+--%
+
+__Argument list:__
+
+- `*dms`: OrderedDict([('desc', 'A list of DataMatrix objects.'), ('type', 'list')])
+
+__Returns:__
+
+No description
+
+- Type: DataMatrix
 
 </div>
 

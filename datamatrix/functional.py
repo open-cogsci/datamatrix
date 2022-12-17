@@ -104,17 +104,17 @@ def stack_multiprocess(fnc, args, processes=None):
 
         __Example:__
 
-        %--
-        python: |
-         def get_dm(i):
-             dm = DataMatrix(length=1)
-             dm.s = i
-             return dm
+        ```python
+        from datamatrix import DataMatrix, functional as fnc
         
-         # This will launch five separate processes
-         dm = fnc.stack_multiprocess(get_dm, [1, 2, 3, 4, 5])
-         print(dm)
-        --%
+        def get_dm(i):
+            dm = DataMatrix(length=1)
+            dm.s = i
+            return dm
+        
+        # This will launch five separate processes and return a single dm
+        dm = fnc.stack_multiprocess(get_dm, [1, 2, 3, 4, 5])
+        ```
         
         arguments:
             fnc:

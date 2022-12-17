@@ -271,5 +271,74 @@ A new DataMatrix.
 
 </div>
 
+<div class="FunctionDoc YAMLDoc" id="stack_multiprocess" markdown="1">
+
+## function __stack\_multiprocess__\(fnc, args, processes=None\)
+
+Facilitates multiprocessing for functions that return `DataMatrix`
+objects.
+
+Specifically, `stack_multiprocess()`, calls `fnc()` in separate
+processes, each time passing a different argument. Arguments are
+specified in `args`, which should be a list (or other iterable) of
+arguments that are passed to `fnc()` for each call separately. In other
+words, as many processes are launched as there are elements in `args`.
+`fnc()` should be a function that accepts a single argument and returns
+a `DataMatrix` object. The resulting `DataMatrix` objects are stacked
+together (similar to `ops.stack()`) and returned as a single 
+`DataMatrix`.
+
+See also:
+
+- <https://docs.python.org/3/library/multiprocessing.html>
+- %link:operations%#function-stack
+
+*Version note:* New in 0.16.0.
+
+__Example:__
+
+```python
+from datamatrix import DataMatrix, functional as fnc
+
+def get_dm(i):
+    dm = DataMatrix(length=1)
+    dm.s = i
+    return dm
+
+# This will launch five separate processes and return a single dm
+dm = fnc.stack_multiprocess(get_dm, [1, 2, 3, 4, 5])
+```
+
+arguments:
+    fnc:
+        desc: A function to call. This function should accept a single
+              argument and return a single `DataMatrix`.
+        type: callable
+    args:
+        desc: A `list` of arguments that are passes separately to
+              `fnc()`.
+
+keywords:
+    processes:
+        desc: The number of processes that are launched simultaneously
+              or `None` to launch one process for each core on the
+              system.
+        type: [None, int]
+
+returns:
+    type: `DataMatrix`
+
+__Arguments:__
+
+- `fnc` -- No description
+- `args` -- No description
+
+__Keywords:__
+
+- `processes` -- No description
+	- Default: None
+
+</div>
+
 </div>
 

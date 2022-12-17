@@ -30,7 +30,7 @@ from datamatrix import operations as ops
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix._datamatrix._multidimensionalcolumn import \
     _MultiDimensionalColumn
-from testcases.test_tools import check_col, check_row, check_series
+from testcases.test_tools import check_col, check_row, check_series, check_dm
 import numpy as np
 import itertools
 import pytest
@@ -237,6 +237,36 @@ def test_group():
     else:
         assert(False)
 
+
+def test_stack(invalid=''):
+
+    dm1 = DataMatrix(length=2)
+    dm1.col1 = 1, 2
+    dm1.col_shared = 3, 4
+    dm1.m = MultiDimensionalColumn(shape=(1,))
+    dm2 = DataMatrix(length=2)
+    dm2.col2 = 5, 6
+    dm2.col_shared = 7, 8
+    dm2.m = MultiDimensionalColumn(shape=(2,))
+    dm3 = DataMatrix(length=2)
+    dm3.col3 = 9, 10
+    dm3.col_shared = 11, 12
+    dm3.m = MultiDimensionalColumn(shape=(3,))
+    dm4 = ops.stack(dm1, dm2, dm3)
+    check_col(dm4.col1, [1, 2, invalid, invalid, invalid, invalid])
+    check_col(dm4.col_shared, [3,4,7,8,11,12])
+    check_col(dm4.col2, [invalid, invalid, 5, 6, invalid, invalid])
+    check_col(dm4.col3, [invalid, invalid, invalid, invalid, 9, 10])
+    assert dm4.m.shape == (6, 3)
+    dm5 = DataMatrix()
+    for row in dm1:
+        dm5 <<= row
+    for row in dm2:
+        dm5 <<= row
+    for row in dm3:
+        dm5 <<= row
+    check_dm(dm4, dm5)
+    
 
 def test_sort():
 

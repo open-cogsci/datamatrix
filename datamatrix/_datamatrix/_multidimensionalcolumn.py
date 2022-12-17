@@ -78,10 +78,16 @@ class _MultiDimensionalColumn(NumericColumn):
                       specify a two-dimensional shape, then the resulting
                       column has three dimensions.
                 type: int
+                
+        keywords:
             defaultnan:
                 desc: Indicates whether the column should be initialized with
                       `nan` values (`True`) or 0s (`False`).
                 type: bool
+                
+        keyword-dict:
+            kwargs:
+                keywords that are passed on to the parent constructor.
         """
 
         if np is None:
@@ -168,6 +174,8 @@ class _MultiDimensionalColumn(NumericColumn):
         if len(self._shape) > 2:
             raise TypeError('Can only change the depth of two-dimensional '
                             'MultiDimensionalColumns/ SeriesColumns')
+        logger.debug('changing depth from {} to {}'.format(self.depth, depth))
+        self._orig_shape = (depth, )
         if depth > self.depth:
             seq = np.zeros((len(self), depth), dtype=self.dtype)
             if self.defaultnan:
@@ -314,22 +322,23 @@ class _MultiDimensionalColumn(NumericColumn):
         with np.printoptions(**self.printoptions):
             return [str(cell) for cell in self]
 
-    def _operate(self, a, number_op, str_op=None, flip=False):
+    def _operate(self, other, number_op, str_op=None, flip=False):
 
         touch_history.touch(self, try_to_load=True)
         # For a 1D array with the length of the datamatrix, we create an array
         # in which the second dimension (i.e. the shape) is constant. This
         # allows us to do by-row operations.
-        if isinstance(a, (list, tuple)):
-            a = np.array(a, dtype=self.dtype)
-        if isinstance(a, NumericColumn):
-            a = np.array(a._seq)
-        if isinstance(a, np.ndarray) and a.shape == (len(self), ):
+        if isinstance(other, (list, tuple)):
+            other = np.array(other, dtype=self.dtype)
+        if isinstance(other, NumericColumn):
+            other = np.array(other._seq)
+        if isinstance(other, np.ndarray) and other.shape == (len(self), ):
             a2 = np.empty(self.shape, dtype=self.dtype)
-            np.swapaxes(a2, 0, -1)[:] = a
-            a = a2
+            np.swapaxes(a2, 0, -1)[:] = other
+            other = a2
         rowid = self._rowid.copy()
-        seq = number_op(a, self._seq) if flip else number_op(self._seq, a)
+        seq = number_op(other, self._seq) if flip else number_op(self._seq,
+                                                                 other)
         return self._empty_col(rowid=rowid, seq=seq)
 
     def _map(self, fnc):
@@ -358,7 +367,7 @@ class _MultiDimensionalColumn(NumericColumn):
         raise NotImplementedError('Cannot compare {}s'.format(
             self.__class__.__name__))
 
-    def _tosequence(self, value, length):
+    def _tosequence(self, value, length=None):
         
         full_shape = (length, ) + self.shape[1:]
         # For float and integers, we simply create a new (length, shape) array

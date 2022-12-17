@@ -69,7 +69,7 @@ def stack(*dms):
          print(dm)
         --%
         
-    arguments:
+    argument-list:
         dms:
             desc: A list of DataMatrix objects.
             type: list
@@ -115,18 +115,18 @@ def stack(*dms):
                 if type(dm[name]) != type(stackdm[name]):
                     raise TypeError(
                         'Non-matching types for column {}'.format(name))
-                # If the column already exists and is a series, modify the
-                # depth to the longest column
-                if isinstance(col, _SeriesColumn):
-                    dm[name].depth = max(col.depth, dm[name].depth)
-                    stackdm[name].depth = max(col.depth, dm[name].depth)
-                # The length doesn't need to be the same, but other than that
-                # the shape of the columns needs to match
-                elif col.shape[1:] != dm[name].shape[1:]:
-                    raise TypeError(
-                        'Non-matching shapes for column {}'.format(name))
+            # If the column already exists and is a series, modify the
+            # depth to the longest column
+            if isinstance(col, _MultiDimensionalColumn) and \
+                    len(col.shape) == 2:
+                dm[name].depth = max(col.depth, dm[name].depth)
+                stackdm[name].depth = max(col.depth, dm[name].depth)
+            # The length doesn't need to be the same, but other than that
+            # the shape of the columns needs to match
+            elif col.shape[1:] != dm[name].shape[1:]:
+                raise TypeError(
+                    'Non-matching shapes for column {}'.format(name))
             dm[name][start_index:start_index + len(stackdm)] = stackdm[name]
-            dm[name]._datamatrix = dm
         start_index += len(stackdm)
     for colname, col in dm.columns:
         col._typechecking = True

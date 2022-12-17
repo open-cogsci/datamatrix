@@ -52,7 +52,20 @@ class NumericColumn(BaseColumn):
     invalid = nan
 
     def __init__(self, datamatrix, **kwargs):
+        """
+        desc:
+            Constructor. You generally don't call this constructor correctly,
+            but use the FloatColumn or IntColumn helper functions.
 
+        arguments:
+            datamatrix:
+                desc: The DataMatrix to which this column belongs.
+                type: DataMatrix
+                
+        keyword-dict:
+            kwargs:
+                keywords that are passed on to the parent constructor.
+        """
         if np is None:
             raise Exception(
                 u'NumPy and SciPy are required, but not installed.'

@@ -36,7 +36,7 @@ def _memmap_dm(x=1):
             return None
         dm[f'm{i}'] = i * x
         for j in range(i):
-            if not dm[f'm{j}'].loaded:
+            if i >= 2 and not dm[f'm{j}'].loaded:
                 print(f'column {j} is not loaded')
                 break
         else:
@@ -117,7 +117,11 @@ def test_memmap_multiprocess_stack():
     if _memmap_dm() is None:
         print('insufficient memory to run test')
     else:
-        dm = fnc.stack_multiprocess(_memmap_dm, [1, 2])
+        try:
+            dm = fnc.stack_multiprocess(_memmap_dm, [1, 2])
+        except ValueError:
+            print('insufficient memory to run test')
+            pass
     cfg.min_mem_free_rel = .5
     cfg.min_mem_free_abs = 4294967296
     cfg.always_load_max_size = 134217728

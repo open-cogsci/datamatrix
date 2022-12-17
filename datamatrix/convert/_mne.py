@@ -79,7 +79,7 @@ def from_mne_epochs(epochs, ch_avg=False):
             plt.title(f'channels = {channels}')
             for intensity, idm in ops.split(dm.intensity):
                 # Average over trials and channels, but not time
-                plt.plot(t, idm.erp[..., ...], label=str(intensity))
+                plt.plot(timestamps, idm.erp[..., ...], label=str(intensity))
             plt.legend(title='Stimulus intensity')
             plt.xlabel('Time (s)')
             plt.ylabel('Voltage')
@@ -182,8 +182,8 @@ def from_mne_tfr(tfr, ch_avg=False, freq_avg=False):
         --%
     
     arguments:
-        epochs:
-            type: mne.Epochs
+        tfr:
+            type: mne.EpochsTFR
     
     keywords:
         ch_avg:
