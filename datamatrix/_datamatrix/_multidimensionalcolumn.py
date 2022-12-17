@@ -92,14 +92,17 @@ class _MultiDimensionalColumn(NumericColumn):
         if isinstance(shape, (int, str)):
             shape = (shape, )
         self.index_names = []
+        self.index_values = []
         for dim_size in shape:
             # Dimension without named indices
             if isinstance(dim_size, int):
                 normshape += (dim_size, )
                 self.index_names.append(list(range(dim_size)))
+                self.index_values.append(list(range(dim_size)))
             else:
                 normshape += (len(dim_size), )
                 self.index_names.append(list(dim_size))
+                self.index_values.append(list(range(len(dim_size))))
         self._shape = normshape
         self.defaultnan = defaultnan
         self._fd = None
@@ -221,15 +224,6 @@ class _MultiDimensionalColumn(NumericColumn):
         
     @property
     def loaded(self):
-        """
-        name: loaded
-
-        desc:
-            A property to unloaded the column to disk (by assigning `False`)
-            and load the column from disk (by assigning `True`). You don't
-            usually change this property manually, but rather let the built-in
-            memory management decide when and columns need to be (un)loaded.
-        """
         if self._loaded is None:
             self._loaded = self._sufficient_free_memory()
         return self._loaded
