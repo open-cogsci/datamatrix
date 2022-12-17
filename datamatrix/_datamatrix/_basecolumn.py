@@ -79,7 +79,7 @@ class BaseColumn(OrderedState):
             Constructor.
 
         arguments:
-            datamatrix:	A DataMatrix object.
+            datamatrix: A DataMatrix object.
             
         keywords:
             rowid:
@@ -99,6 +99,8 @@ class BaseColumn(OrderedState):
         global DataMatrix
         from datamatrix import DataMatrix
 
+        if not isinstance(datamatrix, DataMatrix):
+            raise TypeError('expecting DataMatrix, not {}'.format(datamatrix))
         self._datamatrix = datamatrix
         self._typechecking = True
         self.metadata = metadata
@@ -579,10 +581,9 @@ class BaseColumn(OrderedState):
         returns:
             BaseColunn
         """
-
         seq = [self._seq[self._rowid.index(_rowid)] for _rowid in key]
         return self._empty_col(rowid=key, seq=seq)
-
+        
     def _sortedrowid(self):
 
         """

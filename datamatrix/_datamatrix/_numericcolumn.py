@@ -23,6 +23,7 @@ from datamatrix._datamatrix._callable_values import CallableFloat
 from datamatrix._datamatrix._index import Index
 import operator
 import warnings
+import functools
 try:
     import numpy as np
     from numpy import nanmean, nanmedian, nanstd
@@ -35,6 +36,8 @@ try:
 except ImportError:
     warnings.warn('Install fastnumbers for better performance')
     fastnumbers = None
+rowid_argsort_cache = None, None 
+selected_indices_cache = None, None
 
 
 class NumericColumn(BaseColumn):
@@ -54,7 +57,6 @@ class NumericColumn(BaseColumn):
             raise Exception(
                 u'NumPy and SciPy are required, but not installed.'
             )
-        self._rowid_argsort_cache = None, None
         super(NumericColumn, self).__init__(datamatrix,  **kwargs)
 
     @property
@@ -113,7 +115,6 @@ class NumericColumn(BaseColumn):
     def _init_rowid(self):
 
         self._rowid = self._datamatrix._rowid.asarray.copy()
-        self._rowid_argsort_cache = None, None
 
     def _init_seq(self):
 
@@ -206,41 +207,38 @@ class NumericColumn(BaseColumn):
             raise ValueError('Cannot slice column with a different DataMatrix')
         return self._getrowidkey(key._rowid)
 
-    def _getrowidkey(self, key):
-
-        # We need to select all rows that match the rowids specified in key,
-        # while preserving the order provided by key. To do this, we use the
-        # following logic:
-        # - Get a list of indices (`orig_indices`) that give a sorted view on
-        #   self._rowid.
-        # - Use this to search through a sorted view of _rowid for all items in
-        #   key
-        # - Map the matching indices, which refer to the sorted view of _rowid
-        #   back to a list of indices in the original, non-sorted array.
-        # See also: http://stackoverflow.com/questions/9566592/\
-        #  find-multiple-values-within-a-numpy-array
-        orig_indices = self._rowid_argsort()
-        matching_indices = np.searchsorted(self._rowid[orig_indices], key)
-        selected_indices = orig_indices[matching_indices]
-        return self._empty_col(rowid=self._rowid[selected_indices],
-                               seq=self._seq[selected_indices])
-
     def _getintkey(self, key):
 
         return self.dtype(self._seq[key])
 
-    def _rowid_argsort(self):
+    def _getrowidkey(self, key):
 
-        # In some cases, we need to argsort very often, which is time
-        # consuming. Therefore, this function acts as a cached argsort.
+        if isinstance(key, Index):
+            key = key._a
+        # argsort and searchsorted are fairly time-consuming operations which
+        # need to be performed very often. Therefore we implement a crude
+        # but fast caching mechanism.
+        global rowid_argsort_cache, selected_indices_cache
         try:
             rowid_hash = self._rowid.tobytes()  # As of NumPy 1.9.0
+            # The key caching is contingent on the rowid
+            key_hash = key.tobytes() + rowid_hash
         except AttributeError:
             rowid_hash = self._rowid.tostring()
-        if rowid_hash == self._rowid_argsort_cache[0]:
-            return self._rowid_argsort_cache[1]
-        self._rowid_argsort_cache = rowid_hash, self._rowid.argsort()
-        return self._rowid_argsort_cache[1]
+            key_hash = key.tostring() + rowid_hash
+        if rowid_hash != rowid_argsort_cache[0]:
+            rowid_argsort_cache = rowid_hash, self._rowid.argsort()
+        orig_indices = rowid_argsort_cache[1]
+        if key_hash != selected_indices_cache[0]:
+            matching_indices = np.searchsorted(self._rowid[orig_indices], key)
+            selected_indices = orig_indices[matching_indices]
+            selected_indices_cache = key_hash, selected_indices
+        else:
+            selected_indices = selected_indices_cache[1]
+        return self._empty_col(rowid=self._rowid[selected_indices],
+                               seq=self._seq[selected_indices])
+            
+        
 
     def _setdatamatrixkey(self, key, val):
 
