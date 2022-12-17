@@ -42,7 +42,9 @@ try:
 except ImportError:
     psutil = None
 logger = logging.getLogger('datamatrix')
-suspend_touch = False
+
+        
+        
 
 
 class _MultiDimensionalColumn(NumericColumn):
@@ -54,7 +56,6 @@ class _MultiDimensionalColumn(NumericColumn):
 
     dtype = float
     printoptions = dict(precision=4, threshold=4, edgeitems=2)
-    touch_history = OrderedDict()
 
     def __init__(self, datamatrix, shape, defaultnan=True, **kwargs):
 
@@ -107,9 +108,7 @@ class _MultiDimensionalColumn(NumericColumn):
         
     def __del__(self):
         """Clean up weak references on destruction."""
-        id_ = id(self)
-        if id_ in self.touch_history:
-            self.touch_history.pop(id_)
+        touch_history.remove(self)
 
     def setallrows(self, value):
 
@@ -276,40 +275,9 @@ class _MultiDimensionalColumn(NumericColumn):
                      .format(mem_free_abs // 1024 ** 2, 100 * mem_free_rel))
         return mem_free_abs > cfg.min_mem_free_abs or \
             mem_free_rel > cfg.min_mem_free_rel
-    
-    def _touch(self, try_to_load=False):
-        """Moves the current column to the end of the touch history to indicate
-        that it was used last. Frees up memory by unloading other columns,
-        starting with the least recently used ones.
-        """
-        # Avoid recursive touching. This is a global so that other columns can
-        # also see it.
-        global suspend_touch
-        if suspend_touch:
-            return
-        self_id = id(self)
-        if self_id in self.touch_history:
-            self.touch_history.move_to_end(self_id)
-        else:
-            self.touch_history[self_id] = weakref.ref(self)
-        suspend_touch = True
-        for other_id, col in self.touch_history.items():
-            col = col()
-            if col is None or col is self or not col.loaded:
-                continue
-            if not self._sufficient_free_memory():
-                logger.debug('insufficient free memory')
-                col.loaded = False
-            else:
-                break
-        if try_to_load and not self.loaded and self._sufficient_free_memory():
-            logger.debug(
-                'loading previously unloaded column {}'.format(self_id))
-            self.loaded = True
-        suspend_touch = False
 
     def _init_seq(self):
-        self._touch()
+        touch_history.touch(self)
         if self.loaded:
             # Close previous memmap object
             if self._fd is not None and not self._fd.closed:
@@ -354,7 +322,7 @@ class _MultiDimensionalColumn(NumericColumn):
 
     def _operate(self, a, number_op, str_op=None, flip=False):
 
-        self._touch(try_to_load=True)
+        touch_history.touch(self, try_to_load=True)
         # For a 1D array with the length of the datamatrix, we create an array
         # in which the second dimension (i.e. the shape) is constant. This
         # allows us to do by-row operations.
@@ -444,7 +412,7 @@ class _MultiDimensionalColumn(NumericColumn):
     # Implemented syntax
 
     def __getitem__(self, key):
-        self._touch(try_to_load=True)
+        touch_history.touch(self, try_to_load=True)
         if isinstance(key, tuple) and len(key) <= len(self._seq.shape):
             # Advanced indexing always returns a copy, rather than a view, so
             # there's no need to explicitly copy the result.
@@ -512,7 +480,7 @@ class _MultiDimensionalColumn(NumericColumn):
         return super().__getitem__(key)
 
     def __setitem__(self, key, value):
-        self._touch(try_to_load=True)
+        touch_history.touch(self, try_to_load=True)
         if not isinstance(key, tuple):
             key = (key, )
             key_was_tuple = False
@@ -626,3 +594,45 @@ def MultiDimensionalColumn(shape, defaultnan=True, **kwargs):
     
     return _MultiDimensionalColumn, dict(shape=shape, defaultnan=defaultnan,
                                          **kwargs)
+
+
+class TouchHistory:
+    """Keeps track of which columns have been used least recently and
+    dynamically unloads these to free up memory if necessary.
+    """
+    def __init__(self):
+        self._history = OrderedDict()
+        self.suspended = False
+    
+    def touch(self, col, try_to_load=False):
+        if self.suspended:
+            return
+        id_ = id(col)
+        if id_ in self._history:
+            self._history.move_to_end(id_)
+        else:
+            self._history[id_] = weakref.ref(col)
+        self.suspended = True
+        for other_id, other_col in self._history.items():
+            other_col = other_col()
+            if other_col is None or other_col is col or not other_col.loaded:
+                continue
+            if not other_col._sufficient_free_memory():
+                logger.debug('insufficient free memory')
+                other_col.loaded = False
+            else:
+                break
+        if try_to_load and not col.loaded and col._sufficient_free_memory():
+            logger.debug(
+                'loading previously unloaded column {}'.format(id_))
+            col.loaded = True
+        self.suspended = False
+
+    def remove(self, col):
+        id_ = id(self)
+        if id_ in self._history:
+            self._history.pop(id_)
+
+
+# Singleton instance
+touch_history = TouchHistory()
