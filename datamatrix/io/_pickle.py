@@ -79,9 +79,9 @@ def writepickle(dm, path, protocol=-1):
 
 
 def _upgrade_datamatrix(dm):
-
-    """Fixes the Index object of deprecated versions of DataMatrix."""
-
+    """Upgrades old datamatrix objects so that old memoization files keep
+    being useful after minor upgrades to datamatrix.
+    """
     from datamatrix._datamatrix._index import Index
     if not hasattr(dm._rowid, '_a'):
         object.__setattr__(dm, '_rowid', Index(dm._rowid._l))
