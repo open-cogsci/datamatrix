@@ -70,7 +70,6 @@ class BaseColumn(OrderedState):
 
     default_value = u''
     ndim = 1
-    loaded = True
 
     def __init__(self, datamatrix, rowid=None, seq=None, metadata=None):
 
@@ -112,6 +111,24 @@ class BaseColumn(OrderedState):
             self._init_seq()
         else:
             self._seq = seq
+    
+    @property
+    def loaded(self):
+        """
+        name: loaded
+
+        desc:
+            A property to unloaded the column to disk (by assigning `False`)
+            and load the column from disk (by assigning `True`). You don't
+            usually change this property manually, but rather let the built-in
+            memory management decide when and columns need to be (un)loaded.
+        """
+        return True
+    
+    @loaded.setter
+    def loaded(self, value):
+        if not value:
+            raise NotImplementedError('this column cannot be unloaded')
 
     def equals(self, other):
         
