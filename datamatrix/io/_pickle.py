@@ -95,4 +95,5 @@ def _upgrade_datamatrix(dm):
         if hasattr(col, '_depth') and not hasattr(col, '_shape'):
             logger.warning('upgrading shapeless SeriesColumn')
             col._shape = (col._depth, )
+            col._orig_shape = col._shape
     return dm
