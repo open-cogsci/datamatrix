@@ -20,12 +20,14 @@ title: DataMatrix
 ## Features
 
 - [An intuitive syntax](%link:basic%) that makes your code easy to read
+- Mix tabular data with [time series](%link:series%) and [multidimensional data](%link:multidimensional) in a single data structure
+- Support for [large data](%link:largedata) by intelligent (and automatic) offloading of data to disk when memory is running low
+- Advanced [memoization (caching)](%link:memoization%)
 - Requires only the Python standard libraries (but you can use `numpy` to improve performance)
-- Great support for [functional programming](%link:functional%), including advanced [memoization (caching)](%link:memoization%)
-- Mix [two-dimensional](%link:series%) (series) and one-dimensional data in a single data structure
-- Compatible with your favorite tools for numeric computation:
+- Compatible with your favorite data-science libraries:
     - `seaborn` and `matplotlib` for [plotting](https://pythontutorials.eu/numerical/plotting)
     - `scipy`, `statsmodels`, and `pingouin` for [statistics](https://pythontutorials.eu/numerical/statistics)
+    - `mne` for analysis of electroencephalographic (EEG) and magnetoencephalographic (MEG) data
     - [Convert](%link:convert%) to and from `pandas.DataFrame`
     - Looks pretty inside a Jupyter Notebook
 
