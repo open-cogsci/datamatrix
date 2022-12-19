@@ -265,6 +265,9 @@ class _MultiDimensionalColumn(NumericColumn):
         column to be loaded into memory based on the MIN_MEM_FREE_ABS and
         MIN_MEM_FREE_REL constants.
         """
+        if psutil is None:
+            logger.debug('psutil is not installed. Cannot check available memory.')
+            return True
         memory_size = self._memory_size()
         if memory_size < cfg.always_load_max_size:
             return True
