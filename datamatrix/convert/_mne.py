@@ -33,7 +33,8 @@ def from_mne_epochs(epochs, ch_avg=False):
     desc: |
         *Version note:* New in 0.16.0
         
-        Python MNE is a library for analysis of neurophysiological data.
+        [Python MNE](https://mne.tools/) is a library for analysis of
+        neurophysiological data.
         
         This function converts an `mne.Epochs()` object to a multidimensional
         column. The column's metadata is set to the `epochs.info` property. The
@@ -117,7 +118,8 @@ def from_mne_tfr(tfr, ch_avg=False, freq_avg=False):
     desc: |
         *Version note:* New in 0.16.0
         
-        Python MNE is a library for analysis of neurophysiological data.
+        [Python MNE](https://mne.tools/) is a library for analysis of
+        neurophysiological data.
         
         This function converts an `mne.EpochsTFR()` object to a 
         multidimensional column. The column's metadata is set to the
@@ -143,10 +145,6 @@ def from_mne_tfr(tfr, ch_avg=False, freq_avg=False):
         the second dimension is the channel (which can be referenced by name),
         the third dimension is frequency, and the fourth dimension is sample
         time.
-        
-        See also:
-        
-        - <https://mne.tools/>
         
         %--
         python: |
