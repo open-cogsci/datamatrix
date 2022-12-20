@@ -613,25 +613,47 @@ class TouchHistory:
     def touch(self, col, try_to_load=False):
         if self.suspended:
             return
+        # Make sure the current column is add the end of the history
         id_ = id(col)
         if id_ in self._history:
             self._history.move_to_end(id_)
         else:
             self._history[id_] = weakref.ref(col)
+        # If the current column is loaded, then we return right away, because
+        # there is no need to free up additional memory by unloading other
+        # columns
+        if col._sufficient_free_memory():
+            if try_to_load:
+                col.loaded = True
+            return
+        # Otherwise we suspend the touch mechanism and loop through all other
+        # columns, starting with the least-recently touched ones.
         self.suspended = True
+        to_remove = []
         for other_id, other_col in self._history.items():
+            # If the column doesn't exist anymore, then it's likely a pending
+            # reference, and we remove it. This shouldn't happen though.
             other_col = other_col()
-            if other_col is None or other_col is col or not other_col.loaded:
+            if other_col is None:
+                to_remove.append(other_id)
                 continue
-            if not other_col._sufficient_free_memory():
-                logger.debug('insufficient free memory')
-                other_col.loaded = False
-            else:
+            # If the other column is not loaded or if it's the current column,
+            # then we ignore it.
+            if other_col is col or not other_col.loaded:
+                continue
+            # Otherwise we unload the other column to free up memoty
+            logger.debug('insufficient free memory')
+            other_col.loaded = False
+            # If there is now sufficient free memory to load the current column
+            # then we do that if try_to_load is specified.
+            if col._sufficient_free_memory():
+                if try_to_load:
+                    logger.debug(
+                        'loading previously unloaded column {}'.format(id_))
+                    col.loaded = True
                 break
-        if try_to_load and not col.loaded and col._sufficient_free_memory():
-            logger.debug(
-                'loading previously unloaded column {}'.format(id_))
-            col.loaded = True
+        for other_id in to_remove:
+            self._history.pop(other_id)
         self.suspended = False
 
     def remove(self, col):
