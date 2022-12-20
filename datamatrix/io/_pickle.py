@@ -92,8 +92,14 @@ def _upgrade_datamatrix(dm):
                 object.__setattr__(col, '_rowid', Index(col._rowid._l))
             else:
                 object.__setattr__(col, '_rowid', Index(col._rowid))
-        if hasattr(col, '_depth') and not hasattr(col, '_shape'):
-            logger.warning('upgrading shapeless SeriesColumn')
-            col._shape = (col._depth, )
-            col._orig_shape = col._shape
+        if hasattr(col, '_depth'):
+            logger.warning('upgrading SeriesColumn')
+            if not hasattr(col, '_shape'):
+                col._shape = (col._depth, )
+            if not hasattr(col, '_orig_shape'):
+                col._orig_shape = col._shape
+            if not hasattr(col, '_loaded'):
+                col._loaded = None
+        if not hasattr(col, 'metadata'):
+            col.metadata = None
     return dm
