@@ -1,6 +1,11 @@
 title: datamatrix.operations
 
-A set of operations to apply to columns and `DataMatrix` objects.
+A set of common operations that can be apply to columns and `DataMatrix` objects. This module is typically imported as `ops` for brevity:
+
+```python
+from datamatrix import operations as ops
+```
+
 
 [TOC]
 

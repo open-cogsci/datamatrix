@@ -1,6 +1,11 @@
 title: datamatrix.functional
 
-A set of functions and decorators for [functional programming](https://docs.python.org/3.6/howto/functional.html).
+A set of functions and decorators for [functional programming](https://docs.python.org/3.6/howto/functional.html). This module is typically imported as `fnc` for brevity:
+
+```python
+from datamatrix import functional as fnc
+```
+
 
 [TOC]
 

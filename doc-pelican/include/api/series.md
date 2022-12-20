@@ -176,7 +176,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7f0ffbf8b370>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7f7a3a01f400>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times
 shorter. The depth of the downsampled series is the highest multiple of
@@ -221,7 +221,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7f0ffbf8b370>
+	- Default: <function nanmean at 0x7f7a3a01f400>
 
 __Returns:__
 

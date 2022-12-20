@@ -34,7 +34,7 @@ def main():
         types=['function', 'module'], cls=None, exclude=[
             '_SeriesColumn', 'BaseColumn', 'DataMatrix', 'FloatColumn',
             'MixedColumn', 'Index', 'IntColumn', 'convert',
-            'map_', 'filter_', 'setcol'])
+            'map_', 'filter_', 'setcol', 'Row', '_MultiDimensionalColumn'])
     createdoc('datamatrix/functional.py',
         target='functional.md', onlyContents=True,
         types=['function', 'module'], cls=None, exclude=[

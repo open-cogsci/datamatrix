@@ -1,6 +1,6 @@
 title: DataMatrix
 
-`DataMatrix` is an intuitive Python library for working with column-based and continuous data. It's a light-weight and easy-to-use alternative to `pandas`.
+`DataMatrix` is an intuitive Python library for working with column-based, time-series, and multidimensional data. It's a light-weight and easy-to-use alternative to `pandas`.
 
 <div class="btn-group" role="group" aria-label="...">
   <a role="button" class="btn btn-success" href="%url:install%">

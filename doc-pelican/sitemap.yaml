@@ -5,7 +5,7 @@ Tutorials:
     Statistics: https://pythontutorials.eu/numerical/statistics
     Working with series: https://pythontutorials.eu/numerical/time-series
     Memoization (caching): memoization
-    Working with large data: largedata
+    Working with large data (dynamic loading): largedata
     Analyzing eye-movement data: eyelinkparser
 Modules:
     datamatrix.convert: convert
