@@ -152,7 +152,11 @@ def stack_multiprocess(fnc, args, processes=None):
         raise
     finally:
         for path in results:
-            path.unlink()
+            try:
+                path.unlink()
+            except Exception as e:
+                logger.warning(
+                    'failed to remove temporary file: {}'.format(path))
     return dm
 
 
