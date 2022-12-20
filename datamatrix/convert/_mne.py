@@ -103,7 +103,7 @@ def from_mne_epochs(epochs, ch_avg=False):
         data = epochs.get_data()
         if ch_avg:
             data = data.mean(axis=1)
-            shape = epochs.times
+            shape = (epochs.times, )
         else:
             shape = epochs.info['ch_names'], epochs.times
         col = _MultiDimensionalColumn(dm, shape=shape, metadata=epochs.info)
