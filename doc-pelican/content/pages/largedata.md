@@ -8,7 +8,7 @@ title: Working with large data (dynamic loading)
 
 When working with large datasets, especially those containing multidimensional data, the available memory easily becomes a limiting factor. For example, a multidimensional column of shape `(2000, 500, 500)` takes 3.7 Gb of memory.
 
-DataMatrix automatically offloads multidimensional columns to disk when memory is running low. Let's see how this works by creating a DataMatrix of with a single column of shape `(2000, 500, 500)`. (The first dimension corresponds to the length of the `DataMatrix`.) On its own, this column easily fits in memory, and we can use the `loaded` property to verify that the column has indeed been loaded into memory.
+DataMatrix automatically offloads multidimensional columns to disk when memory is running low. Let's see how this works by creating a DataMatrix with a single column of shape `(2000, 500, 500)`. (The first dimension corresponds to the length of the `DataMatrix`.) On its own, this column easily fits in memory, and we can use the `loaded` property to verify that the column has indeed been loaded into memory.
 
 
 ~~~python
@@ -87,7 +87,7 @@ It is aso possible (though not recommended) to create columns that, by themselve
 
 ## Implementation details
 
-When a column is offloaded to disk, a `numpy.memmap()` object is created instead of a regular `numpy.ndarray`. This object is mapped onto a hidden temporary file that created in the current working directory and had the extension `.memmap`.
+When a column is offloaded to disk, a `numpy.memmap` object is created instead of a regular `numpy.ndarray`. This object is mapped onto a hidden temporary file in the current working directory with the extension `.memmap`.
 
 See also:
 
