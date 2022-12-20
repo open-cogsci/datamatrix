@@ -23,7 +23,7 @@ The following packages are required for extra functionality:
 ### PyPi (pip install)
 
 ~~~bash
-pip install https://github.com/open-cogsci/python-datamatrix/releases/download/prerelease%2F1.0.0a3/datamatrix-1.0.0a3-py2.py3-none-any.whl --upgrade
+pip install https://github.com/open-cogsci/python-datamatrix/releases/download/prerelease%2F1.0.0a4/datamatrix-1.0.0a4-py2.py3-none-any.whl --upgrade
 ~~~
 
 Optional dependencies:
