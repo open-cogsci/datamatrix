@@ -261,9 +261,6 @@ def last_occurrence(series, value, equal=True):
     return _occurrence(series, value, equal=equal)
 
 
-
-
-
 def concatenate(*series):
 
     """
@@ -294,11 +291,10 @@ def concatenate(*series):
         type:	SeriesColumn
     """
 
-    if not series or not all(isinstance(s, _SeriesColumn) for s in series):
-        raise TypeError(u'Expecting one or more SeriesColumn objects')
+    _validate_multiple_series(series)
     if not all(s.dm is series[0].dm for s in series):
         raise ValueError(
-            u'SeriesColumn objects don\'t belong to the same DataMatrix')
+            u'columns don\'t belong to the same DataMatrix')
     newseries = _SeriesColumn(
         series[0]._datamatrix,
         depth=sum(s.depth for s in series)
@@ -362,7 +358,7 @@ def endlock(series):
         desc:	An end-locked signal.
         type:	SeriesColumn
     """
-
+    _validate_series(series)
     endlock_series = _SeriesColumn(series._datamatrix, series.depth)
     endlock_series[:] = np.nan
     src = series._seq
@@ -441,9 +437,7 @@ def lock(series, lock):
                 `SeriesColumn` and `zero_point` is the zero point to which the
                 signal has been locked.
     """
-
-    if not isinstance(series, _SeriesColumn):
-        raise TypeError('series should be a SeriesColumn')
+    _validate_series(series)
     if len(series) != len(lock):
         raise ValueError('lock and series should be the same length')
     try:
@@ -519,14 +513,8 @@ def normalize_time(dataseries, timeseries):
                 the timestamps.
         type:   SeriesColumn
     """
-
-    if (
-        not isinstance(dataseries, _SeriesColumn)
-        or not isinstance(timeseries, _SeriesColumn)
-    ):
-        raise TypeError(
-            'dataseries and timeseries should be SeriesColumn objects'
-        )
+    _validate_series(dataseries)
+    _validate_series(timeseries)
     if dataseries.dm is not timeseries.dm:
         raise ValueError(
             'dataseries and timeseries should belong to the same DataMatrix'
@@ -984,7 +972,7 @@ def threshold(series, fnc, min_length=1):
                 above threshold.
         type:   SeriesColumn
     """
-
+    _validate_series(series)
     threshold_series = _SeriesColumn(series._datamatrix, series.depth)
     threshold_series[:] = 0
     # First walk through all rows
@@ -1358,7 +1346,7 @@ def fft(series, truncate=True):
         desc: The FFT of the signal.
         type: SeriesColumn
     """
-
+    _validate_series(series)
     newseries = _SeriesColumn(series._datamatrix, depth=series.depth)
     newseries[:] = np.fft.fft(series, axis=1)
     if truncate:
@@ -1732,6 +1720,28 @@ def _occurrence(series, value, equal, reverse=False):
     col = FloatColumn(series.dm)
     col[:] = a
     return col
+
+
+def _validate_series(obj):
+    if not isinstance(obj, _MultiDimensionalColumn):
+        raise TypeError('expecting a SeriesColumn or MultiDimensionalColumn '
+                        'not {}'.format(type(obj)))
+    if len(obj.shape) != 2:
+        raise ValueError(
+            'expecting a two dimensions, not {}'.format(len(obj.shape)))
+
+
+def _validate_multiple_series(seq):
+    if not seq:
+        raise TypeError(
+            'expecting at least one SeriesColumn or MultiDimensionalColumn')
+    for obj in seq:
+        if not isinstance(obj, _MultiDimensionalColumn):
+            raise TypeError('expecting SeriesColumns or MultiDimensionalColumns '
+                            'not {}'.format(type(obj)))
+        if len(obj.shape) != 2:
+            raise ValueError(
+                'expecting two dimensions, not {}'.format(len(obj.shape)))
 
 
 reduce_ = reduce  # Backwards compatibility
