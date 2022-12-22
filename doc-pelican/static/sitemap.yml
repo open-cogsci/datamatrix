@@ -1,0 +1,63 @@
+!!python/object/apply:collections.OrderedDict
+- - - Install
+    - /1.0/install
+  - - Tutorials
+    - !!python/object/apply:collections.OrderedDict
+      - - - Basic use
+          - /1.0/basic
+        - - Plotting
+          - https://pythontutorials.eu/numerical/plotting
+        - - Statistics
+          - https://pythontutorials.eu/numerical/statistics
+        - - Working with series
+          - https://pythontutorials.eu/numerical/time-series
+        - - Memoization (caching)
+          - /1.0/memoization
+        - - Working with large data (dynamic loading)
+          - /1.0/largedata
+        - - Analyzing eye-movement data
+          - /1.0/eyelinkparser
+  - - Modules
+    - !!python/object/apply:collections.OrderedDict
+      - - - datamatrix.convert
+          - /1.0/convert
+        - - datamatrix.functional
+          - /1.0/functional
+        - - datamatrix.io
+          - /1.0/io
+        - - datamatrix.operations
+          - /1.0/operations
+        - - datamatrix.series
+          - /1.0/series
+        - - datamatrix.multidimensional
+          - /1.0/multidimensional
+  - - v1.0
+    - !!python/object/apply:collections.OrderedDict
+      - - - v1.0
+          - http://pydatamatrix.eu/1.0/
+        - - v0.15
+          - http://pydatamatrix.eu/0.15/
+        - - v0.14
+          - http://pydatamatrix.eu/0.14/
+        - - v0.13
+          - http://pydatamatrix.eu/0.13/
+        - - v0.12
+          - http://pydatamatrix.eu/0.12/
+        - - v0.11
+          - http://pydatamatrix.eu/0.11/
+        - - v0.10
+          - http://pydatamatrix.eu/0.10/
+        - - v0.9
+          - http://pydatamatrix.eu/0.9/
+        - - v0.8
+          - http://pydatamatrix.eu/0.8/
+        - - v0.7
+          - http://pydatamatrix.eu/0.7/
+        - - v0.6
+          - http://pydatamatrix.eu/0.6/
+        - - v0.5
+          - http://pydatamatrix.eu/0.5/
+        - - v0.4
+          - http://pydatamatrix.eu/0.4/
+        - - v0.3
+          - http://pydatamatrix.eu/0.3/
