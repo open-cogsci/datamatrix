@@ -96,16 +96,20 @@ The basic documentation (including function and module references) is hosted on 
 
 ## Dependencies
 
-- Python >= 3.7
+`DataMatrix` requires only the Python standard library. That is, you can use it without installing any additional Python packages (although the pip and conda packages install some of the optional dependencies by default). Python 3.7 and higher are supported.
 
-Optional:
+The following packages are required for extra functionality:
 
-- `numpy` and `scipy` for using the `FloatColumn`, `IntColumn`, and `SeriesColumn` objects
+- `numpy` and `scipy` for using the `FloatColumn`, `IntColumn`, `SeriesColumn`, `MultiDimensionalColumn` objects
+- `pandas` for conversion to and from `pandas.DataFrame`
+- `mne` for conversion to and from `mne.Epochs` and `mne.TFR`
+- `fastnumbers` for improved performance
 - `prettytable` for creating a text representation of a DataMatrix (e.g. to print it out)
 - `openpyxl` for reading and writing `.xlsx` files
-- `fastnumbers` for improved performance
-- `tomlkit` for reading settings from `pyproject.toml`
+- `json_tricks` for hashing, serialization to and from `json`, and memoization (caching)
+- `tomlkit` for reading configuration from `pyproject.toml`
 - `psutil` for dynamic loading of large data
+
 
 ## Installation
 
@@ -134,7 +138,8 @@ conda install datamatrix -c conda-forge
 ### Ubuntu
 
 ~~~
-sudo add-apt-repository ppa:smathot/cogscinl
+sudo add-apt-repository ppa:smathot/cogscinl  # for stable releases
+sudo add-apt-repository ppa:smathot/rapunzel  # for development releases
 sudo apt-get update
 sudo apt install python3-datamatrix
 ~~~
