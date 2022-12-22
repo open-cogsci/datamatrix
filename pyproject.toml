@@ -1,0 +1,32 @@
+[build-system]
+requires = ["flit_core >=3.4"]
+build-backend = "flit_core.buildapi"
+[project]
+name = "datamatrix"
+authors = [
+    {name = "Sebastiaan Mathôt", email = "s.mathot@cogsci.nl"}
+]
+readme = "readme.md"
+license = {file = "COPYING"}
+requires-python = ">=3.7"
+dynamic = ["version", "description"]
+dependencies = [
+    "numpy",
+    "scipy",
+    "fastnumbers",
+    "prettytable",
+    "openpyxl",
+    "json_tricks",
+    "tomlkit",
+    "psutil"
+]
+keywords = ["data analysis", "scientific software", "time series"]
+[project.urls]
+Documentation = "https://github.com/open-cogsci/datamatrix"
+Source = "https://github.com/open-cogsci/datamatrix"
+[tool.datamatrix]
+min_mem_free_rel = 0.5
+min_mem_free_abs = 4294967296
+always_load_max_size = 134217728
+never_load_min_size = inf
+save_chunk_size = 134217728
