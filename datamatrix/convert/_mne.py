@@ -31,8 +31,6 @@ from datamatrix._datamatrix._multidimensionalcolumn import \
 def from_mne_epochs(epochs, ch_avg=False):
     """
     desc: |
-        *Version note:* New in 0.16.0
-        
         [Python MNE](https://mne.tools/) is a library for analysis of
         neurophysiological data.
         
@@ -51,9 +49,7 @@ def from_mne_epochs(epochs, ch_avg=False):
         the second dimension is the channel (which can be referenced by name),
         and the third dimension is sample time.
         
-        See also:
-        
-        - <https://mne.tools/>
+        *Version note:* New in 1.0.0
         
         %--
         python: |
@@ -116,8 +112,6 @@ def from_mne_epochs(epochs, ch_avg=False):
 def from_mne_tfr(tfr, ch_avg=False, freq_avg=False):
     """
     desc: |
-        *Version note:* New in 0.16.0
-        
         [Python MNE](https://mne.tools/) is a library for analysis of
         neurophysiological data.
         
@@ -145,6 +139,8 @@ def from_mne_tfr(tfr, ch_avg=False, freq_avg=False):
         the second dimension is the channel (which can be referenced by name),
         the third dimension is frequency, and the fourth dimension is sample
         time.
+        
+        *Version note:* New in 1.0.0
         
         %--
         python: |

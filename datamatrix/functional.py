@@ -100,7 +100,7 @@ def stack_multiprocess(fnc, args, processes=None):
         - <https://docs.python.org/3/library/multiprocessing.html>
         - %link:operations%#function-stack
         
-        *Version note:* New in 0.16.0.
+        *Version note:* New in 1.0.0.
 
         __Example:__
 

@@ -3,7 +3,7 @@ title: Install
 
 ## Dependencies
 
-`DataMatrix` requires only the Python standard library. That is, you can use it without installing any additional Python packages. Python 3.7 and higher are supported.
+`DataMatrix` requires only the Python standard library. That is, you can use it without installing any additional Python packages (although the pip and conda packages install some of the optional dependencies by default). Python 3.7 and higher are supported.
 
 The following packages are required for extra functionality:
 
@@ -23,13 +23,7 @@ The following packages are required for extra functionality:
 ### PyPi (pip install)
 
 ~~~bash
-pip install https://github.com/open-cogsci/python-datamatrix/releases/download/prerelease%2F1.0.0a4/datamatrix-1.0.0a4-py2.py3-none-any.whl --upgrade
-~~~
-
-Optional dependencies:
-
-~~~bash
-pip install fastnumbers numpy scipy prettytable openpyxl pandas json_tricks tomlkit mne psutil
+pip install datamatrix
 ~~~
 
 
@@ -37,13 +31,6 @@ pip install fastnumbers numpy scipy prettytable openpyxl pandas json_tricks toml
 
 ~~~bash
 conda install -c conda-forge datamatrix
-~~~
-
-Optional dependencies:
-
-
-~~~bash
-conda install -c conda-forge scipy pandas json_tricks tomlkit mne psutil
 ~~~
 
 

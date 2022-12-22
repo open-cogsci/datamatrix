@@ -359,7 +359,7 @@ Ellipsis averaging (`...`) is especially useful when working with multidimension
 
 ```python
 
-# Averaging gover the third dimension gives a column of shape (2, 2)
+# Averaging over the third dimension gives a column of shape (2, 2)
 dm.avg3 = dm.mdim_col[:, :, ...]
 # Average over the second dimension gives a colum of shape (2, 3)
 dm.avg2 = dm.mdim_col[:, ...]

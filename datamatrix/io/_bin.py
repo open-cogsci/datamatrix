@@ -45,7 +45,7 @@ def readbin(path):
         dm = io.readbin('data.dm')
         ~~~
         
-        *Version note:* New in 0.16.0.
+        *Version note:* New in 1.0.0
 
     arguments:
         path: The path to the binary file.
@@ -99,7 +99,7 @@ def writebin(dm, path):
         io.writebin(dm, 'data.dm')
         ~~~
         
-        *Version note:* New in 0.16.0.
+        *Version note:* New in 1.0.0
 
 
     arguments:

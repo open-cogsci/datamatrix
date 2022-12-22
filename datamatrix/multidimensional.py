@@ -36,7 +36,7 @@ def nancount(col):
         Counts the number of `NAN` values for each cell in a multidimensional
         column, and returns this as an int column.
         
-        *Version note:* Moved to `datamatrix.multidimensional` in 0.16.0
+        *Version note:* Moved to `datamatrix.multidimensional` in 1.0.0
         
         *Version note:* New in 0.15.0
         
@@ -78,7 +78,7 @@ def infcount(col):
         Counts the number of `INF` values for each cell in a multidimensional
         column, and returns this as an int column.
         
-        *Version note:* Moved to `datamatrix.multidimensional` in 0.16.0
+        *Version note:* Moved to `datamatrix.multidimensional` in 1.0.0
         
         *Version note:* New in 0.15.0
         
@@ -126,7 +126,7 @@ def flatten(dm):
         the same shape, or that `dm` doesn't contain any multidimensional
         columns, in which case a copy of `dm` is returned.
         
-        *Version note:* Moved to `datamatrix.multidimensional` in 0.16.0
+        *Version note:* Moved to `datamatrix.multidimensional` in 1.0.0
         
         *Version note:* New in 0.15.0
         
@@ -199,7 +199,7 @@ def reduce(col, operation=nanmean):
         Transforms multidimensional values to single values by applying an
         operation (typically a mean) to each multidimensional value.
         
-        *Version note:* Moved to `datamatrix.multidimensional` in 0.16.0
+        *Version note:* Moved to `datamatrix.multidimensional` in 1.0.0
         
         *Version note:* As of 0.11.0, the function has been renamed to
         `reduce()`. The original `reduce_()` is deprecated.
