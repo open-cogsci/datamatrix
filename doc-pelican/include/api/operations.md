@@ -494,16 +494,20 @@ A iterator over (value, DataMatrix) tuples if no values are provided; an iterato
 
 ## function __stack__\(\*dms\)
 
-*Version note:* New in 0.16.0
-
 Stacks multiple DataMatrix objects such that the resulting DataMatrix
 has a length that is equal to the sum of all the stacked DataMatrix
 objects. Phrased differently, this function vertically concatenates
 DataMatrix objects.
 
+See also [`stack_multiprocess()`](%url:functional%) for stacking
+DataMatrix objects that are returned by functions running in different
+processes.
+
 Stacking two DataMatrix objects can also be done with the `<<`
 operator. However, when stacking more than two DataMatrix objects,
 using `stack()` is much faster than iteratively stacking with `<<`.
+
+*Version note:* New in 1.0.0
 
 __Example:__
 

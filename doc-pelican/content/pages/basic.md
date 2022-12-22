@@ -1,6 +1,10 @@
 title: Basic use
 
-Ultra-short cheat sheet:
+
+[TOC]
+
+
+## Ultra-short cheat sheet
 
 ~~~python
 from datamatrix import DataMatrix, io
@@ -27,7 +31,7 @@ dm.fibonacci[dm.fibonacci == 1] = -1
 # The first two cells from the fibonacci column
 print(dm.fibonacci[:2])
 # Column mean
-print('Mean: %s' % dm.fibonacci.mean)
+print(dm.fibonacci[...])
 # Multiply all fibonacci cells by 2
 dm.fibonacci_times_two = dm.fibonacci * 2
 # Loop through all rows
@@ -53,8 +57,6 @@ dm = (dm.fibonacci > 0) & (dm.fibonacci < 3)
 ~~~
 
 Slightly longer cheat sheet:
-
-[TOC]
 
 
 ## Creating a DataMatrix

@@ -15,7 +15,7 @@ This function requires that all multidimensional columns in `dm` have
 the same shape, or that `dm` doesn't contain any multidimensional
 columns, in which case a copy of `dm` is returned.
 
-*Version note:* Moved to `datamatrix.multidimensional` in 0.16.0
+*Version note:* Moved to `datamatrix.multidimensional` in 1.0.0
 
 *Version note:* New in 0.15.0
 
@@ -58,7 +58,7 @@ A 'flattened' DataMatrix without multidimensional columns
 Counts the number of `INF` values for each cell in a multidimensional
 column, and returns this as an int column.
 
-*Version note:* Moved to `datamatrix.multidimensional` in 0.16.0
+*Version note:* Moved to `datamatrix.multidimensional` in 1.0.0
 
 *Version note:* New in 0.15.0
 
@@ -97,7 +97,7 @@ An int column with the number of `INF` values in each cell.
 Counts the number of `NAN` values for each cell in a multidimensional
 column, and returns this as an int column.
 
-*Version note:* Moved to `datamatrix.multidimensional` in 0.16.0
+*Version note:* Moved to `datamatrix.multidimensional` in 1.0.0
 
 *Version note:* New in 0.15.0
 
@@ -131,12 +131,12 @@ An int column with the number of `NAN` values in each cell.
 
 <div class="FunctionDoc YAMLDoc" id="reduce" markdown="1">
 
-## function __reduce__\(col, operation=<function nanmean at 0x7fad5d653400>\)
+## function __reduce__\(col, operation=<function nanmean at 0x7f6ffa02b400>\)
 
 Transforms multidimensional values to single values by applying an
 operation (typically a mean) to each multidimensional value.
 
-*Version note:* Moved to `datamatrix.multidimensional` in 0.16.0
+*Version note:* Moved to `datamatrix.multidimensional` in 1.0.0
 
 *Version note:* As of 0.11.0, the function has been renamed to
 `reduce()`. The original `reduce_()` is deprecated.
@@ -163,7 +163,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `col` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7fad5d653400>
+	- Default: <function nanmean at 0x7f6ffa02b400>
 
 __Returns:__
 

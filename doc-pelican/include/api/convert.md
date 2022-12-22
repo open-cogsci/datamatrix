@@ -27,8 +27,6 @@ A DataMatrix.
 
 ## function __from\_mne\_epochs__\(epochs, ch\_avg=False\)
 
-*Version note:* New in 0.16.0
-
 [Python MNE](https://mne.tools/) is a library for analysis of
 neurophysiological data.
 
@@ -47,9 +45,7 @@ three-dimensional, where the first dimension is the number of rows,
 the second dimension is the channel (which can be referenced by name),
 and the third dimension is sample time.
 
-See also:
-
-- <https://mne.tools/>
+*Version note:* New in 1.0.0
 
 %--
 python: |
@@ -106,8 +102,6 @@ No description
 
 ## function __from\_mne\_tfr__\(tfr, ch\_avg=False, freq\_avg=False\)
 
-*Version note:* New in 0.16.0
-
 [Python MNE](https://mne.tools/) is a library for analysis of
 neurophysiological data.
 
@@ -135,6 +129,8 @@ four-dimensional, where the first dimension is the number of rows,
 the second dimension is the channel (which can be referenced by name),
 the third dimension is frequency, and the fourth dimension is sample
 time.
+
+*Version note:* New in 1.0.0
 
 %--
 python: |

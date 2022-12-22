@@ -16,7 +16,7 @@ __Example:__
 dm = io.readbin('data.dm')
 ~~~
 
-*Version note:* New in 0.16.0.
+*Version note:* New in 1.0.0
 
 __Arguments:__
 
@@ -127,7 +127,7 @@ __Example:__
 io.writebin(dm, 'data.dm')
 ~~~
 
-*Version note:* New in 0.16.0.
+*Version note:* New in 1.0.0
 
 __Arguments:__
 
