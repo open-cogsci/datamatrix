@@ -21,6 +21,8 @@ dependencies = [
     "psutil"
 ]
 keywords = ["data analysis", "scientific software", "time series"]
+[tool.flit.sdist]
+exclude = ["doc-pelican", "testcases", ".github"]
 [project.urls]
 Documentation = "https://github.com/open-cogsci/datamatrix"
 Source = "https://github.com/open-cogsci/datamatrix"
