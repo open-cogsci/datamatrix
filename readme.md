@@ -3,7 +3,7 @@
 *An intuitive, Pythonic way to work with tabular data.*
 
 Sebastiaan Mathôt  <br />
-Copyright 2015-2022  <br />
+Copyright 2015-2023  <br />
 <https://pydatamatrix.eu/>
 
 
@@ -29,8 +29,6 @@ Copyright 2015-2022  <br />
 
 `DataMatrix` is also one of the core libraries of [OpenSesame](https://osdoc.cogsci.nl/), a graphical experiment builder for the social sciences, and [Rapunzel](https://rapunzel.cogsci.nl/), a modern code editor for numerical computing with Python and R.
 
-
-## Features
 
 ## Features
 
@@ -124,6 +122,7 @@ pip install datamatrix
 *Historical note:* The DataMatrix project used to correspond to another package of the same name, which was discontinued in 2010. If you want to install this package, you can do still do so by providing an explicit version (0.9 is the latest version of this package), as shown below. With thanks to [dennogumi.org](https://www.dennogumi.org/) for handing over this project's entry on PyPi, thus avoiding much unnecessary confusion!
 
 ~~~
+# Doesn't install datamatrix but a previous package by the same name!
 pip install datamatrix==0.9
 ~~~
 
