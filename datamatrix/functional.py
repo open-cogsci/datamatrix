@@ -30,7 +30,7 @@ import functools
 import logging
 from contextlib import contextmanager
 from datamatrix.py3compat import *
-from datamatrix import DataMatrix
+from datamatrix import DataMatrix, cfg
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._index import Index
 from datamatrix._functional._memoize import memoize
@@ -422,6 +422,7 @@ def _stack_multiprocess_inner(fnc, arg):
     if not isinstance(dm, DataMatrix):
         raise ValueError('function should return DataMatrix, not {}'
                          .format(type(dm)))
-    path = Path('.{}.dm'.format(id(dm)))
+    path = Path(cfg.tmp_dir) / Path('.{}.dm'.format(id(dm)))
+    logger.info('writing process result to temporary file {}'.format(path))
     io.writebin(dm, path)
     return path

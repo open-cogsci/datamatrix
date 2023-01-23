@@ -64,8 +64,8 @@ def readbin(path):
         dm_path = Path(member.name)
         if dm_path.suffix == '.datamatrix':
             logger.debug('reading datamatrix pickle from {}'.format(dm_path))
-            tar.extract(member)
-            dm = readpickle(dm_path)
+            tar.extract(member, path=cfg.tmp_dir)
+            dm = readpickle(Path(cfg.tmp_dir) / dm_path)
             dm_path.unlink()
             break
     else:
@@ -75,14 +75,15 @@ def readbin(path):
             continue
         aux_path = col._seq
         logger.debug('reading auxiliary file: {}'.format(aux_path))
-        tar.extract(tar.getmember(str(aux_path)))
+        tar.extract(tar.getmember(str(aux_path)), path=cfg.tmp_dir)
         col._init_seq()
         chunk_slice = int(cfg.save_chunk_size / col._memory_size() * len(col))
-        with aux_path.open('rb+') as fd:
+        tmp_path = Path(cfg.tmp_dir) / aux_path
+        with tmp_path.open('rb+') as fd:
             a = np.memmap(fd, mode='r', shape=col.shape, dtype=col.dtype)
             for i in range(0, len(col), chunk_slice):
                 col._seq[i:i + chunk_slice] = a[i:i + chunk_slice]
-        aux_path.unlink()
+        tmp_path.unlink()
     return dm
 
 
@@ -129,14 +130,14 @@ def writebin(dm, path):
                 a[i:i + chunk_slice] = col._seq[i:i + chunk_slice]
         tmp[id(col)] = col._fd, col._seq
         col._fd = None
-        object.__setattr__(col, '_seq' , aux_path)
-        tar.add(aux_path)
+        object.__setattr__(col, '_seq' , aux_path.name)
+        tar.add(aux_path, arcname=aux_path.name)
         aux_path.unlink()
     # The datamatrix can now be safely pickled
     dm_path = path.parent / Path('.{}.datamatrix'.format(id(dm)))
     logger.debug('writing datamatrix pickle to {}'.format(dm_path))
     writepickle(dm, dm_path)
-    tar.add(dm_path)
+    tar.add(dm_path, arcname=dm_path.name)
     tar.close()
     dm_path.unlink()
     # The _seq and _fd properties can be restored again

@@ -31,6 +31,7 @@ class Config:
     always_load_max_size = 134217728
     never_load_min_size = float('inf')
     save_chunk_size = 134217728
+    tmp_dir = os.getcwd()
     
     def __init__(self):
         logger.debug('initializing config')

@@ -45,8 +45,6 @@ logger = logging.getLogger('datamatrix')
 
         
         
-
-
 class _MultiDimensionalColumn(NumericColumn):
 
     """
@@ -303,8 +301,8 @@ class _MultiDimensionalColumn(NumericColumn):
             logger.warning('the size of this column exceeds system memory. '
                            'The column will be created, but operations that '
                            'require data to be loaded into memory will fail.')
-        self._fd = tempfile.NamedTemporaryFile(dir=os.getcwd(), prefix='.',
-                                               suffix='.memmap')
+        self._fd = tempfile.TemporaryFile(dir=cfg.tmp_dir, prefix='.',
+                                          suffix='.memmap')
         self._seq = np.memmap(self._fd, shape=self.shape, dtype=self.dtype)
         chunk_slice = int(cfg.save_chunk_size / memory_size * len(self))
         self._seq[:] = np.nan if self.defaultnan else 0
