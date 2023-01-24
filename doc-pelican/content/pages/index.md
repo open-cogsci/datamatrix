@@ -11,9 +11,9 @@ title: DataMatrix
   <span class="glyphicon glyphicon-education" aria-hidden="true"></span>
   	Basic use
   </a>
-  <a role="button" class="btn btn-success" href="http://forum.cogsci.nl/">
+  <a role="button" class="btn btn-success" href="https://professional.cogsci.nl/">
   <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
-  Forum</a>
+  Get support</a>
 </div>
 
 
@@ -21,7 +21,7 @@ title: DataMatrix
 
 - [An intuitive syntax](%link:basic%) that makes your code easy to read
 - Mix tabular data with [time series](%link:series%) and [multidimensional data](%link:multidimensional) in a single data structure
-- Support for [large data](%link:largedata) by intelligent (and automatic) offloading of data to disk when memory is running low
+- Support for [large data](%link:largedata%) by intelligent (and automatic) offloading of data to disk when memory is running low
 - Advanced [memoization (caching)](%link:memoization%)
 - Requires only the Python standard libraries (but you can use `numpy` to improve performance)
 - Compatible with your favorite data-science libraries:

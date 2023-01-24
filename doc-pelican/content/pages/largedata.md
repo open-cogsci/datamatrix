@@ -87,7 +87,7 @@ It is aso possible (though not recommended) to create columns that, by themselve
 
 ## Implementation details
 
-When a column is offloaded to disk, a `numpy.memmap` object is created instead of a regular `numpy.ndarray`. This object is mapped onto a hidden temporary file in the current working directory with the extension `.memmap`.
+When a column is offloaded to disk, a `numpy.memmap` object is created instead of a regular `numpy.ndarray`. This object is mapped onto a hidden temporary file in the current working directory. Depending on the operating system, this temporary file is either invisible (unlinked) or has the extension `.memmap`.
 
 See also:
 
