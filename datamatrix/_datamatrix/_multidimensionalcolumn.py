@@ -636,8 +636,10 @@ class TouchHistory:
                 to_remove.append(other_id)
                 continue
             # If the other column is not loaded or if it's the current column,
-            # then we ignore it.
-            if other_col is col or not other_col.loaded:
+            # then we ignore it. We also ignore columns that are below a
+            # certain size, because these should always be loaded.
+            if other_col is col or not other_col.loaded or \
+                    other_col._memory_size() < cfg.always_load_max_size:
                 continue
             # Otherwise we unload the other column to free up memoty
             logger.debug('insufficient free memory')
