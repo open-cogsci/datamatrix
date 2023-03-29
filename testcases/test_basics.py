@@ -134,6 +134,10 @@ def test_mixedcolumn():
     check_col(dm.col, [1.1, 1, 'x', None])
     dm.col[dm.col == {1, None}] = 'a', 'b'
     check_col(dm.col, [1.1, 'a', 'x', 'b'])
+    dm = DataMatrix({'col': ['1.1', '1', 'x', 'b']})
+    check_col(dm.col, [1.1, 1, 'x', 'b'])
+    dm = DataMatrix(col=['1.1', '1', 'x', 'b'])
+    check_col(dm.col, [1.1, 1, 'x', 'b'])
 
 
 def test_intcolumn():

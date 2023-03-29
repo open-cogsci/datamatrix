@@ -89,6 +89,32 @@ class DataMatrix(OrderedState):
         """
 
         global _id
+        # If a dict is provided, then we use this to initialize the datamatrix.
+        # This emulates DataFrame initialization. To preserve backwards
+        # compatibility, we use the first argument (length) for this, even
+        # though that's a bit ugly. The actual initialization happens at the
+        # end.
+        if isinstance(length, dict):
+            init_dict = length
+            length = 0
+            if columns:
+                logger.warning('initializing from dict, ignoring columns list')
+                columns = 0
+        else:
+            init_dict = None
+        # If column have been provided, verify that they are lists of equal
+        # length. If a length has been explicitly provided, it should match
+        # the column length. If not, the length is set to the column length.
+        if columns:
+            values = list(columns.values())
+            if any(not isinstance(column, list) for column in values):
+                raise TypeError('columns should be lists')
+            column_length = len(values[0])
+            if any(len(column) != column_length for column in values):
+                raise ValueError('columns should be of equal length')
+            if length != 0 and length != column_length:
+                raise ValueError('length does not match length of columns')
+            length = column_length
         try:
             length = int(length)
         except ValueError:
@@ -108,6 +134,9 @@ class DataMatrix(OrderedState):
         _id += 1
         for column_name, val in columns.items():
             self[column_name] = val
+        # If a dict was provided, initialize the datamatrix
+        if init_dict is not None:
+            self._fromdict(init_dict)
 
     @property
     def shape(self):
