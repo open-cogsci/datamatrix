@@ -13,10 +13,9 @@ dynamic = ["version", "description"]
 dependencies = [
     "numpy",
     "scipy",
-    "fastnumbers",
     "prettytable",
     "openpyxl",
-    "json_tricks",
+    "json-tricks",
     "tomlkit",
     "psutil"
 ]
@@ -24,7 +23,7 @@ keywords = ["data analysis", "scientific software", "time series"]
 [tool.flit.sdist]
 exclude = ["doc-pelican", "testcases", ".github"]
 [project.urls]
-Documentation = "https://github.com/open-cogsci/datamatrix"
+Documentation = "https://pydatamatrix.eu"
 Source = "https://github.com/open-cogsci/datamatrix"
 [tool.datamatrix]
 min_mem_free_rel = 0.5
