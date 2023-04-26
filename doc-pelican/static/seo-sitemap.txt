@@ -1,0 +1,11 @@
+https://pydatamatrix.eu/1.0/install
+https://pydatamatrix.eu/1.0/basic
+https://pydatamatrix.eu/1.0/memoization
+https://pydatamatrix.eu/1.0/largedata
+https://pydatamatrix.eu/1.0/eyelinkparser
+https://pydatamatrix.eu/1.0/convert
+https://pydatamatrix.eu/1.0/functional
+https://pydatamatrix.eu/1.0/io
+https://pydatamatrix.eu/1.0/operations
+https://pydatamatrix.eu/1.0/series
+https://pydatamatrix.eu/1.0/multidimensional
