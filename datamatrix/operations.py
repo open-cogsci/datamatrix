@@ -427,7 +427,14 @@ def split(col, *values):
     # that are passed to the function
     _values = values if values else col.unique
     for val in _values:
+        # Setting this flag tells the datamatrix to not copy all columns, but
+        # rather to create UninstiatedColumn objects which are turned into
+        # actual columns only when they are requested. This is much faster and
+        # saves memory in cases where a large datamatrix is split but most
+        # columns are never actually used in the splitted datamatrix objects.
+        object.__setattr__(col._datamatrix, '_instantiate_on_select', False)
         dm = col == val
+        object.__setattr__(col._datamatrix, '_instantiate_on_select', True)
         if not dm:
             warn(u'No matching rows for %s' % val)
         if values:

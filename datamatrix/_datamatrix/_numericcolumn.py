@@ -250,8 +250,6 @@ class NumericColumn(BaseColumn):
             selected_indices = selected_indices_cache[1]
         return self._empty_col(rowid=self._rowid[selected_indices],
                                seq=self._seq[selected_indices])
-            
-        
 
     def _setdatamatrixkey(self, key, val):
 
