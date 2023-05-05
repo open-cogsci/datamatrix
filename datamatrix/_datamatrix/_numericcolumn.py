@@ -224,7 +224,7 @@ class NumericColumn(BaseColumn):
 
         return self.dtype(self._seq[key])
 
-    def _getrowidkey(self, key):
+    def _getrowidkey(self, key, dm=None):
 
         if isinstance(key, Index):
             key = key._a
@@ -249,7 +249,8 @@ class NumericColumn(BaseColumn):
         else:
             selected_indices = selected_indices_cache[1]
         return self._empty_col(rowid=self._rowid[selected_indices],
-                               seq=self._seq[selected_indices])
+                               seq=self._seq[selected_indices],
+                               datamatrix=dm)
 
     def _setdatamatrixkey(self, key, val):
 

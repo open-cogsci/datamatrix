@@ -25,15 +25,21 @@ class UninstantiatedColumn:
     
     Parameters
     ----------
+    name: str
     parent_col: BaseColumn
     rowid: Index
+    dm: DataMatrix
     """
-    def __init__(self, parent_col, rowid):
+    def __init__(self, name, parent_col, rowid, dm):
         logger.debug(
-            f'creating uninstantiatedselection from {parent_col.name}')
+            f'creating uninstantiatedselection from {name}')
         self._parent_col = parent_col
         self._rowid = rowid
+        self._dm = dm
+        self._name = name
         
     def instantiate(self):
-        logger.debug(f'instantiating selection from {self._parent_col.name}')
-        return self._parent_col._getrowidkey(self._rowid)
+        logger.debug(f'instantiating selection from {self._name}')
+        if isinstance(self._parent_col, UninstantiatedColumn):
+            self._parent_col = self._parent_col.instantiate()
+        return self._parent_col._getrowidkey(self._rowid, self._dm)

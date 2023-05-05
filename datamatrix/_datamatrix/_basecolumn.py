@@ -584,7 +584,7 @@ class BaseColumn(OrderedState):
             raise ValueError('Cannot slice column with a different DataMatrix')
         return self[[self._rowid.index(_rowid) for _rowid in key._rowid]]
 
-    def _getrowidkey(self, key):
+    def _getrowidkey(self, key, dm=None):
 
         """
         visible: False
@@ -599,7 +599,7 @@ class BaseColumn(OrderedState):
             BaseColunn
         """
         seq = [self._seq[self._rowid.index(_rowid)] for _rowid in key]
-        return self._empty_col(rowid=key, seq=seq)
+        return self._empty_col(rowid=key, seq=seq, datamatrix=dm)
         
     def _sortedrowid(self):
 

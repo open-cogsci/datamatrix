@@ -153,6 +153,10 @@ class DataMatrix(OrderedState):
     @property
     def columns(self):
 
+        for name, col in self._cols.items():
+            if isinstance(col, UninstantiatedColumn):
+                col = col.instantiate()
+                self._cols[name] = col
         return self._to_list(self._cols.items(), key=lambda col: col[0])
 
     @property
@@ -310,12 +314,13 @@ class DataMatrix(OrderedState):
             # By default we create new columns with a copy of the selected data 
             if not hasattr(self, '_instantiate_on_select') or \
                     self._instantiate_on_select:
-                dm._cols[name] = self._cols[name]._getrowidkey(_rowid)
+                dm._cols[name] = self._cols[name]._getrowidkey(_rowid, dm)
             # Except when _instatiate_on_select is set to False, in which case
             # we create an UninstantiatedColumn object which can be turned into
             # an actual column when it is requested in _getcolbyname()
             else:
-                dm._cols[name] = UninstantiatedColumn(self._cols[name], _rowid)
+                dm._cols[name] = UninstantiatedColumn(
+                    name, self._cols[name], _rowid, dm)
             dm._cols[name]._datamatrix = dm
         return dm
 
