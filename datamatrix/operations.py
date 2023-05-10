@@ -105,6 +105,7 @@ def stack(*dms):
     start_index = 0
     dm = DataMatrix(length=new_length)
     for stackdm in dms:
+        stackdm._instantiate()
         for name, col in stackdm._cols.items():
             if name not in dm._cols:
                 if isinstance(col, _MultiDimensionalColumn):

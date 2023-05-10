@@ -99,7 +99,7 @@ def writebin(dm, path):
         ~~~ .python
         io.writebin(dm, 'data.dm')
         ~~~
-        
+
         *Version note:* New in 1.0.0
 
 
@@ -107,6 +107,7 @@ def writebin(dm, path):
         dm:     The DataMatrix to write.
         path:   The path to the binary file.
     """
+    dm._instantiate()
     if np is None:
         raise Exception(
             'NumPy and SciPy are required, but not installed.')

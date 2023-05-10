@@ -153,10 +153,7 @@ class DataMatrix(OrderedState):
     @property
     def columns(self):
 
-        for name, col in self._cols.items():
-            if isinstance(col, UninstantiatedColumn):
-                col = col.instantiate()
-                self._cols[name] = col
+        self._instantiate()
         return self._to_list(self._cols.items(), key=lambda col: col[0])
 
     @property
@@ -340,6 +337,7 @@ class DataMatrix(OrderedState):
             type:	DataMatrix.
         """
 
+        self._instantiate()
         # A tuple of length two is interpreted by a SeriesColumn as a sample
         # and row. Therefore, we turn tuples into lists.
         if isinstance(key, tuple):
@@ -376,7 +374,7 @@ class DataMatrix(OrderedState):
                 desc:	The new length.
                 type:	int
         """
-
+        self._instantiate()
         if value < len(self):
             object.__setattr__(self, u'_rowid', self._rowid[:value])
             for name, col in self._cols.items():
@@ -424,7 +422,7 @@ class DataMatrix(OrderedState):
         returns:
             type:	DataMatrix.
         """
-
+        self._instantiate()
         if self != other:
             raise Exception('Can only merge related datamatrices')
         dm = DataMatrix(len(_rowid))
@@ -495,7 +493,7 @@ class DataMatrix(OrderedState):
         returns:
             type:	BaseColumn
         """
-
+        self._instantiate()
         for col in self._cols.values():
             if col is key:
                 return col
@@ -522,13 +520,7 @@ class DataMatrix(OrderedState):
         col = self._cols.get(key, None)
         if col is None:
             raise AttributeError(u'No column named "%s"' % key)
-        # If an UninstantiatedColumn is requested, then we turn it into an
-        # instantiated column, i.e. a copy of a larger column with a copy of
-        # the selected data.
-        if isinstance(col, UninstantiatedColumn):
-            col = col.instantiate()
-            self._cols[key] = col
-        return col
+        return self._instantiate_column(key, col)
 
     def _getrow(self, key):
 
@@ -815,6 +807,7 @@ class DataMatrix(OrderedState):
 
     def __str__(self):
 
+        self._instantiate()
         if len(self) > PRINT_MAX_ROWS:
             return str(self[:PRINT_MAX_ROWS]) + u'\n(+ %d rows not shown)' \
                 % (len(self) - PRINT_MAX_ROWS)
@@ -876,6 +869,7 @@ class DataMatrix(OrderedState):
         """
         
         import numpy as np
+        self._instantiate()
         a = np.empty((len(self), len(self.columns)), dtype=object)
         for i, col in enumerate(self._cols.values()):
             if hasattr(col, 'depth'):
@@ -897,3 +891,20 @@ class DataMatrix(OrderedState):
         from datamatrix import convert as cnv
         
         return cnv.to_pandas(self)
+
+    def _instantiate(self):
+        """Instantiates all uninstantiated columns"""
+        for name, col in self._cols.items():
+            if isinstance(col, UninstantiatedColumn):
+                col = col.instantiate()
+                self._cols[name] = col
+
+    def _instantiate_column(self, key, col):
+        """Makes sure that a specific column is instantiated, and returns the
+        instantiated column.
+        """
+        if not isinstance(col, UninstantiatedColumn):
+            return col
+        col = col.instantiate()
+        self._cols[key] = col
+        return col
