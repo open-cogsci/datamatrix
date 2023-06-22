@@ -22,6 +22,7 @@ from datamatrix import cfg
 from datamatrix._datamatrix._multidimensionalcolumn import \
     _MultiDimensionalColumn
 from datamatrix.io._pickle import readpickle, writepickle
+import os
 import logging
 import tarfile
 from pathlib import Path
@@ -60,12 +61,18 @@ def readbin(path):
         path = Path(path)
     logger.debug('reading binary file from {}'.format(path))
     tar = tarfile.open(path, 'r:gz')
+    # Extracte to a temporary folder that is based on the pid of the current
+    # process. This avoids races conditions if multiple processes are reading
+    # from the same file
+    tmp_dir = Path(cfg.tmp_dir) / f'.{os.getpid()}'
+    if not tmp_dir.exists():
+        tmp_dir.mkdir()
     for member in tar.getmembers():
-        dm_path = Path(member.name)
+        dm_path = tmp_dir / Path(member.name)
         if dm_path.suffix == '.datamatrix':
             logger.debug('reading datamatrix pickle from {}'.format(dm_path))
-            tar.extract(member, path=cfg.tmp_dir)
-            dm = readpickle(Path(cfg.tmp_dir) / dm_path)
+            tar.extract(member, path=str(tmp_dir))
+            dm = readpickle(tmp_dir / dm_path)
             dm_path.unlink()
             break
     else:
@@ -75,15 +82,16 @@ def readbin(path):
             continue
         aux_path = col._seq
         logger.debug('reading auxiliary file: {}'.format(aux_path))
-        tar.extract(tar.getmember(str(aux_path)), path=cfg.tmp_dir)
+        tar.extract(tar.getmember(str(aux_path)), path=str(tmp_dir))
         col._init_seq()
         chunk_slice = int(cfg.save_chunk_size / col._memory_size() * len(col))
-        tmp_path = Path(cfg.tmp_dir) / aux_path
+        tmp_path = tmp_dir / aux_path
         with tmp_path.open('rb+') as fd:
             a = np.memmap(fd, mode='r', shape=col.shape, dtype=col.dtype)
             for i in range(0, len(col), chunk_slice):
                 col._seq[i:i + chunk_slice] = a[i:i + chunk_slice]
         tmp_path.unlink()
+    tmp_dir.rmdir()
     return dm
 
 
@@ -99,7 +107,7 @@ def writebin(dm, path):
         ~~~ .python
         io.writebin(dm, 'data.dm')
         ~~~
-
+        
         *Version note:* New in 1.0.0
 
 
@@ -107,7 +115,6 @@ def writebin(dm, path):
         dm:     The DataMatrix to write.
         path:   The path to the binary file.
     """
-    dm._instantiate()
     if np is None:
         raise Exception(
             'NumPy and SciPy are required, but not installed.')
@@ -122,7 +129,7 @@ def writebin(dm, path):
     for col in dm._cols.values():
         if not isinstance(col, _MultiDimensionalColumn) or col.loaded:
             continue
-        aux_path = path.parent / Path('.{}.memmap'.format(id(col)))
+        aux_path = path.parent / Path(f'.{id(col)}-{os.getpid()}.memmap')
         logger.debug('writing auxiliary file: {}'.format(aux_path))
         chunk_slice = int(cfg.save_chunk_size / col._memory_size() * len(col))
         with aux_path.open('wb+') as fd:
@@ -135,7 +142,7 @@ def writebin(dm, path):
         tar.add(aux_path, arcname=aux_path.name)
         aux_path.unlink()
     # The datamatrix can now be safely pickled
-    dm_path = path.parent / Path('.{}.datamatrix'.format(id(dm)))
+    dm_path = path.parent / Path(f'.{id(dm)}-{os.getpid()}.datamatrix')
     logger.debug('writing datamatrix pickle to {}'.format(dm_path))
     writepickle(dm, dm_path)
     tar.add(dm_path, arcname=dm_path.name)

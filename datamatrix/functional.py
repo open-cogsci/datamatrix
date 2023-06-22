@@ -28,6 +28,7 @@ except ImportError:
     from inspect import getargspec
 import functools
 import logging
+import os
 from contextlib import contextmanager
 from datamatrix.py3compat import *
 from datamatrix import DataMatrix, cfg
@@ -101,6 +102,9 @@ def stack_multiprocess(fnc, args, processes=None):
         - %link:operations%#function-stack
         
         *Version note:* New in 1.0.0.
+        
+        *Version note:* As of 1.0.4, if one of the processes crashes, and error
+        is shown with the Exception, but the main process doesn't crash.
 
         __Example:__
 
@@ -139,19 +143,27 @@ def stack_multiprocess(fnc, args, processes=None):
     from datamatrix import io, operations as ops
     
     logger.debug('starting multiprocessing')
-    with mp.Pool(processes) as pool:
-        results = pool.map(functools.partial(_stack_multiprocess_inner, fnc),
-                           args)
-        logger.debug('received {} DataMatrix objects'.format(len(results)))
+    pool = mp.Pool(processes)
+    fnc = functools.partial(_stack_multiprocess_inner, fnc)
+    results = [pool.apply_async(fnc, (arg,)) for arg in args]
+    paths = []
+    for result in results:
+        try:
+            path = result.get()
+        except Exception as e:
+            logger.error(f'a process failed with the following exception: {e}')
+        else:
+            paths.append(path)
+    logger.debug('received {} DataMatrix objects'.format(len(paths)))
     # The return values consist of path objects that refer to temporary
     # binary datamatrix files. We read these files, stack them, and then
     # delete them.
     try:
-        dm = ops.stack([io.readbin(path) for path in results])
+        dm = ops.stack([io.readbin(path) for path in paths])
     except Exception as e:
         raise
     finally:
-        for path in results:
+        for path in paths:
             try:
                 path.unlink()
             except Exception as e:
@@ -417,12 +429,15 @@ def _stack_multiprocess_inner(fnc, arg):
     """
     from pathlib import Path
     from datamatrix import io
+    import gc
     
     dm = fnc(arg)
     if not isinstance(dm, DataMatrix):
         raise ValueError('function should return DataMatrix, not {}'
                          .format(type(dm)))
-    path = Path(cfg.tmp_dir) / Path('.{}.dm'.format(id(dm)))
+    path = Path(cfg.tmp_dir) / Path(f'.{id(dm)}-{os.getpid()}.dm')
     logger.info('writing process result to temporary file {}'.format(path))
     io.writebin(dm, path)
+    del dm
+    gc.collect()
     return path
