@@ -99,7 +99,7 @@ def _group(a):
     yield a[i2], a[-1] + 1
 
 
-def _trim(a, vtrace, std_thr, gap_margin, gap_vt):
+def  _trim(a, vtrace, std_thr, gap_margin, gap_vt):
     """Sets missing data, or values that diverge too much from the mean, or
     values that exceed a velocity threshold to zero, taking a margin around the
     trimmed data. The only gaps that are not trimmed are at the end.
@@ -121,15 +121,16 @@ def _trim(a, vtrace, std_thr, gap_margin, gap_vt):
     return a
 
 
-def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
+def _blinkreconstruct_recursive(a, bl=[], vt_start=10, vt_end=5, maxdur=500,
                                 margin=10, gap_margin=20, gap_vt=10,
                                 smooth_winlen=21, std_thr=3):
     """Implements a recursive blink-reconstruction algorithm that is a big
     improvement over the original algorithm.
     """
-    def fnc_recursive(a):
+
+    def fnc_recursive(a, bl):
         """Shortcut for recursive function call that retains all keywords."""
-        return _blinkreconstruct_recursive(a, vt_start=vt_start, vt_end=vt_end,
+        return _blinkreconstruct_recursive(a, bl, vt_start=vt_start, vt_end=vt_end,
                                            maxdur=maxdur, margin=margin,
                                            gap_margin=gap_margin,
                                            gap_vt=gap_vt,
@@ -146,12 +147,13 @@ def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
     # Get the first occuring blink
     blink_points = _blink_points(vtrace, vt_start=vt_start, vt_end=vt_end,
                                  maxdur=maxdur, margin=margin)
+    
     # If no blink exists, we trim the signal as a final operation and then
-    # leave it.
+    # leave it. ## Plus return the blink list ##
     if blink_points is None:
         logger.debug('no more blinks')
         return _trim(a, vtrace, std_thr=std_thr, gap_margin=gap_margin,
-                     gap_vt=gap_vt)
+                     gap_vt=gap_vt), bl
     # If a blink exists, see if we can get four valid points around it for
     # cubic spline interpolation. If not, then we do linear interpolation.
     istart, iend = blink_points
@@ -168,5 +170,9 @@ def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
             kind='cubic')
     interp_x = np.arange(istart, iend)
     a[interp_x] = interp_fnc(interp_x)
+
+    # appens blink point to the blink list
+    bl.append(tuple(blink_points))
+
     # Recursive call to self to continue cleaning up other blinks (if any)
-    return fnc_recursive(a)
+    return fnc_recursive(a, bl)

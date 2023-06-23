@@ -1502,7 +1502,7 @@ def _blinkreconstruct(a, vt=5, vt_start=10, vt_end=5, maxdur=500, margin=10,
     if mode == 'advanced':
         from datamatrix._datamatrix._blinkreconstruct import \
             _blinkreconstruct_recursive
-        return _blinkreconstruct_recursive(a, vt_start=vt_start, vt_end=vt_end,
+        return _blinkreconstruct_recursive(a, bl=[], vt_start=vt_start, vt_end=vt_end,
                                            maxdur=maxdur, margin=margin,
                                            gap_margin=gap_margin,
                                            gap_vt=gap_vt,
@@ -1594,7 +1594,7 @@ def _blinkreconstruct(a, vt=5, vt_start=10, vt_end=5, maxdur=500, margin=10,
         if i == 0:
             continue
         a[i] = a[i - 1]
-    return a
+    return a, lblink
 
 
 def _smooth(a, winlen=11, wintype='hanning'):
