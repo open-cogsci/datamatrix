@@ -57,7 +57,11 @@ def _blink_points(vtrace, vt_start, vt_end, maxdur, margin):
     # generally very long (although they can be).
     if iend - istart > maxdur:
         logger.debug('blink too long ({})'.format(iend - istart))
-        return None
+        blink_points = _blink_points(vtrace[iend:], vt_start=vt_start, vt_end=vt_end,
+                                    maxdur=maxdur, margin=margin)
+        if blink_points is not None:
+            blink_points += iend
+        return blink_points
     return np.array([istart, iend])
 
 
