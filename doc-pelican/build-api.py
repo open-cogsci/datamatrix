@@ -6,7 +6,7 @@ sys.path.insert(0, '/home/sebastiaan/git/python-yamldoc/')
 import yamldoc
 import imp
 
-ROOT = '/home/sebastiaan/git/python-datamatrix/'
+ROOT = '/home/sebastiaan/git/datamatrix/'
 TARGET = 'include/api/'
 sys.path.insert(0, ROOT)
 

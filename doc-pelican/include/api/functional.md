@@ -295,6 +295,9 @@ See also:
 
 *Version note:* New in 1.0.0.
 
+*Version note:* As of 1.0.4, if one of the processes crashes, and error
+is shown with the Exception, but the main process doesn't crash.
+
 __Example:__
 
 ```python

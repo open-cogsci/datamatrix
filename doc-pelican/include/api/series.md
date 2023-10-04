@@ -87,6 +87,11 @@ introduced, wich can be specified through the `mode` keyword. The
 advanced algorithm is recommended for new analyses, and will be made
 the default in future releases.
 
+*Version note:* As of 1.0.5 the advanced algorithm has been updated
+with a [bugfix](https://github.com/open-cogsci/datamatrix/pull/18) and
+the end of a blink is defined as the moment where the velocity drops
+to 1% of the velocity standard deviation, as opposed to 0.
+
 __Source:__
 
 - Mathot, S., & Vilotijević, A. (2022). Methods in cognitive 
@@ -176,7 +181,7 @@ A new series.
 
 <div class="FunctionDoc YAMLDoc" id="downsample" markdown="1">
 
-## function __downsample__\(series, by, fnc=<function nanmean at 0x7f6ffa02b400>\)
+## function __downsample__\(series, by, fnc=<function nanmean at 0x7f31341e1090>\)
 
 Downsamples a series by a factor, so that it becomes 'by' times
 shorter. The depth of the downsampled series is the highest multiple of
@@ -221,7 +226,7 @@ __Keywords:__
 
 - `fnc` -- The function to average the samples that are combined into 1 value. Typically an average or a median.
 	- Type: callable
-	- Default: <function nanmean at 0x7f6ffa02b400>
+	- Default: <function nanmean at 0x7f31341e1090>
 
 __Returns:__
 

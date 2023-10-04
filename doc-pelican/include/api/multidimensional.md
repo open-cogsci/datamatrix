@@ -131,7 +131,7 @@ An int column with the number of `NAN` values in each cell.
 
 <div class="FunctionDoc YAMLDoc" id="reduce" markdown="1">
 
-## function __reduce__\(col, operation=<function nanmean at 0x7f6ffa02b400>\)
+## function __reduce__\(col, operation=<function nanmean at 0x7f31341e1090>\)
 
 Transforms multidimensional values to single values by applying an
 operation (typically a mean) to each multidimensional value.
@@ -163,7 +163,7 @@ __Arguments:__
 __Keywords:__
 
 - `operation` -- The operation function to use for the reduction. This function should accept `col` as first argument, and `axis=1` as keyword argument.
-	- Default: <function nanmean at 0x7f6ffa02b400>
+	- Default: <function nanmean at 0x7f31341e1090>
 
 __Returns:__
 
