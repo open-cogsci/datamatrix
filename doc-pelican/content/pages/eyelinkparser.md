@@ -13,7 +13,7 @@ We will analyze pupil size during the `sounds` and `retention` traces as a funct
 This tutorial makes use of the [`eyelinkparser` module](https://github.com/smathot/python-eyelinkparser), which can be installed with pip:
 
 ~~~bash
-pip install python-eyelinkparser
+pip install eyelinkparser
 ~~~
 
 The data has been collected with an EyeLink 1000 eye tracker.
