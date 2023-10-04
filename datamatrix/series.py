@@ -716,6 +716,11 @@ def blinkreconstruct(series, vt=5, vt_start=10, vt_end=5, maxdur=500,
         introduced, wich can be specified through the `mode` keyword. The
         advanced algorithm is recommended for new analyses, and will be made
         the default in future releases.
+        
+        *Version note:* As of 1.0.5 the advanced algorithm has been updated
+        with a [bugfix](https://github.com/open-cogsci/datamatrix/pull/18) and
+        the end of a blink is defined as the moment where the velocity drops
+        to 1% of the velocity standard deviation, as opposed to 0.
 
         __Source:__
 

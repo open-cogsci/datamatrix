@@ -44,7 +44,7 @@ def _blink_points(vtrace, vt_start, vt_end, maxdur, margin):
     imid = amid[0] + istart
     # The end blink period is the moment at which the pupil velocity drops
     # back to zero again.
-    aend = np.where(vtrace[imid:] < 0)[0]
+    aend = np.where(vtrace[imid:] < np.nanstd(vtrace) / 100)[0]
     if len(aend) == 0:
         return None
     iend = aend[0] + imid
@@ -57,8 +57,13 @@ def _blink_points(vtrace, vt_start, vt_end, maxdur, margin):
     # generally very long (although they can be).
     if iend - istart > maxdur:
         logger.debug('blink too long ({})'.format(iend - istart))
-        blink_points = _blink_points(vtrace[iend:], vt_start=vt_start, vt_end=vt_end,
-                                    maxdur=maxdur, margin=margin)
+        # We search the remaining part of the trace for blinks, that is, 
+        # starting from iend. If any blink points are found, iend is added
+        # to their timestamps to correct for the fact that we did not search
+        # from the beginning of the trace.
+        blink_points = _blink_points(vtrace[iend:], vt_start=vt_start,
+                                     vt_end=vt_end, maxdur=maxdur,
+                                     margin=margin)
         if blink_points is not None:
             blink_points += iend
         return blink_points
@@ -116,11 +121,15 @@ def _trim(a, vtrace, std_thr, gap_margin, gap_vt):
     for istart, iend in _group(indices):
         if iend == len(a):
             continue
+        logger.debug(
+            f'trimming value outliers [{istart - gap_margin} {iend + gap_margin}]')
         a[istart - gap_margin:iend + gap_margin] = np.nan
     indices = np.where(np.abs(vtrace) > gap_vt)[0]
     for istart, iend in _group(indices):
         if iend == len(a):
             continue
+        logger.debug(
+            f'trimming velocity outliers [{istart - gap_margin} {iend + gap_margin}]')
         a[istart - gap_margin:iend + gap_margin] = np.nan
     return a
 
