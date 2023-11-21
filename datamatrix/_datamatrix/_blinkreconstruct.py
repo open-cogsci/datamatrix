@@ -180,6 +180,11 @@ def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
             a[cubic_spline_points],
             kind='cubic')
     interp_x = np.arange(istart, iend)
-    a[interp_x] = interp_fnc(interp_x)
+    interp_y = interp_fnc(interp_x)
+    if np.all(a[interp_x] == interp_y):
+        logger.warning('Segment was already interpolated. This likely '
+                       'indicates noisy data. Aborting blink reconstruction.')
+        return
+    a[interp_x] = interp_y
     # Recursive call to self to continue cleaning up other blinks (if any)
     return fnc_recursive(a)
