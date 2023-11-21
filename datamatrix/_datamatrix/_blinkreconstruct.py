@@ -184,7 +184,7 @@ def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
     if np.all(a[interp_x] == interp_y):
         logger.warning('Segment was already interpolated. This likely '
                        'indicates noisy data. Aborting blink reconstruction.')
-        return
+        return a
     a[interp_x] = interp_y
     # Recursive call to self to continue cleaning up other blinks (if any)
     return fnc_recursive(a)
