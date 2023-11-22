@@ -145,7 +145,8 @@ def stack_multiprocess(fnc, args, processes=None):
     logger.debug('starting multiprocessing')
     pool = mp.Pool(processes)
     fnc = functools.partial(_stack_multiprocess_inner, fnc)
-    results = [pool.apply_async(fnc, (arg,)) for arg in args]
+    results = [pool.apply_async(fnc, (arg, i))
+               for (i, arg) in enumerate(args)]
     paths = []
     for result in results:
         try:
@@ -422,7 +423,7 @@ def _count_unbound_arguments(fnc):
     return len(getargspec(fnc).args) - nbound
 
 
-def _stack_multiprocess_inner(fnc, arg):
+def _stack_multiprocess_inner(fnc, arg, process_nr):
     """A helper function for stack_multiprocess that calls another function,
     ensures that the result value is a DataMatrix, saves the DataMatrix to 
     disk, and then returns the path to the saved file.
@@ -435,7 +436,7 @@ def _stack_multiprocess_inner(fnc, arg):
     if not isinstance(dm, DataMatrix):
         raise ValueError('function should return DataMatrix, not {}'
                          .format(type(dm)))
-    path = Path(cfg.tmp_dir) / Path(f'.{id(dm)}-{os.getpid()}.dm')
+    path = Path(cfg.tmp_dir) / Path(f'.{id(dm)}-{os.getpid()}-{process_nr}.dm')
     logger.info('writing process result to temporary file {}'.format(path))
     io.writebin(dm, path)
     del dm
