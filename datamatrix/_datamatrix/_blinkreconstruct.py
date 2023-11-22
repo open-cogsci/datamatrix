@@ -158,18 +158,18 @@ def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
     # Get the first occuring blink
     blink_points = _blink_points(vtrace, vt_start=vt_start, vt_end=vt_end,
                                  maxdur=maxdur, margin=margin)
-    if list(blink_points) in processed_blink_points:
-        logger.warning('Blink reconstruction entered infinite loop. This '
-                       'likely indicates noisy data. Aborting blink '
-                       'reconstruction for this signal.')
-        return a
-    processed_blink_points.append(list(blink_points))
     # If no blink exists, we trim the signal as a final operation and then
     # leave it.
     if blink_points is None:
         logger.debug('no more blinks')
         return _trim(a, vtrace, std_thr=std_thr, gap_margin=gap_margin,
                      gap_vt=gap_vt)
+    if list(blink_points) in processed_blink_points:
+        logger.warning('Blink reconstruction entered infinite loop. This '
+                       'likely indicates noisy data. Aborting blink '
+                       'reconstruction for this signal.')
+        return a
+    processed_blink_points.append(list(blink_points))
     # If a blink exists, see if we can get four valid points around it for
     # cubic spline interpolation. If not, then we do linear interpolation.
     istart, iend = blink_points
