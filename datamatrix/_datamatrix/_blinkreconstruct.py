@@ -136,18 +136,17 @@ def _trim(a, vtrace, std_thr, gap_margin, gap_vt):
 
 def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
                                 margin=10, gap_margin=20, gap_vt=10,
-                                smooth_winlen=21, std_thr=3):
+                                smooth_winlen=21, std_thr=3,
+                                processed_blink_points=[]):
     """Implements a recursive blink-reconstruction algorithm that is a big
     improvement over the original algorithm.
     """
     def fnc_recursive(a):
         """Shortcut for recursive function call that retains all keywords."""
-        return _blinkreconstruct_recursive(a, vt_start=vt_start, vt_end=vt_end,
-                                           maxdur=maxdur, margin=margin,
-                                           gap_margin=gap_margin,
-                                           gap_vt=gap_vt,
-                                           smooth_winlen=smooth_winlen,
-                                           std_thr=std_thr)
+        return _blinkreconstruct_recursive(
+            a, vt_start=vt_start, vt_end=vt_end, maxdur=maxdur, margin=margin,
+            gap_margin=gap_margin, gap_vt=gap_vt, smooth_winlen=smooth_winlen,
+            std_thr=std_thr, processed_blink_points=processed_blink_points)
     # Create a copy of the signal, smooth it, and calculate the velocity
     a = np.copy(a)
     try:
@@ -159,6 +158,12 @@ def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
     # Get the first occuring blink
     blink_points = _blink_points(vtrace, vt_start=vt_start, vt_end=vt_end,
                                  maxdur=maxdur, margin=margin)
+    if list(blink_points) in processed_blink_points:
+        logger.warning('Blink reconstruction entered infinite loop. This '
+                       'likely indicates noisy data. Aborting blink '
+                       'reconstruction for this signal.')
+        return a
+    processed_blink_points.append(list(blink_points))
     # If no blink exists, we trim the signal as a final operation and then
     # leave it.
     if blink_points is None:
@@ -181,10 +186,6 @@ def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
             kind='cubic')
     interp_x = np.arange(istart, iend)
     interp_y = interp_fnc(interp_x)
-    if np.all(a[interp_x] == interp_y):
-        logger.warning('Segment was already interpolated. This likely '
-                       'indicates noisy data. Aborting blink reconstruction.')
-        return a
     a[interp_x] = interp_y
     # Recursive call to self to continue cleaning up other blinks (if any)
     return fnc_recursive(a)
