@@ -6,6 +6,7 @@ import sys
 import shutil
 sys.path.insert(0, '/home/sebastiaan/git/academicmarkdown')
 import yaml
+import json
 from collections import OrderedDict
 from pelican import signals
 from pelican.readers import MarkdownReader
@@ -36,6 +37,16 @@ ITEM_TYPES = [
     'PYGAZE_WAIT', 'PYGAZE_DRIFT_CORRECT', 'PYGAZE_STOP_RECORDING',
     'PYGAZE_START_RECORDING', 'THIS_STYLE'
     ]
+
+
+DEFAULT_SUMMARY_PROMPT = '''Write a comprehensive summary for the documentation below.
+
+```markdown
+{content}
+```
+'''
+SUMMARY_PROMPT_PATTERN = r"<summary_prompt>(.*?)</summary_prompt>"
+
 
 root = os.path.dirname(os.path.dirname(__file__)) + '/content'
 
@@ -134,7 +145,28 @@ class AcademicMarkdownReader(MarkdownReader):
                     u'<span class="item-type">%s</span>' % item_type.lower())
         metadata = self._parse_metadata(self._md.Meta)
         build.path = build.path[3:]
+        build_path = build.path
+        url = SITEURL + source_path[len(build_path[0]) + 14:-3]
+        summary_prompt = None
+        with open('sigmund-sources-datamatrix.jsonl', 'a') as fd:
+            for chunk in markdown_split(text):
+                print(f'{url} {len(chunk)}')
+                fd.write(json.dumps(
+                    {'content': chunk,
+                     'url': url,
+                     'title': metadata['title']}) + '\n')
+
         return content, metadata
+
+
+def markdown_split(md, maxlen=5000):
+    while len(md) > maxlen:
+        split_point = md[:len(md) // 2].rfind('\n#')
+        if split_point < 0:
+            break
+        yield md[:split_point + 1]
+        md = md[split_point + 1:]
+    yield md
 
 
 def init_academicmarkdown(sender):
