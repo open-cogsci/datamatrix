@@ -137,10 +137,12 @@ def _trim(a, vtrace, std_thr, gap_margin, gap_vt):
 def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
                                 margin=10, gap_margin=20, gap_vt=10,
                                 smooth_winlen=21, std_thr=3,
-                                processed_blink_points=[]):
+                                processed_blink_points=None):
     """Implements a recursive blink-reconstruction algorithm that is a big
     improvement over the original algorithm.
     """
+    if processed_blink_points is None:
+        processed_blink_points = []
     def fnc_recursive(a):
         """Shortcut for recursive function call that retains all keywords."""
         return _blinkreconstruct_recursive(
