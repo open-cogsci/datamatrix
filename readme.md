@@ -3,7 +3,7 @@
 *An intuitive, Pythonic way to work with tabular data.*
 
 Sebastiaan Mathôt  <br />
-Copyright 2015-2023  <br />
+Copyright 2015-2024  <br />
 <https://pydatamatrix.eu/>
 
 
