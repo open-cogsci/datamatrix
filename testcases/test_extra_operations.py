@@ -226,6 +226,10 @@ def test_group():
     dm.b = 'x', 'x', 'x', 'y'
     dm.c = IntColumn
     dm.c = 0, 1, 2, 3
+    dm.s = SeriesColumn(depth=3)
+    dm.s = 1, 2, 3
+    dm.m = MultiDimensionalColumn(shape=(2, 2))
+    dm.m = [[1, 2], [3, 4]]
     dm = ops.group(dm, [dm.a, dm.b])
     # Assert that at least one of the permutations passes
     for ref in itertools.permutations([[3, np.nan], [2, np.nan], [0, 1]]):

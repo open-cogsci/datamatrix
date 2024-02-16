@@ -632,7 +632,7 @@ def group(dm, by):
     for i, key in enumerate(keys):
         dm_ = bycol_hashed == int(key)
         for name, col in groupcols:
-            if isinstance(col, _SeriesColumn):
+            if isinstance(col, _MultiDimensionalColumn):
                 continue
             if cm[name].depth < len(dm_[name]):
                 cm[name].defaultnan = True
