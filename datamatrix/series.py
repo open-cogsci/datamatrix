@@ -1483,7 +1483,7 @@ def _map(series, fnc_, **kwdict):
     """
 
     f = lambda a: fnc_(a, **kwdict)
-    if isinstance(series, _SeriesColumn):
+    if isinstance(series, _MultiDimensionalColumn):
         return fnc.map_(f, series)
     if isinstance(series, np.ndarray):
         return f(series)
