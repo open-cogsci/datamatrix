@@ -17,6 +17,8 @@
 		<![endif]-->
 		<link href='https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed|Ubuntu+Mono|Roboto+Slab' rel='stylesheet' type='text/css'>
 		<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-4e347a093d7f9792"></script>
+		<script type="module" src="https://sigmundai.eu/public/search-widget.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css" integrity="sha512-q3eWabyZPc1XTCmF+8/LuE1ozpg5xxn7iO89yfSOd5/oKvyqLngoNGsx8jq92Y8eXJ/IRxQbEC+FGSYxtk2oiw==" crossorigin="anonymous" referrerpolicy="no-referrer" />						
 		{% include "google-analytics.html" %}
 		{% include "cookie-consent.html" %}
 	</head>
@@ -37,11 +39,11 @@
 				<!-- Sidebar, only visible on large screens -->
 				<div class="col-md-4 cogsci-sidebar visible-lg visible-md">
 					{% include 'social.html' %}
-					{% include 'search.html' %}
 					{% include 'supported-by.html' %}
 				</div>
 				<!-- Content -->
 				<div class="col-md-8 cogsci-content">
+					<search-widget endpoint="https://sigmundai.eu/public/search"></search-widget>
 					{% block content %}
 					{% endblock %}
 				</div>
