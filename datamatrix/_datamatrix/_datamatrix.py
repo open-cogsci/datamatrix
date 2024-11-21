@@ -343,6 +343,8 @@ class DataMatrix(OrderedState):
         # and row. Therefore, we turn tuples into lists.
         if isinstance(key, tuple):
             key = list(key)
+            if isinstance(key[0], str):
+                return self._getcolbyname(key[0])[key[1:]]
         _rowid = self._rowid[key]
         dm = DataMatrix(len(_rowid))
         object.__setattr__(dm, u'_rowid', _rowid)

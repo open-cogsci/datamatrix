@@ -23,10 +23,7 @@ from datamatrix.py3compat import *
 from datamatrix import cfg
 from datamatrix._datamatrix._numericcolumn import NumericColumn, FloatColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
-try:
-    from collections.abc import Sequence  # Python 3.3 and later
-except ImportError:
-    from collections import Sequence
+from collections.abc import Sequence, Collection
 from collections import OrderedDict
 try:
     import numpy as np
@@ -103,7 +100,9 @@ class _MultiDimensionalColumn(NumericColumn):
                 normshape += (dim_size, )
                 self.index_names.append(list(range(dim_size)))
                 self.index_values.append(list(range(dim_size)))
-            else:
+            elif isinstance(dim_size, Collection):
+                if isinstance(dim_size, str):
+                    raise ValueError('A dimension cannot be a string')
                 normshape += (len(dim_size), )
                 self.index_names.append(list(dim_size))
                 self.index_values.append(list(range(len(dim_size))))
@@ -417,7 +416,7 @@ class _MultiDimensionalColumn(NumericColumn):
 
     def __getitem__(self, key):
         touch_history.touch(self, try_to_load=True)
-        if isinstance(key, tuple) and len(key) <= len(self._seq.shape):
+        if isinstance(key, (tuple, list)) and len(key) <= len(self._seq.shape):
             # Advanced indexing always returns a copy, rather than a view, so
             # there's no need to explicitly copy the result.
             indices = self._numindices(key, accept_ellipsis=True)
