@@ -228,6 +228,8 @@ class NumericColumn(BaseColumn):
 
         if isinstance(key, Index):
             key = key._a
+        if isinstance(key, (tuple, list)):
+            key = np.array(key)
         # argsort and searchsorted are fairly time-consuming operations which
         # need to be performed very often. Therefore we implement a crude
         # but fast caching mechanism.
