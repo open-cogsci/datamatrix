@@ -178,6 +178,9 @@ class _MultiDimensionalColumn(NumericColumn):
             if self.defaultnan:
                 seq[:] = np.nan
             seq[:, :self.depth] = self._seq
+            # If the depth is changed, we need to take this into account by 
+            # setting the current shape based on the target shape
+            self._shape = seq.shape[1:]            
             self._seq = seq
             self._shape = (depth, )
             return

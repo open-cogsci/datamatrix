@@ -20,7 +20,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 from datamatrix.py3compat import *
 from datamatrix import cfg, io
 from datamatrix import DataMatrix, MultiDimensionalColumn, INF, \
-    functional as fnc
+    functional as fnc, SeriesColumn
 from testcases.test_tools import check_dm
 import itertools as it
 
@@ -125,3 +125,12 @@ def test_memmap_multiprocess_stack():
     cfg.min_mem_free_rel = .5
     cfg.min_mem_free_abs = 4294967296
     cfg.always_load_max_size = 134217728
+
+
+def test_memmap_seriescolumn_depth():
+    dm = DataMatrix(length=2)
+    dm.s = SeriesColumn(depth=3)
+    dm.s.loaded = False
+    assert not dm.s.loaded
+    dm.s.depth = 4
+    assert not dm.s.loaded
