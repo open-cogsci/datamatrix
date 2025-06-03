@@ -16,12 +16,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
-import logging
-import os
-import weakref
 from datamatrix.py3compat import *
+import logging
+import weakref
 from datamatrix import cfg
-from datamatrix._datamatrix._numericcolumn import NumericColumn, FloatColumn
+from datamatrix._datamatrix._mixedcolumn import MixedColumn
+from datamatrix._datamatrix._numericcolumn import NumericColumn, FloatColumn, \
+    IntColumn
 from datamatrix._datamatrix._datamatrix import DataMatrix
 from collections.abc import Sequence, Collection
 from collections import OrderedDict
@@ -348,11 +349,19 @@ class _MultiDimensionalColumn(NumericColumn):
 
         # For a MultiDimensionalColumn, we need to make a special case, because
         # the shape of the new MultiDimensionalColumn may be different from
-        # the shape of the original column.
+        # the shape of the original column. The new column may even be a 
+        # different kind of column altogether.
         for i, cell in enumerate(self):
             a = fnc(cell)
             if not i:
-                newcol = self.__class__(self.dm, shape=len(a))
+                if isinstance(a, float):
+                    newcol = FloatColumn(self.dm)
+                elif isinstance(a, int):
+                    newcol = IntColumn(self.dm)
+                elif isinstance(a, str):
+                    newcol = MixedColumn(self.dm)
+                else:
+                    newcol = self.__class__(self.dm, shape=len(a))
             newcol[i] = a
         return newcol
 

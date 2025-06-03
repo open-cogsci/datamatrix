@@ -18,12 +18,13 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from datamatrix.py3compat import *
-from datamatrix import DataMatrix, MixedColumn, IntColumn, FloatColumn
+from datamatrix import DataMatrix, MixedColumn, IntColumn, FloatColumn, \
+    MultiDimensionalColumn
 from datamatrix import functional as fnc
-from testcases.test_tools import capture_stdout
+from testcases.test_tools import capture_stdout, check_series
 
 
-def test_map_():
+def test_map():
 
     for coltype in (MixedColumn, FloatColumn, IntColumn):
         dm = DataMatrix(length=2, default_col_type=coltype)
@@ -31,12 +32,28 @@ def test_map_():
         dm.a = fnc.map_(lambda x: x*2, dm.a)
         assert dm.a == [2, 4]
         assert isinstance(dm.a, coltype)
+        dm.a = 1, 2
+        dm.a = dm.a @ (lambda x: x*2)
+        assert dm.a == [2, 4]
+        assert isinstance(dm.a, coltype)
         dm = fnc.map_(lambda **d: {'a' : 0}, dm)
         assert dm.a == [0, 0]
         assert isinstance(dm.a, coltype)
 
 
-def test_filter_():
+def test_map_multidimensional():
+    dm = DataMatrix(length=2)
+    dm.m = MultiDimensionalColumn(shape=(3,))
+    dm.m = [[1,2,3], [4,5,6]]
+    dm.mean = dm.m @ (lambda a: a.mean())
+    assert dm.mean == [2, 5]
+    dm.half = dm.m @ (lambda a: a / 2)
+    check_series(dm.half, [[0.5, 1., 1.5], [2, 2.5, 3.]])
+    dm.short = dm.m @ (lambda a: a[:2])
+    check_series(dm.short, [[1, 2], [4, 5]])
+
+
+def test_filter():
 
     dm = DataMatrix(length=4)
     dm.a = range(4)
