@@ -25,7 +25,7 @@ desc:
 ---
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix.multidimensional import nancount, infcount, flatten, reduce
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix._datamatrix._basecolumn import BaseColumn
@@ -1516,7 +1516,7 @@ def _blinkreconstruct(a, vt=5, vt_start=10, vt_end=5, maxdur=500, margin=10,
     if mode != 'original':
         raise ValueError(
             'blinkreconstruct() mode should be "orignal" or "advanced"')
-    warn('Using "original" blink-reconstruction mode. For new code, '
+    utils.logger.warning('Using "original" blink-reconstruction mode. For new code, '
          '"advanced" mode is recommended.')
     # Create a copy of the signal, a smoothed version, and calculate the
     # velocity profile.
@@ -1524,7 +1524,7 @@ def _blinkreconstruct(a, vt=5, vt_start=10, vt_end=5, maxdur=500, margin=10,
     try:
         strace = _smooth(a, winlen=smooth_winlen)
     except Exception as e:
-        warn(e)
+        utils.logger.warning(e)
         strace = a
     vtrace = strace[1:]-strace[:-1]
     # Start blink detection
@@ -1660,7 +1660,7 @@ def _interpolate(y):
     y = np.copy(y)
     xnan = np.isnan(y)
     if np.sum(xnan) == len(y):
-        warn(u'Cannot interpolate all-nan array')
+        utils.logger.warning(u'Cannot interpolate all-nan array')
         return y
     inan = np.where(xnan)
     x = np.arange(len(y))

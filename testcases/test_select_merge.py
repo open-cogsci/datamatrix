@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
     SeriesColumn
 from testcases.test_tools import check_col, check_series, check_integrity, \
@@ -98,11 +98,9 @@ def test_floatcolumn():
     dm.col = 1, 2, np.nan, np.inf
     dm2 = dm.col == '1'
     check_col(dm2.col, [1])
-    with pytest.warns(UserWarning):
-        dm2 = dm.col == ''
+    dm2 = dm.col == ''
     check_col(dm2.col, [np.nan])
-    with pytest.warns(UserWarning):
-        dm2 = dm.col != ''
+    dm2 = dm.col != ''
     check_col(dm2.col, [1, 2, np.inf])
     dm2 = dm.col == np.nan
     check_col(dm2.col, [np.nan])
@@ -112,9 +110,8 @@ def test_floatcolumn():
     check_col(dm2.col, [np.inf])
     dm2 = dm.col != np.inf
     check_col(dm2.col, [1, 2, np.nan])
-    with pytest.warns(UserWarning):
-        with pytest.raises(TypeError):
-            dm.col > ''
+    with pytest.raises(TypeError):
+        dm.col > ''
     # Check type selectors
     dm = DataMatrix(length=2, default_col_type=FloatColumn)
     dm.col = 1, 2

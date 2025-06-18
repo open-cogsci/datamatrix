@@ -22,7 +22,7 @@ desc:
 ---
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix.io._text import readtxt, writetxt
 from datamatrix.io._pickle import readpickle, writepickle
 from datamatrix.io._excel import readxlsx, writexlsx

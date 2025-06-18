@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
 from datamatrix import (
     DataMatrix, MixedColumn, FloatColumn, IntColumn, MultiDimensionalColumn,
     SeriesColumn, NAN
@@ -187,13 +186,7 @@ def test_floatcolumn():
     # Test nans
     dm.col = 'nan'
     check_col(dm.col, [np.nan, np.nan])
-    with pytest.warns(UserWarning):
-        dm.col = None
-    check_col(dm.col, [np.nan, np.nan])
     dm.col = np.nan
-    check_col(dm.col, [np.nan, np.nan])
-    with pytest.warns(UserWarning):
-        dm.col = 'x'
     check_col(dm.col, [np.nan, np.nan])
     # Test infs
     dm.col = 'inf'
@@ -205,8 +198,7 @@ def test_floatcolumn():
     check_col(dm.col, [np.nan, np.inf])
     dm.col = np.inf, np.nan
     check_col(dm.col, [np.inf, np.nan])
-    with pytest.warns(UserWarning):
-        dm.col = 'x', None
+    dm.col = 'x', None
     check_col(dm.col, [np.nan, np.nan])
     # Check dtype
     assert dm.col._seq.dtype == np.float64

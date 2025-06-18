@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+import warnings
 from datamatrix import Row
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._mixedcolumn import MixedColumn
@@ -33,8 +33,9 @@ try:
 except ImportError:
     np = None
 from collections import OrderedDict
-_id = 0
 
+
+_id = 0
 PRINT_MAX_ROWS = 20
 PRINT_MAX_COLUMNS = 6
 PRINT_MAX_NUMBER = 999999
@@ -152,13 +153,22 @@ class DataMatrix(OrderedState):
 
     @property
     def columns(self):
-
-        self._instantiate()
-        return self._to_list(self._cols.items(), key=lambda col: col[0])
+        """*Version note:* Backwards incompatible change in 2.0.0
+        
+        Return a list of column names. (Previous returned a list of name, 
+        column tuples.
+        """
+        return self._to_list(self._cols.keys())
 
     @property
     def column_names(self):
-
+        """*Version note:* Deprecated in 2.0.0
+        
+        Use DataMatrix.columns instead.
+        """        
+        warnings.warn(
+            'DataMatrix.column_names is deprecated, use DataMatrix.columns '
+            'instead', DeprecationWarning)
         return self._to_list(self._cols.keys())
 
     @property
@@ -184,8 +194,8 @@ class DataMatrix(OrderedState):
     @property
     def is_2d(self):
 
-        for name, col in self.columns:
-            if hasattr(col, u'depth'):
+        for name in self.columns:
+            if hasattr(self[name], u'depth'):
                 return False
         return True
 
@@ -458,7 +468,7 @@ class DataMatrix(OrderedState):
         """
 
         for name, col in d.items():
-            if isinstance(col, basestring):
+            if isinstance(col, str):
                 self.length = 1
             elif len(col) > len(self):
                 self.length = len(col)
@@ -695,8 +705,8 @@ class DataMatrix(OrderedState):
         global _id
         OrderedState.__setstate__(self, state)
         object.__setattr__(self, u'_id', _id)
-        for name, column in self.columns:
-            column._datamatrix = self
+        for name in self.columns:
+            self[name]._datamatrix = self
         _id += 1
 
     def __dir__(self):
@@ -766,7 +776,7 @@ class DataMatrix(OrderedState):
             else:
                 raise ValueError('Column not found: %s' % value)
         # Delete column by name
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             if value in self._cols:
                 del self._cols[value]
                 return
@@ -793,14 +803,14 @@ class DataMatrix(OrderedState):
 
         if isinstance(key, BaseColumn):
             return self._getcolbyobject(key)
-        if isinstance(key, basestring):
+        if isinstance(key, str):
             return self._getcolbyname(key)
         if isinstance(key, int):
             return self._getrow(key)
         if isinstance(key, slice):
             return self._slice(key)
         if isinstance(key, Sequence):
-            if all(isinstance(v, (basestring, BaseColumn)) for v in key):
+            if all(isinstance(v, (str, BaseColumn)) for v in key):
                 from datamatrix import operations as ops
                 return ops.keep_only(self, *key)
             return self._slice(key)
@@ -817,7 +827,8 @@ class DataMatrix(OrderedState):
         import prettytable
         t = prettytable.PrettyTable()
         t.add_column('#', self._rowid)
-        for name, col in list(self.columns)[:PRINT_MAX_COLUMNS]:
+        for name in list(self.columns)[:PRINT_MAX_COLUMNS]:
+            col = self[name]
             t.add_column(
                 name,
                 [

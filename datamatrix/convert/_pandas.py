@@ -23,7 +23,7 @@ desc:
 ---
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import DataMatrix
 from datamatrix._datamatrix._basecolumn import BaseColumn
 
@@ -104,8 +104,8 @@ def to_pandas(obj):
     if not isinstance(obj, DataMatrix):
         raise TypeError('Expecting a column or DataMatrix')
     d = {}
-    for colname, col in obj.columns:
-        d[colname] = list(col)
+    for colname in obj.columns:
+        d[colname] = list(obj[colname])
     return pd.DataFrame(d)
 
 
@@ -143,9 +143,9 @@ def from_pandas(df):
         return dm
     for colname in df.columns:
         if isinstance(colname, tuple):
-            _colname = u'_'.join([safe_decode(i) for i in colname])
+            _colname = u'_'.join([utils.safe_decode(i) for i in colname])
         else:
-            _colname = safe_decode(colname)
+            _colname = utils.safe_decode(colname)
         dm[_colname] = df[colname]
     ops.auto_type(dm)
     return dm

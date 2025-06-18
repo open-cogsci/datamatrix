@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix._ordered_state import OrderedState
 import array
 try:
@@ -102,7 +102,7 @@ class Index(OrderedState):
 
     def __str__(self):
 
-        return safe_str(self.__unicode__())
+        return utils.safe_decode(self.__unicode__())
 
     def __repr__(self):
 

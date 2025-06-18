@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 
 
 class UninstantiatedColumn:
@@ -31,7 +31,7 @@ class UninstantiatedColumn:
     dm: DataMatrix
     """
     def __init__(self, name, parent_col, rowid, dm):
-        logger.debug(
+        utils.logger.debug(
             f'creating uninstantiatedselection from {name}')
         self._parent_col = parent_col
         self._rowid = rowid
@@ -39,7 +39,7 @@ class UninstantiatedColumn:
         self._name = name
         
     def instantiate(self):
-        logger.debug(f'instantiating selection from {self._name}')
+        utils.logger.debug(f'instantiating selection from {self._name}')
         if isinstance(self._parent_col, UninstantiatedColumn):
             self._parent_col = self._parent_col.instantiate()
         return self._parent_col._getrowidkey(self._rowid, self._dm)

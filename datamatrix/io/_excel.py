@@ -19,7 +19,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 
 
 import os
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import DataMatrix, MixedColumn
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 try:
@@ -69,7 +69,7 @@ def readxlsx(path, default_col_type=MixedColumn, sheet=None):
         for colname, cell in zip(column_names, rows[i]):
             if cell.value is None:
                 dm[colname][i] = default_col_type.default_value
-                warn(u'Some rows miss column %s' % colname)
+                utils.logger.warning(u'Some rows miss column %s' % colname)
             else:
                 dm[colname][i] = cell.value
     return dm
@@ -98,7 +98,7 @@ def writexlsx(dm, path):
 
     try:
         os.makedirs(os.path.dirname(path))
-    except:
+    except Exception:
         pass
     wb = Workbook()
     wb.guess_types = True
@@ -106,8 +106,8 @@ def writexlsx(dm, path):
     ws = wb.active
     ws.title = u'Main sheet'
     flat_columns = [
-        colname for colname, column in dm.columns
-        if not isinstance(column, _SeriesColumn)
+        colname for colname in dm.columns
+        if not isinstance(dm[colname], _SeriesColumn)
     ]
     for colnr, colname in enumerate(flat_columns):
         ws[utils.get_column_letter(colnr+1)+'1'] = colname
@@ -117,8 +117,8 @@ def writexlsx(dm, path):
             ws[utils.get_column_letter(colnr+1)+str(rownr+2)] = value
     # Next we will write all series to individual sheets
     series_columns = [
-        colname for colname, column in dm.columns
-        if isinstance(column, _SeriesColumn)
+        colname for colname in dm.columns
+        if isinstance(dm[colname], _SeriesColumn)
     ]
     for colname in series_columns:
         ws = wb.create_sheet(title=colname)

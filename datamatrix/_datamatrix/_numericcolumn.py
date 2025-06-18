@@ -17,13 +17,11 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix._datamatrix._basecolumn import BaseColumn, NUMBER
 from datamatrix._datamatrix._callable_values import CallableFloat
 from datamatrix._datamatrix._index import Index
 import operator
-import warnings
-import functools
 try:
     import numpy as np
     from numpy import nanmean, nanmedian, nanstd
@@ -34,7 +32,7 @@ except ImportError:
 try:
     import fastnumbers
 except ImportError:
-    warnings.warn('Install fastnumbers for better performance')
+    utils.logger.warning('Install fastnumbers for better performance')
     fastnumbers = None
 rowid_argsort_cache = None, None 
 selected_indices_cache = None, None
@@ -138,7 +136,7 @@ class NumericColumn(BaseColumn):
 
         value = BaseColumn._checktype(self, value)
         if not isinstance(value, NUMBER):
-            warn(u'Invalid type for FloatColumn: %s' % safe_decode(value))
+            utils.logger.warning(u'Invalid type for FloatColumn: %s' % utils.safe_decode(value))
             return self.invalid
         return value
 
@@ -146,7 +144,7 @@ class NumericColumn(BaseColumn):
 
         if length is None:
             length = len(self._datamatrix)
-        if value is None or isinstance(value, basestring):
+        if value is None or isinstance(value, str):
             a = np.empty(length, dtype=self.dtype)
             a[:] = self._checktype(value)
             return a
@@ -316,7 +314,7 @@ class IntColumn(NumericColumn):
 
         if length is None:
             length = len(self._datamatrix)
-        if not isinstance(value, basestring):
+        if not isinstance(value, str):
             try:
                 value = list(value)
             except:
@@ -337,7 +335,7 @@ class IntColumn(NumericColumn):
             seq = self._seq
             self._init_seq()
             self._seq[:] = seq
-            warnings.warn(u'Changing dtype to int64')
+            logger.warning(u'Changing dtype to int64')
             super(NumericColumn, self)._setslicekey(key, value)
 
     def _checktype(self, value):
@@ -347,7 +345,7 @@ class IntColumn(NumericColumn):
             if isinstance(value, int):
                 return value
             raise TypeError(
-                u'IntColumn expects integers, not %s' % safe_decode(value)
+                u'IntColumn expects integers, not %s' % utils.safe_decode(value)
             )
         if isinstance(value, int):
             return value
@@ -355,7 +353,7 @@ class IntColumn(NumericColumn):
             return int(float(value))
         except:
             raise TypeError(
-                u'IntColumn expects integers, not %s' % safe_decode(value)
+                u'IntColumn expects integers, not %s' % utils.safe_decode(value)
             )
 
     def _operate(self, other, number_op, str_op=None, flip=False):

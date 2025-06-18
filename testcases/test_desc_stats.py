@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
     SeriesColumn
 from testcases.test_tools import check_series
@@ -71,8 +71,7 @@ def check_desc_stats(col_type, invalid, assert_invalid):
     assert dm.col[...] == dm.col.mean == 1
     assert dm.col.median == 1
     if col_type in (IntColumn, FloatColumn):
-        with pytest.warns(RuntimeWarning):
-            assert_invalid(dm.col.std)
+        assert_invalid(dm.col.std)
     else:
         assert_invalid(dm.col.std)
     assert dm.col.min == 1
@@ -81,14 +80,13 @@ def check_desc_stats(col_type, invalid, assert_invalid):
     # Zero lengths
     dm.length = 0
     if col_type in (IntColumn, FloatColumn):
-        with pytest.warns(RuntimeWarning):
-            assert_invalid(dm.col[...])
-            assert_invalid(dm.col.mean)
-            assert_invalid(dm.col.median)
-            assert_invalid(dm.col.std)
-            assert_invalid(dm.col.min)
-            assert_invalid(dm.col.max)
-            assert_invalid(dm.col.sum)
+        assert_invalid(dm.col[...])
+        assert_invalid(dm.col.mean)
+        assert_invalid(dm.col.median)
+        assert_invalid(dm.col.std)
+        assert_invalid(dm.col.min)
+        assert_invalid(dm.col.max)
+        assert_invalid(dm.col.sum)
     else:
         assert_invalid(dm.col[...])
         assert_invalid(dm.col.mean)

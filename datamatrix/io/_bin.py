@@ -17,20 +17,18 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import cfg
 from datamatrix._datamatrix._multidimensionalcolumn import \
     _MultiDimensionalColumn
 from datamatrix.io._pickle import readpickle, writepickle
 import os
-import logging
 import tarfile
 from pathlib import Path
 try:
     import numpy as np
 except ImportError:
     np = None
-logger = logging.getLogger('datamatrix')
 
 
 def readbin(path):
@@ -59,7 +57,7 @@ def readbin(path):
             'NumPy and SciPy are required, but not installed.')
     if not isinstance(path, Path):
         path = Path(path)
-    logger.debug('reading binary file from {}'.format(path))
+    utils.logger.debug('reading binary file from {}'.format(path))
     tar = tarfile.open(path, 'r:gz')
     # Extracte to a temporary folder that is based on the pid of the current
     # process. This avoids races conditions if multiple processes are reading
@@ -70,7 +68,7 @@ def readbin(path):
     for member in tar.getmembers():
         dm_path = tmp_dir / Path(member.name)
         if dm_path.suffix == '.datamatrix':
-            logger.debug('reading datamatrix pickle from {}'.format(dm_path))
+            utils.logger.debug('reading datamatrix pickle from {}'.format(dm_path))
             tar.extract(member, path=str(tmp_dir))
             dm = readpickle(tmp_dir / dm_path)
             dm_path.unlink()
@@ -81,7 +79,7 @@ def readbin(path):
         if not isinstance(col, _MultiDimensionalColumn) or col.loaded:
             continue
         aux_path = col._seq
-        logger.debug('reading auxiliary file: {}'.format(aux_path))
+        utils.logger.debug('reading auxiliary file: {}'.format(aux_path))
         tar.extract(tar.getmember(str(aux_path)), path=str(tmp_dir))
         col._init_seq()
         chunk_slice = int(cfg.save_chunk_size / col._memory_size() * len(col))
@@ -120,7 +118,7 @@ def writebin(dm, path):
             'NumPy and SciPy are required, but not installed.')
     if not isinstance(path, Path):
         path = Path(path)
-    logger.debug('writing binary file to {}'.format(path))
+    utils.logger.debug('writing binary file to {}'.format(path))
     tar = tarfile.open(path, 'w:gz')
     # We first write all data from unloaded MultiDimensionalColumns to
     # separate files. The _seq and _fd properties are temporarily removed from
@@ -130,7 +128,7 @@ def writebin(dm, path):
         if not isinstance(col, _MultiDimensionalColumn) or col.loaded:
             continue
         aux_path = path.parent / Path(f'.{id(col)}-{os.getpid()}.memmap')
-        logger.debug('writing auxiliary file: {}'.format(aux_path))
+        utils.logger.debug('writing auxiliary file: {}'.format(aux_path))
         chunk_slice = int(cfg.save_chunk_size / col._memory_size() * len(col))
         with aux_path.open('wb+') as fd:
             a = np.memmap(fd, mode='w+', shape=col.shape, dtype=col.dtype)
@@ -143,7 +141,7 @@ def writebin(dm, path):
         aux_path.unlink()
     # The datamatrix can now be safely pickled
     dm_path = path.parent / Path(f'.{id(dm)}-{os.getpid()}.datamatrix')
-    logger.debug('writing datamatrix pickle to {}'.format(dm_path))
+    utils.logger.debug('writing datamatrix pickle to {}'.format(dm_path))
     writepickle(dm, dm_path)
     tar.add(dm_path, arcname=dm_path.name)
     tar.close()

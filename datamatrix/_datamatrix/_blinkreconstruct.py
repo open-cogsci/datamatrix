@@ -19,7 +19,7 @@ along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 desc: pass
 ---
 """
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import series as srs
 import numpy as np
 from scipy.interpolate import interp1d
@@ -56,7 +56,7 @@ def _blink_points(vtrace, vt_start, vt_end, maxdur, margin):
     # We don't accept blinks that are too long, because blinks are not
     # generally very long (although they can be).
     if iend - istart > maxdur:
-        logger.debug('blink too long ({})'.format(iend - istart))
+        utils.logger.debug('blink too long ({})'.format(iend - istart))
         # We search the remaining part of the trace for blinks, that is, 
         # starting from iend. If any blink points are found, iend is added
         # to their timestamps to correct for the fact that we did not search
@@ -121,14 +121,14 @@ def _trim(a, vtrace, std_thr, gap_margin, gap_vt):
     for istart, iend in _group(indices):
         if iend == len(a):
             continue
-        logger.debug(
+        utils.logger.debug(
             f'trimming value outliers [{istart - gap_margin} {iend + gap_margin}]')
         a[istart - gap_margin:iend + gap_margin] = np.nan
     indices = np.where(np.abs(vtrace) > gap_vt)[0]
     for istart, iend in _group(indices):
         if iend == len(a):
             continue
-        logger.debug(
+        utils.logger.debug(
             f'trimming velocity outliers [{istart - gap_margin} {iend + gap_margin}]')
         a[istart - gap_margin:iend + gap_margin] = np.nan
     return a
@@ -154,7 +154,7 @@ def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
     try:
         strace = srs._smooth(a, winlen=smooth_winlen)
     except Exception as e:
-        warn(e)
+        utils.logger.warning(e)
         strace = a
     vtrace = np.diff(strace)
     # Get the first occuring blink
@@ -163,11 +163,11 @@ def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
     # If no blink exists, we trim the signal as a final operation and then
     # leave it.
     if blink_points is None:
-        logger.debug('no more blinks')
+        utils.logger.debug('no more blinks')
         return _trim(a, vtrace, std_thr=std_thr, gap_margin=gap_margin,
                      gap_vt=gap_vt)
     if list(blink_points) in processed_blink_points:
-        logger.warning('Blink reconstruction entered infinite loop. This '
+        utils.logger.warning('Blink reconstruction entered infinite loop. This '
                        'likely indicates noisy data. Aborting blink '
                        'reconstruction for this signal.')
         return a
@@ -177,10 +177,10 @@ def _blinkreconstruct_recursive(a, vt_start=10, vt_end=5, maxdur=500,
     istart, iend = blink_points
     cubic_spline_points = _cubic_spline_points(vtrace, istart, iend)
     if cubic_spline_points is None:
-        logger.debug('linear interpolation: {}'.format(str(blink_points)))
+        utils.logger.debug('linear interpolation: {}'.format(str(blink_points)))
         interp_fnc = interp1d(blink_points, a[blink_points])
     else:
-        logger.debug('cubic-spline interpolation: {}'.format(
+        utils.logger.debug('cubic-spline interpolation: {}'.format(
             str(cubic_spline_points)))
         interp_fnc = interp1d(
             cubic_spline_points,

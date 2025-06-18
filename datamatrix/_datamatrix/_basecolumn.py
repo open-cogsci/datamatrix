@@ -20,7 +20,7 @@ desc: pass
 ---
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix._datamatrix._index import Index
 from datamatrix._ordered_state import OrderedState
 from datamatrix._datamatrix._callable_values import CallableFloat
@@ -44,7 +44,7 @@ except NameError:
 INF = float('inf')
 NAN = float('nan')
 NUMBER = numbers.Number
-BASESTRING_OR_NUMBER = NUMBER, basestring
+BASESTRING_OR_NUMBER = NUMBER, str
 try:
     from collections.abc import Sequence  # As of Python 3.3
 except ImportError:
@@ -155,8 +155,12 @@ class BaseColumn(OrderedState):
         desc:
             An interator for all unique values that occur in the column.
         """
-
-        return list(safe_sorted(set(self._seq)))
+        unique_values = set(self._seq)
+        try:
+            unique_values = sorted(unique_values)
+        except TypeError:
+            unique_values = sorted(unique_values, key=lambda i: utils.safe_decode(i))
+        return list(unique_values)
 
     @property
     def count(self):
@@ -296,7 +300,8 @@ class BaseColumn(OrderedState):
             names if the column occurs multiple times in the DataMatrix.
         """
 
-        l = [name for name, col in self._datamatrix.columns if col is self]
+        l = [name for name in self._datamatrix.columns
+             if self._datamatrix[name] is self]
         if not l:
             return None
         if len(l) == 1:
@@ -386,7 +391,7 @@ class BaseColumn(OrderedState):
         # fixed by explicitly using the NAN keyword.
         value = fastnumbers.fast_real(value, nan=NAN)
         if isinstance(value, bytes):
-            return safe_decode(value)
+            return utils.safe_decode(value)
         return value
 
     def _checktype_regular(self, value):
@@ -395,7 +400,7 @@ class BaseColumn(OrderedState):
             value = float(value)
         except (ValueError, TypeError):
             if isinstance(value, bytes):
-                return safe_decode(value)
+                return utils.safe_decode(value)
             return value
         if (
             not math.isnan(value) and
@@ -695,7 +700,7 @@ class BaseColumn(OrderedState):
 
         if (
             isinstance(val, set)
-            or isinstance(val, basestring)
+            or isinstance(val, str)
             or not hasattr(val, u'__len__')
         ):
             return False
@@ -852,7 +857,7 @@ class BaseColumn(OrderedState):
                 col._seq[i] = number_op(val, _other)
                 continue
             if str_op is not None:
-                col._seq[i] = str_op(safe_decode(val), safe_decode(_other))
+                col._seq[i] = str_op(utils.safe_decode(val), utils.safe_decode(_other))
                 continue
             col._seq[i] = _other if flip else val
         return col

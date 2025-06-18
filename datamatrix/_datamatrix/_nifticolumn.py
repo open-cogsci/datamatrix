@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix._datamatrix._basecolumn import BaseColumn
 import os
 
@@ -103,13 +103,13 @@ class NiftiColumn(BaseColumn):
         _set_globals()
         if value is None or isinstance(value, IMAGES):
             return value
-        if isinstance(value, basestring) and os.path.isfile(value):
+        if isinstance(value, str) and os.path.isfile(value):
             return image.load_img(value)
         raise TypeError('Invalid type: {}'.format(value))
 
     def _tosequence(self, value, length=None):
 
-        if isinstance(value, (basestring, IMAGES)):
+        if isinstance(value, (str, IMAGES)):
             return [self._checktype(value)] * (
                 len(self._datamatrix)
                 if length is None

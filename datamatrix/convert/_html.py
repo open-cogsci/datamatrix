@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import DataMatrix
 from datamatrix._datamatrix._seriescolumn import _SeriesColumn
 from datamatrix._datamatrix._basecolumn import BaseColumn
@@ -66,7 +66,7 @@ def _basecolumn_to_html(col):
         html.append(
             u'<tr>'
             + u''.join([
-                u'<td>' + safe_decode(cell) + u'</td>'
+                u'<td>' + utils.safe_decode(cell) + u'</td>'
                 for cell in col[i:i + MAX_COLS]
             ])
             + u'</tr>'
@@ -91,7 +91,7 @@ def _seriescolumn_to_html(series):
                 (
                     u'<td>…</td>'
                     if i == MAX_COLS - 1 and series.depth > MAX_COLS
-                    else u'<td>' + safe_decode(val) + u'</td>'
+                    else u'<td>' + utils.safe_decode(val) + u'</td>'
                 )
                 for i, val in zip(range(MAX_COLS), cell)
             ])
@@ -113,12 +113,12 @@ def _datamatrix_to_html(dm):
         + u''.join([
             u'<th>'
             + (
-                u'%s(%d)' % (name, col.depth)
-                if isinstance(col, _SeriesColumn)
+                u'%s(%d)' % (name, dm[name].depth)
+                if isinstance(dm[name], _SeriesColumn)
                 else name
             )
             + '</th>'
-            for name, col in dm.columns[:MAX_COLS]
+            for name in dm.columns[:MAX_COLS]
         ])
         + u'</tr>'
     )]
@@ -130,7 +130,7 @@ def _datamatrix_to_html(dm):
                 + (
                     u'%s ... %s' % (str(cell[:2])[:-1], str(cell[-2:])[1:])
                     if np is not None and isinstance(cell, np.ndarray)
-                    else safe_decode(cell)
+                    else utils.safe_decode(cell)
                 )
                 + u'</td>'
                 for i, (name, cell) in zip(range(MAX_COLS), row)

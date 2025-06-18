@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import cfg, io
 from datamatrix import DataMatrix, MultiDimensionalColumn, INF, \
     functional as fnc, SeriesColumn
@@ -60,25 +60,25 @@ def test_dynamic_loading():
         print('insufficient memory to run test')
     else:
         print('without touching')
-        for name, col in dm.columns:
-            print(name, col.loaded)
+        for name in dm.columns:
+            print(name, dm[name].loaded)
         assert not dm.m0.loaded
         print('setting m0')
         dm.m0 = -1
         assert dm.m0[..., ..., ...] == -1
-        for name, col in dm.columns:
-            print(name, col.loaded)
+        for name in dm.columns:
+            print(name, dm[name].loaded)
         assert dm.m0.loaded
         print('getting m1')
         dm.m1 = -1
         assert dm.m1[..., ..., ...] == -1
-        for name, col in dm.columns:
-            print(name, col.loaded)
+        for name in dm.columns:
+            print(name, dm[name].loaded)
         assert dm.m1.loaded
         print('operating m2')
         assert (dm.m2 * 2)[..., ..., ...] == 4
-        for name, col in dm.columns:
-            print(name, col.loaded)
+        for name in dm.columns:
+            print(name, dm[name].loaded)
         assert dm.m2.loaded
     cfg.min_mem_free_rel = .5
     cfg.min_mem_free_abs = 4294967296

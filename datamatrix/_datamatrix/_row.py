@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 
 
 class Row(object):
@@ -91,7 +91,7 @@ class Row(object):
 
         if isinstance(key, int):
             key = self._datamatrix.column_names[key]
-        elif isinstance(key, basestring):
+        elif isinstance(key, str):
             # Create a new column with default values if the column does not
             # exist yet
             if key not in self._datamatrix.column_names:
@@ -103,7 +103,7 @@ class Row(object):
 
         import prettytable
         t = prettytable.PrettyTable(["Name", "Value"])
-        for name, col in self._datamatrix.columns:
+        for name in self._datamatrix.columns:
             t.add_row([name, self[name]])
         return str(t)
 

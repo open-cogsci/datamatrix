@@ -16,10 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
-import logging
+from datamatrix import utils
 import os
 from pathlib import Path
-logger = logging.getLogger('datamatrix')
 
 
 class Config:
@@ -34,24 +33,24 @@ class Config:
     tmp_dir = os.getcwd()
     
     def __init__(self):
-        logger.debug('initializing config')
+        utils.logger.debug('initializing config')
         pyproject_toml = Path('pyproject.toml')
         if not pyproject_toml.exists():
             return
         try:
             import tomlkit
         except ImportError:
-            logger.warning(
+            utils.logger.warning(
                 'tomlkit not available. Cannot read pyproject.toml.')
             return
-        logger.debug('reading pyproject.toml')
+        utils.logger.debug('reading pyproject.toml')
         toml = tomlkit.parse(pyproject_toml.read_text())
         if 'tool' not in toml or \
                 'datamatrix' not in toml['tool']:
-            logger.debug('no tool.datamatrix entry in pyproject.toml')
+            utils.logger.debug('no tool.datamatrix entry in pyproject.toml')
             return
         for key, value in toml['tool']['datamatrix'].items():
-            logger.debug('{} = {}'.format(key, value))
+            utils.logger.debug('{} = {}'.format(key, value))
             setattr(self, key, value)
 
 

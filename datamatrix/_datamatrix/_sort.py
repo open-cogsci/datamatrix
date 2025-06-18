@@ -20,11 +20,11 @@ desc: pass
 ---
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 try:
     import fastnumbers
 except ImportError:
-    warn('Install fastnumbers for better performance')
+    utils.logger.warning('Install fastnumbers for better performance')
     fastnumbers = None
 import math
 

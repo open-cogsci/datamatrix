@@ -22,7 +22,7 @@ desc:
 ---
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix.convert._pandas import from_pandas, to_pandas, wrap_pandas
 from datamatrix.convert._json import from_json, to_json
 from datamatrix.convert._mne import from_mne_epochs, from_mne_tfr

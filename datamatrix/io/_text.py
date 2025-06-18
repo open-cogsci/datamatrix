@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import DataMatrix, MixedColumn
 import os
 import csv
@@ -56,7 +56,7 @@ def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
     """
 
     d = collections.OrderedDict()
-    with safe_open(path, u'r' if py3 else u'Ur') as csvfile:
+    with open(path, 'r', encoding='utf-8') as csvfile:
         reader = csv.reader(
             csvfile,
             delimiter=delimiter,
@@ -64,7 +64,7 @@ def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
         )
         # Register columns while silently stripping BOMs
         for column in next(reader):
-            column = safe_decode(column)
+            column = utils.safe_decode(column)
             if column.startswith(BOM):
                 column = column[1:]
             d[column] = []
@@ -74,7 +74,7 @@ def readtxt(path, delimiter=',', quotechar='"', default_col_type=MixedColumn):
                 all_columns.remove(column)
                 d[column].append(val)
             for column in all_columns:
-                warn(u'Some rows miss column %s' % column)
+                utils.logger.warning(u'Some rows miss column %s' % column)
                 d[column].append(u'')
     dm = DataMatrix(default_col_type=default_col_type)._fromdict(d)
     return dm
@@ -107,13 +107,13 @@ def writetxt(dm, path, delimiter=',', quotechar='"'):
         os.makedirs(os.path.dirname(path))
     except:
         pass
-    with safe_open(path, 'w') as csvfile:
+    with open(path, 'w', encoding='utf-8') as csvfile:
         writer = csv.writer(
             csvfile,
             delimiter=delimiter,
             quotechar=quotechar,
             lineterminator='\n'
         )
-        writer.writerow([safe_str(colname) for colname in dm.column_names])
+        writer.writerow([utils.safe_decode(colname) for colname in dm.column_names])
         for row in dm:
-            writer.writerow([safe_str(value) for colname, value in row])
+            writer.writerow([utils.safe_decode(value) for colname, value in row])

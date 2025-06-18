@@ -38,8 +38,8 @@ dm.fibonacci_times_two = dm.fibonacci * 2
 for row in dm:
     print(row.fibonacci) # get the fibonacci cell from the row
 # Loop through all columns
-for colname, col in dm.columns:
-    for cell in col: # Loop through all cells in the column
+for colname in dm.columns:
+    for cell in dm[colname]: # Loop through all cells in the column
         print(cell) # do something with the cell
 # Or just see which columns exist
 print(dm.column_names)
@@ -519,12 +519,12 @@ for row in dm:
     print(row.col)
 ```
 
-By iterating over `DataMatrix.columns`, you get successive `(column_name, column)` tuples.
+By iterating over `DataMatrix.columns`, you get colum names.
 
 
 ```python
-for colname, col in dm.columns:
-    print('%s = %s' % (colname, col))
+for colname in dm.columns:
+    print('%s = %s' % (colname, dm[colname]))
 ```
 
 By iterating over a column, you get successive cells:

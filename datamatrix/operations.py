@@ -27,7 +27,7 @@ try:
     from collections.abc import Sequence  # Python 3
 except ImportError:
     from collections import Sequence  # Python 2
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import DataMatrix, FloatColumn, IntColumn, SeriesColumn, \
     MixedColumn, MultiDimensionalColumn, NAN, Row
 from datamatrix._datamatrix._multidimensionalcolumn import \
@@ -133,8 +133,8 @@ def stack(*dms):
                     'Non-matching shapes for column {}'.format(name))
             dm[name][start_index:start_index + len(stackdm)] = stackdm[name]
         start_index += len(stackdm)
-    for colname, col in dm.columns:
-        col._typechecking = True
+    for colname in dm.columns:
+        dm[colname]._typechecking = True
     return dm
 
 
@@ -192,7 +192,7 @@ def pivot_table(dm, values, index, columns, *args, **kwargs):
     """
     
     def _to_names(obj):
-        if isinstance(obj, basestring):
+        if isinstance(obj, str):
             return obj
         if isinstance(obj, BaseColumn):
             return obj.name
@@ -259,7 +259,7 @@ def z(col):
         return (zcol - zcol.mean) / zcol.std
     except ZeroDivisionError:
         pass
-    warn('z scores are NAN because standard deviation is 0')
+    utils.logger.warning('z scores are NAN because standard deviation is 0')
     zcol[:] = NAN
     return zcol
 
@@ -298,7 +298,8 @@ def weight(col):
 
     dm1 = col._datamatrix
     dm2 = DataMatrix(length=int(col.sum))
-    for colname, _col in dm1.columns:
+    for colname in dm1.columns:
+        _col = dm1[colname]
         dm2[colname] = type(_col)
     i2 = 0
     for i1, weight in enumerate(col):
@@ -437,7 +438,7 @@ def split(col, *values):
         dm = col == val
         object.__setattr__(col._datamatrix, '_instantiate_on_select', True)
         if not dm:
-            warn(u'No matching rows for %s' % val)
+            utils.logger.warning(u'No matching rows for %s' % val)
         if values:
             yield dm
         else:
@@ -450,7 +451,7 @@ def tuple_split(col, *values):
     visible: False
     """
 
-    warn(
+    utils.logger.warning(
         'tuple_split() is deprecated. Please use split() instead.',
         DeprecationWarning
     )
@@ -538,18 +539,19 @@ def fullfactorial(dm, ignore=u''):
 
     if not dm.columns:
         return DataMatrix()
-    if not all(isinstance(col, MixedColumn) for colname, col in dm.columns):
+    if not all(isinstance(dm[colname], MixedColumn) for colname in dm.columns):
         raise TypeError(u'fullfactorial only works with MixedColumns')
     # Create a new DataMatrix that strips all empty cells, and packs them such
     # that empty cells are moved toward the end.
     dm = dm[:]
-    for colname, col in dm.columns:
+    for colname in dm.columns:
+        col = dm[colname]
         col = (col != ignore)[colname]
         dm[colname][:len(col)] = col
         dm[colname][len(col):] = ignore
     # A list where each value is an int X that corresponds to a factor with X
     # levels.
-    design = [len(c != ignore) for n, c in dm.columns]
+    design = [len(dm[colname] != ignore) for colname in dm.columns]
     a = _fullfact(design)
     # Create an DataMatrix with empty columns
     fdm = DataMatrix(a.shape[0])
@@ -617,13 +619,13 @@ def group(dm, by):
     bycol_hashed[:] = [hash(key) for key in bycol]
     keys = bycol_hashed.unique
     groupcols = [
-        (name, col) for name, col in dm.columns if name not in bynames
+        (name, dm[name]) for name in dm.columns if name not in bynames
     ]
-    nogroupcols = [(name, col) for name, col in dm.columns if name in bynames]
+    nogroupcols = [(name, dm[name]) for name in dm.columns if name in bynames]
     cm = DataMatrix(length=len(keys))
     for name, col in groupcols:
         if isinstance(col, _MultiDimensionalColumn):
-            warn(u'Failed to create series for MultiDimensionalColumn s%s' % name)
+            utils.logger.warning(u'Failed to create series for MultiDimensionalColumn s%s' % name)
             continue
         cm[name] = SeriesColumn(depth=0)
     for name, col in nogroupcols:
@@ -641,7 +643,7 @@ def group(dm, by):
             try:
                 cm[name][i, :len(dm_[name])] = dm_[name]
             except ValueError:
-                warn(u'Failed to create series for MixedColumn %s' % name)
+                utils.logger.warning(u'Failed to create series for MixedColumn %s' % name)
         for name, col in nogroupcols:
             cm[name][i] = dm_[name][0]
     return cm
@@ -819,7 +821,7 @@ def shuffle_horiz(*obj):
     """
 
     if len(obj) == 1 and isinstance(obj[0], DataMatrix):
-        obj = [column for colname, column in obj[0].columns]
+        obj = [obj[0][colname] for colname in obj[0].columns]
     try:
         assert(len(obj) > 0)
         for column in obj:
@@ -835,8 +837,8 @@ def shuffle_horiz(*obj):
     dm_shuffle = keep_only(dm, *obj)
     for row in dm_shuffle:
         random.shuffle(row)
-    for colname, column in dm_shuffle.columns:
-        dm._cols[colname] = column
+    for colname in dm_shuffle.columns:
+        dm._cols[colname] = dm_shuffle[colname]
     dm._mutate()
     return dm
 
@@ -887,7 +889,7 @@ def keep_only(dm, *cols):
             )
     for colname in colnames:
         if colname not in dm.column_names:
-            warn('no column named {}'.format(colname))
+            utils.logger.warning('no column named {}'.format(colname))
     for colname in dm.column_names:
         if colname not in colnames:
             del dm[colname]
@@ -926,7 +928,8 @@ def auto_type(dm):
     """
 
     new_dm = DataMatrix(length=len(dm))
-    for name, col in dm.columns:
+    for name in dm.columns:
+        col = dm[name]
         new_dm[name] = _best_fitting_col_type(col)
         new_dm[name][:] = col
     return new_dm
@@ -944,7 +947,7 @@ def _colname(col):
         BaseColumn.
     """
 
-    if isinstance(col, basestring):
+    if isinstance(col, str):
         return col
     if isinstance(col, BaseColumn):
         return col.name

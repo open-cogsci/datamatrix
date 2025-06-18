@@ -27,15 +27,12 @@ try:
 except ImportError:
     from inspect import getargspec
 import functools
-import logging
 import os
 from contextlib import contextmanager
-from datamatrix.py3compat import *
-from datamatrix import DataMatrix, cfg
+from datamatrix import DataMatrix, cfg, utils
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._index import Index
 from datamatrix._functional._memoize import memoize
-logger = logging.getLogger('datamatrix')
 
 
 @contextmanager
@@ -64,10 +61,7 @@ def profile(path=u'profile.txt', sortby=u'cumulative'):
 
     import cProfile
     import pstats
-    if py3:
-        import io
-    else:
-        import StringIO as io
+    import io
 
     pr = cProfile.Profile()
     pr.enable()
@@ -142,7 +136,7 @@ def stack_multiprocess(fnc, args, processes=None):
     import multiprocessing as mp
     from datamatrix import io, operations as ops
     
-    logger.debug('starting multiprocessing')
+    utils.logger.debug('starting multiprocessing')
     pool = mp.Pool(processes)
     fnc = functools.partial(_stack_multiprocess_inner, fnc)
     results = [pool.apply_async(fnc, (arg, i))
@@ -152,10 +146,10 @@ def stack_multiprocess(fnc, args, processes=None):
         try:
             path = result.get()
         except Exception as e:
-            logger.error(f'a process failed with the following exception: {e}')
+            utils.logger.error(f'a process failed with the following exception: {e}')
         else:
             paths.append(path)
-    logger.debug('received {} DataMatrix objects'.format(len(paths)))
+    utils.logger.debug('received {} DataMatrix objects'.format(len(paths)))
     # The return values consist of path objects that refer to temporary
     # binary datamatrix files. We read these files, stack them, and then
     # delete them.
@@ -168,7 +162,7 @@ def stack_multiprocess(fnc, args, processes=None):
             try:
                 path.unlink()
             except Exception as e:
-                logger.warning(
+                utils.logger.warning(
                     'failed to remove temporary file: {}'.format(path))
     return dm
 
@@ -217,9 +211,7 @@ def curry(fnc):
             return fnc(*args)
         return curry(functools.partial(fnc, *args))
 
-    if py3:
-        return functools.wraps(fnc)(inner)
-    return inner
+    return functools.wraps(fnc)(inner)
 
 
 def map_(fnc, obj):
@@ -388,7 +380,7 @@ def setcol(dm, name, value):
         type:	DataMatrix
     """
 
-    if not isinstance(name, basestring):
+    if not isinstance(name, str):
         raise TypeError('name should be a string')
     newdm = dm[:]
     if isinstance(value, BaseColumn):
@@ -437,7 +429,7 @@ def _stack_multiprocess_inner(fnc, arg, process_nr):
         raise ValueError('function should return DataMatrix, not {}'
                          .format(type(dm)))
     path = Path(cfg.tmp_dir) / Path(f'.{id(dm)}-{os.getpid()}-{process_nr}.dm')
-    logger.info('writing process result to temporary file {}'.format(path))
+    utils.logger.info('writing process result to temporary file {}'.format(path))
     io.writebin(dm, path)
     del dm
     gc.collect()

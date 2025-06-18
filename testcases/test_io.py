@@ -51,10 +51,8 @@ def test_io():
     check_dm(refdm, testdm)
 
     io.writexlsx(testdm, 'tmp.xlsx')
-    with pytest.warns(UserWarning):  # Not all rows have column C
-        testdm = io.readxlsx('tmp.xlsx')
+    testdm = io.readxlsx('tmp.xlsx')
     check_dm(refdm, testdm)
     io.writexlsx(testdm, 'tmp.xlsx')
-    with pytest.warns(UserWarning):  # Not all rows have column C
-        testdm = io.readxlsx('tmp.xlsx')
+    testdm = io.readxlsx('tmp.xlsx')
     check_dm(refdm, testdm)

@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 import pytest
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn	
 from testcases.test_tools import all_nan
@@ -36,13 +36,12 @@ def _test_numeric_properties(coltype, nan):
     assert dm.c.min == 1
     assert dm.c.sum == 6
     if coltype in (IntColumn, FloatColumn):
-        with pytest.warns(RuntimeWarning):
-            all_nan(dm.d.mean, nan)
-            all_nan(dm.d.median, nan)
-            all_nan(dm.d.std, nan)
-            all_nan(dm.d.max, nan)
-            all_nan(dm.d.min, nan)
-            all_nan(dm.d.sum, nan)
+        all_nan(dm.d.mean, nan)
+        all_nan(dm.d.median, nan)
+        all_nan(dm.d.std, nan)
+        all_nan(dm.d.max, nan)
+        all_nan(dm.d.min, nan)
+        all_nan(dm.d.sum, nan)
     else:
         all_nan(dm.d.mean, nan)
         all_nan(dm.d.median, nan)

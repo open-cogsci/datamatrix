@@ -16,11 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
-import logging
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix._datamatrix._multidimensionalcolumn import \
     _MultiDimensionalColumn
-logger = logging.getLogger('datamatrix')
 
 
 class _SeriesColumn(_MultiDimensionalColumn):
@@ -29,7 +27,7 @@ class _SeriesColumn(_MultiDimensionalColumn):
                  **kwargs):
         if depth is not None:
             if shape is not None:
-                logger.warning(
+                utils.logger.warning(
                     'both depth and shape provided (ignoring shape)')
             shape = (depth, )
         elif shape is None:

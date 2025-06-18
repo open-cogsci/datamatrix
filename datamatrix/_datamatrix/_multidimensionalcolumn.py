@@ -16,8 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
-from datamatrix.py3compat import *
-import logging
+from datamatrix import utils
 import weakref
 from datamatrix import cfg
 from datamatrix._datamatrix._mixedcolumn import MixedColumn
@@ -39,7 +38,6 @@ try:
     import psutil
 except ImportError:
     psutil = None
-logger = logging.getLogger('datamatrix')
 
         
         
@@ -172,7 +170,7 @@ class _MultiDimensionalColumn(NumericColumn):
         if len(self._shape) > 2:
             raise TypeError('Can only change the depth of two-dimensional '
                             'MultiDimensionalColumns/ SeriesColumns')
-        logger.debug('changing depth from {} to {}'.format(self.depth, depth))
+        utils.logger.debug('changing depth from {} to {}'.format(self.depth, depth))
         self._orig_shape = (depth, )
         if depth > self.depth:
             seq = np.zeros((len(self), depth), dtype=self.dtype)
@@ -241,7 +239,7 @@ class _MultiDimensionalColumn(NumericColumn):
     def loaded(self, val):
         if val == self._loaded:
             return
-        logger.debug('{} column {}'.format('loading' if val else 'unloading',
+        utils.logger.debug('{} column {}'.format('loading' if val else 'unloading',
                                            id(self)))
         self._loaded = val
         # Simply assigning self._seq will trigger a conversion to/ from
@@ -267,7 +265,7 @@ class _MultiDimensionalColumn(NumericColumn):
         MIN_MEM_FREE_REL constants.
         """
         if psutil is None:
-            logger.debug('psutil is not installed. Cannot check available memory.')
+            utils.logger.debug('psutil is not installed. Cannot check available memory.')
             return True
         memory_size = self._memory_size()
         if memory_size < cfg.always_load_max_size:
@@ -277,7 +275,7 @@ class _MultiDimensionalColumn(NumericColumn):
         vm = psutil.virtual_memory()
         mem_free_abs =  vm.available - memory_size
         mem_free_rel = mem_free_abs / vm.total
-        logger.debug('{} MB {:.1f}% will be available after loading column'
+        utils.logger.debug('{} MB {:.1f}% will be available after loading column'
                      .format(mem_free_abs // 1024 ** 2, 100 * mem_free_rel))
         return mem_free_abs > cfg.min_mem_free_abs or \
             mem_free_rel > cfg.min_mem_free_rel
@@ -289,7 +287,7 @@ class _MultiDimensionalColumn(NumericColumn):
             if self._fd is not None and not self._fd.closed:
                 self._fd.close()
                 self._fd = None
-            logger.debug('initializing loaded column {}'.format(id(self)))
+            utils.logger.debug('initializing loaded column {}'.format(id(self)))
             if self.defaultnan:
                 self._seq = np.empty(self.shape, dtype=self.dtype)
                 self._seq[:] = np.nan
@@ -298,10 +296,10 @@ class _MultiDimensionalColumn(NumericColumn):
             return
         # Use memory-mapped array
         import tempfile
-        logger.debug('initializing unloaded column {}'.format(id(self)))
+        utils.logger.debug('initializing unloaded column {}'.format(id(self)))
         memory_size = self._memory_size()
         if memory_size >= psutil.virtual_memory().total:
-            logger.warning('the size of this column exceeds system memory. '
+            utils.logger.warning('the size of this column exceeds system memory. '
                            'The column will be created, but operations that '
                            'require data to be loaded into memory will fail.')
         self._fd = tempfile.TemporaryFile(dir=cfg.tmp_dir, prefix='.',
@@ -440,7 +438,7 @@ class _MultiDimensionalColumn(NumericColumn):
             # average axis 0.
             averaging_axes = self._averaging_axes(key)
             if averaging_axes:
-                logger.debug('averaging over axes {}'.format(averaging_axes))
+                utils.logger.debug('averaging over axes {}'.format(averaging_axes))
                 value = np.nanmean(value, axis=averaging_axes)
             # If the index refers to exactly one value, then we return this
             # value as a float.
@@ -458,7 +456,7 @@ class _MultiDimensionalColumn(NumericColumn):
                                  for dim, size in enumerate(value.shape[1:])
                                  if size == 1)
             if squeeze_dims:
-                logger.debug('squeezing dimensions {}'.format(squeeze_dims))
+                utils.logger.debug('squeezing dimensions {}'.format(squeeze_dims))
                 value = value.squeeze(axis=squeeze_dims)
             # If we're averaging across the first dimension, then we cannot
             # create column from the result because it changes the rows. In
@@ -541,7 +539,7 @@ class _MultiDimensionalColumn(NumericColumn):
         # should load to memory, because the contents are written to disk and
         # replaced by a path that points towards this file.
         if self._fd is not None:
-            logger.warning('loading column into memory for pickling. Use '
+            utils.logger.warning('loading column into memory for pickling. Use '
                            'io.writebin() and io.readbin() for reading and '
                            'writing columns that don\'t fit in memory.')
             self.loaded = True
@@ -653,13 +651,13 @@ class TouchHistory:
                     other_col._memory_size() < cfg.always_load_max_size:
                 continue
             # Otherwise we unload the other column to free up memoty
-            logger.debug('insufficient free memory')
+            utils.logger.debug('insufficient free memory')
             other_col.loaded = False
             # If there is now sufficient free memory to load the current column
             # then we do that if try_to_load is specified.
             if col._sufficient_free_memory():
                 if try_to_load:
-                    logger.debug(
+                    utils.logger.debug(
                         'loading previously unloaded column {}'.format(id_))
                     col.loaded = True
                 break

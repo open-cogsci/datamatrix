@@ -35,9 +35,9 @@ def all_nan(*l):
 def check_dm(dm, ref):
 
     assert dm.column_names == ref.column_names
-    for column_name in dm.column_names:
+    for column_name in dm.columns:
         assert not isinstance(column_name, bytes)
-    for colname in dm.column_names:
+    for colname in dm.columns:
         check_col(dm[colname], ref[colname])
     assert isinstance(dm._rowid, Index)
 
@@ -88,7 +88,8 @@ def check_series(col, ref):
 
 def check_integrity(dm):
 
-    for name, col in dm.columns:
+    for name in dm.columns:
+        col = dm[name]
         if len(dm._rowid) != len(col._rowid):
             print('Integrity failure: %s != %s' % (dm._rowid, col._rowid))
             assert False

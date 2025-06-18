@@ -79,11 +79,11 @@ dm.fibonacci_times_two = dm.fibonacci * 2
 for row in dm:
     print(row.fibonacci) # get the fibonacci cell from the row
 # Loop through all columns
-for colname, col in dm.columns:
-    for cell in col: # Loop through all cells in the column
+for colname in dm.columns:    
+    for cell in dm[col]: # Loop through all cells in the column
         print(cell) # do something with the cell
 # Or just see which columns exist
-print(dm.column_names)
+print(dm.columns)
 ```
 
 

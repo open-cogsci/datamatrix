@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import (
     MixedColumn, IntColumn, FloatColumn, SeriesColumn, DataMatrix
 )
@@ -53,11 +53,11 @@ def to_json(dm):
                     (
                         name,
                         (
-                            type(column).__name__,
-                            column._seq
+                            type(dm[name]).__name__,
+                            dm[name]._seq
                         )
                     )
-                    for name, column in dm.columns
+                    for name  in dm.columns
                 ])
             )
         ]),

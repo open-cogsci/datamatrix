@@ -21,7 +21,7 @@ desc:
     objects.
 ---
 """
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import DataMatrix, IntColumn, FloatColumn, NAN, INF
 from datamatrix._datamatrix._multidimensionalcolumn import \
     _MultiDimensionalColumn
@@ -162,7 +162,8 @@ def flatten(dm):
     # Check the shape of the multidimensional columns in the datamatrix, and
     # ensure that they are all the same
     shape = None
-    for colname, col in dm.columns:
+    for colname in dm.columns:
+        col = dm[colname]
         if not isinstance(col, _MultiDimensionalColumn):
             continue
         if shape is None:
@@ -178,7 +179,8 @@ def flatten(dm):
     for dim in shape[1:]:
         depth *= dim
     long_dm = DataMatrix(length=len(dm) * depth)
-    for colname, col in dm.columns:
+    for colname in dm.columns:
+        col = dm[colname]
         # multidimensional columns are flattened and then inserted into the
         # datamatrix as a float column
         if isinstance(col, _MultiDimensionalColumn):

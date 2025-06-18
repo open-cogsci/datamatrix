@@ -23,7 +23,7 @@ desc:
 ---
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix._datamatrix._multidimensionalcolumn import \
     _MultiDimensionalColumn
 

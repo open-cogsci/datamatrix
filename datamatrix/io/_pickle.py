@@ -17,11 +17,9 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 import pickle
 import os
-import logging
-logger = logging.getLogger('datamatrix')
 
 
 def readpickle(path):
@@ -85,15 +83,16 @@ def _upgrade_datamatrix(dm):
     from datamatrix._datamatrix._index import Index
     if not hasattr(dm._rowid, '_a'):
         object.__setattr__(dm, '_rowid', Index(dm._rowid._l))
-        logger.warning('upgrading Index')
-    for colname, col in dm.columns:
+        utils.logger.warning('upgrading Index')
+    for colname in dm.columns:
+        col = dm[colname]
         if not hasattr(dm._rowid, '_a'):
             if hasattr(col._rowid, '_l'):
                 object.__setattr__(col, '_rowid', Index(col._rowid._l))
             else:
                 object.__setattr__(col, '_rowid', Index(col._rowid))
         if hasattr(col, '_depth'):
-            logger.warning('upgrading SeriesColumn')
+            utils.logger.warning('upgrading SeriesColumn')
             if not hasattr(col, '_shape'):
                 col._shape = (col._depth, )
             if not hasattr(col, '_orig_shape'):

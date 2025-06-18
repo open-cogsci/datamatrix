@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import DataMatrix, MixedColumn, FloatColumn, IntColumn, \
     SeriesColumn
 
@@ -39,7 +39,8 @@ def check_iteration(col_type):
         ('col1', [1,2]),
         ('col2', [3,4])
         ]
-    for (name, col), (ref_name, ref_col) in zip(dm.columns, ref):
+    for name, (ref_name, ref_col) in zip(dm.columns, ref):
+        col = dm[name]
         assert(name == ref_name)
         assert(list(col) == ref_col)
     # Cells within column iteration

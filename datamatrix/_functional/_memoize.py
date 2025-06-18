@@ -17,13 +17,12 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import DataMatrix, convert as cnv, io
 from functools import partial
 import tarfile
 import sys
 import os
-import logging
 import warnings
 try:
     from collections.abc import Sequence  # Python 3.3 and later
@@ -36,7 +35,6 @@ try:
     import numpy as np
 except ImportError:
     np = None
-logger = logging.getLogger('datamatrix')
 
 
 ONE_GIGABYTE = 1024**3
@@ -244,7 +242,7 @@ class memoize(object):
             return self._lazy_evaluation_kwargs(obj)
         if (
             isinstance(obj, Sequence)
-            and not isinstance(obj, basestring)
+            and not isinstance(obj, str)
         ):
             return self._lazy_evaluation_args(obj)
         return obj
@@ -292,13 +290,13 @@ class memoize(object):
                 try:
                     with open(cache_path, u'rb') as fd:
                         obj = pickle.load(fd)
-                    logger.debug('read pickle from memoization cache: {}'
+                    utils.logger.debug('read pickle from memoization cache: {}'
                                  .format(cache_path))
                 except pickle.UnpicklingError as e:
                     # DataMatrix objects are stored as binary files, because
                     # this allows memmaped columns to be included
                     obj = io.readbin(cache_path)
-                    logger.debug(
+                    utils.logger.debug(
                         'read binary datamatrix from memoization cache {}'
                         .format(cache_path))
                 # Old-style datamatrix objects need to be upgraded so that
@@ -322,13 +320,13 @@ class memoize(object):
                 # this allows memmaped columns to be included.
                 if isinstance(retval, DataMatrix):
                     io.writebin(retval, cache_path)
-                    logger.debug(
+                    utils.logger.debug(
                         'wrote binary datamatrix to memoization cache: {}'
                         .format(cache_path))
                 else:
                     with open(cache_path, u'wb') as fd:
                         pickle.dump(retval, fd)
-                    logger.debug('wrote pickle to memoization cache: {}'
+                    utils.logger.debug('wrote pickle to memoization cache: {}'
                                  .format(cache_path))
         else:
             self._cache[memkey] = pickle.dumps(retval)
@@ -337,7 +335,7 @@ class memoize(object):
                     print('%s: dropping oldest cached value' % self.__name__)
                 self._cache.popitem(last=False)
             if not self._cache:
-                warnings.warn('Return value exceeds max_size')
+                logger.warning('Return value exceeds max_size')
         return (
             (retval, memkey, self._latest_source)
             if self._debug
@@ -354,7 +352,7 @@ class memoize(object):
             return self._serialize_kwargs(obj)
         if (
             isinstance(obj, Sequence)
-            and not isinstance(obj, basestring)
+            and not isinstance(obj, str)
         ):
             return self._serialize_args(obj)
         if isinstance(obj, DataMatrix):

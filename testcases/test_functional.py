@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix.py3compat import *
+from datamatrix import utils
 from datamatrix import DataMatrix, MixedColumn, IntColumn, FloatColumn, \
     MultiDimensionalColumn
 from datamatrix import functional as fnc
@@ -86,8 +86,7 @@ def test_curry():
     assert add(1,2)(3) == 6
     assert add(1)(2,3) == 6
     assert add(1)(2)(3) == 6
-    if py3:
-        assert add.__doc__ == 'test'
+    assert add.__doc__ == 'test'
 
 
 def test_memoize():
