@@ -17,12 +17,14 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix import Row, utils
-from datamatrix._datamatrix._basecolumn import BaseColumn
-from datamatrix._datamatrix._mixedcolumn import MixedColumn
-from datamatrix._datamatrix._index import Index
-from datamatrix._datamatrix._uninstantiatedcolumn import UninstantiatedColumn
-from datamatrix._ordered_state import OrderedState
+from ..import Row, utils
+from .._ordered_state import OrderedState
+from ._dataframe_compat_mixin import DataFrameCompatMixin
+from ._dataframe_compat import df_compat_function
+from ._basecolumn import BaseColumn
+from ._mixedcolumn import MixedColumn
+from ._index import Index
+from ._uninstantiatedcolumn import UninstantiatedColumn
 try:
     from collections.abc import Sequence  # Python 3.3 and later
 except ImportError:
@@ -40,24 +42,8 @@ PRINT_MAX_COLUMNS = 6
 PRINT_MAX_NUMBER = 999999
 
 
-def mimic_DataFrame(function_name):
-    
-    def inner(fnc):
-    
-        def innermost(self, *args, **kwargs):
-            
-            from datamatrix import convert as cnv
-            df_in = cnv.to_pandas(self)
-            fnc = getattr(df_in, function_name)
-            df_out = fnc(*args, **kwargs)
-            return df_out
-            
-        return innermost
-        
-    return inner
 
-
-class DataMatrix(OrderedState):
+class DataMatrix(OrderedState, DataFrameCompatMixin):
 
     """
     desc:
@@ -197,35 +183,8 @@ class DataMatrix(OrderedState):
             if hasattr(self[name], u'depth'):
                 return False
         return True
-
-    def equals(self, other):
         
-        """
-        visible: False
-
-        desc:
-            Mimics pandas.DataFrame API
-        """
-        
-        if (
-            not isinstance(other, DataMatrix) or
-            len(self.columns) != len(other.columns)
-        ):
-            return False
-        for colname in self.column_names:
-            if (
-                colname not in other or
-                not other[colname].equals(self[colname])
-            ):
-                return False
-        return True
-
-    @mimic_DataFrame('drop_duplicates')
-    def drop_duplicates(self, *args, **kwargs): pass
-    @mimic_DataFrame('groupby')
-    def groupby(self, *args, **kwargs): pass
-        
-    def rename(self, old, new):
+    def rename(self, *args, **kwargs):
 
         """
         desc:
@@ -239,6 +198,14 @@ class DataMatrix(OrderedState):
             new:	The new name.
         """
 
+        if len(args) == 2 and isinstance(args[0], str) and isinstance(args[1], str):
+            old, new = args
+        elif 'old' in kwargs and 'new' in kwargs:
+            old = kwargs.get('old')
+            new = kwargs.get('new')
+        else:
+            return df_compat_function('rename')(self, *args, **kwargs)
+            
         if old == new:
             return
         if old not in self._cols:
@@ -256,20 +223,6 @@ class DataMatrix(OrderedState):
         ])
         object.__setattr__(self, u'_cols', _cols)
         self._mutate()
-
-    def get(self, key, default=None):
-
-        """
-        visible: False
-
-        desc:
-            Improves compatibility with pandas.DataFrame
-        """
-
-        from datamatrix.convert._pandas import to_pandas
-        if key in self:
-            return to_pandas(self[key])
-        return default
 
     # Private functions. These can also be called by the BaseColumn (and
     # derived) classes.
@@ -658,6 +611,8 @@ class DataMatrix(OrderedState):
         """
 
         if self._sorted:
+            if key is None:                
+                key = (lambda x: x.lower() if isinstance(x, str) else x)
             return list(sorted(seq, key=key))
         return list(seq)
         
@@ -919,9 +874,29 @@ class DataMatrix(OrderedState):
         return col
 
     # The functions below mimic the pandas.DataFrame API
+    # --------------------------------------------------        
+    def head(self, n=5):
+        return self[:n]
+        
+    def tail(self, n=5):
+        return self[-n:]
     
-    def __dataframe__(self):
+    @property
+    def ndim(self):
+        # needs testing
+        return 2
         
-        from datamatrix import convert as cnv
+    @property
+    def size(self):
+        return len(self) * len(self.columns)
         
-        return cnv.to_pandas(self)    
+    def dtypes(self):
+        # needs testing
+        return [col.dtype for col in self._cols]            
+        
+    def get(self, key, default=None):
+        # needs testing
+        try:
+            return self.__getitem__(key)
+        except KeyError:
+            return default

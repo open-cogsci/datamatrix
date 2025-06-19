@@ -73,7 +73,7 @@ def wrap_pandas(fnc):
     return inner
 
 
-def to_pandas(obj):
+def to_dataframe(obj):
 
     """
     desc: |
@@ -99,8 +99,6 @@ def to_pandas(obj):
         type: [DataFrame, Series]
     """
 
-    if isinstance(obj, BaseColumn):
-        return pd.Series(list(obj), dtype=None)
     if not isinstance(obj, DataMatrix):
         raise TypeError('Expecting a column or DataMatrix')
     d = {}
@@ -109,7 +107,7 @@ def to_pandas(obj):
     return pd.DataFrame(d)
 
 
-def from_pandas(df):
+def from_dataframe(df):
 
     """
     desc: |
@@ -138,14 +136,21 @@ def from_pandas(df):
     from datamatrix import operations as ops
 
     dm = DataMatrix(length=len(df))
-    if isinstance(df, pd.Series):
-        dm.series = df
-        return dm
     for colname in df.columns:
         if isinstance(colname, tuple):
-            _colname = u'_'.join([utils.safe_decode(i) for i in colname])
+            _colname = '_'.join([utils.safe_decode(i) for i in colname])
         else:
             _colname = utils.safe_decode(colname)
         dm[_colname] = df[colname]
     ops.auto_type(dm)
     return dm
+
+
+def to_series(column):
+    if not isinstance(column, BaseColumn):
+        raise ValueError(f'Column expected, not {type(column)}')
+    return pd.Series(list(column), dtype=column.dtype)
+
+
+to_pandas = to_dataframe
+from_pandas = from_dataframe

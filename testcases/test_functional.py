@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from datamatrix import utils
 from datamatrix import DataMatrix, MixedColumn, IntColumn, FloatColumn, \
     MultiDimensionalColumn
 from datamatrix import functional as fnc
@@ -45,8 +44,8 @@ def test_map_multidimensional():
     dm = DataMatrix(length=2)
     dm.m = MultiDimensionalColumn(shape=(3,))
     dm.m = [[1,2,3], [4,5,6]]
-    dm.mean = dm.m @ (lambda a: a.mean())
-    assert dm.mean == [2, 5]
+    dm.m_mean = dm.m @ (lambda a: a.mean())
+    assert dm.m_mean == [2, 5]
     dm.half = dm.m @ (lambda a: a / 2)
     check_series(dm.half, [[0.5, 1., 1.5], [2, 2.5, 3.]])
     dm.short = dm.m @ (lambda a: a[:2])

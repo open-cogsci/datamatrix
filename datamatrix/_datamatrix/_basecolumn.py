@@ -20,12 +20,12 @@ desc: pass
 ---
 """
 
-from datamatrix import utils
-from datamatrix._datamatrix._index import Index
-from datamatrix._ordered_state import OrderedState
-from datamatrix._datamatrix._callable_values import CallableFloat
-from datamatrix._datamatrix._sort import sortable, fastnumbers
-import collections
+from .. import utils
+from .._ordered_state import OrderedState
+from ._index import Index
+from ._dataframe_compat_mixin import SeriesCompatMixin
+from ._callable_values import CallableFloat
+from ._sort import sortable, fastnumbers
 import numbers
 import operator
 import math
@@ -60,7 +60,7 @@ except NameError:
     Ellipsis = None  # was introduced in Python 3.10
 
 
-class BaseColumn(OrderedState):
+class BaseColumn(OrderedState, SeriesCompatMixin):
 
     """
     desc:
@@ -69,6 +69,7 @@ class BaseColumn(OrderedState):
     """
 
     default_value = u''
+    dtype = object
     ndim = 1
 
     def __init__(self, datamatrix, rowid=None, seq=None, metadata=None):
@@ -1042,3 +1043,4 @@ class BaseColumn(OrderedState):
         return self._operate(other, operator.pow, flip=True)
     def __matmul__(self, other):
         return self._map(other)
+
