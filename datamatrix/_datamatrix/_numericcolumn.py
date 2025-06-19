@@ -321,6 +321,7 @@ class IntColumn(NumericColumn):
                 pass
             else:
                 return super(NumericColumn, self)._tosequence(value, length)
+                return super(NumericColumn, self)._tosequence(value, length)
         value = self._checktype(value)
         return super(NumericColumn, self)._tosequence(value, length)
 
@@ -370,7 +371,7 @@ class IntColumn(NumericColumn):
     def __eq__(self, other):
 
         if isinstance(other, type):
-            if other is self.dtype:
+            if other == self.dtype:
                 return self._datamatrix
             return self._datamatrix._selectrowid(Index(0))
         if self._issequence(other):
@@ -387,7 +388,7 @@ class IntColumn(NumericColumn):
     def __ne__(self, other):
 
         if isinstance(other, type):
-            if other is not self.dtype:
+            if other != self.dtype:
                 return self._datamatrix
             return self._datamatrix._selectrowid(Index(0))
         if self._issequence(other):

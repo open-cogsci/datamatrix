@@ -116,7 +116,7 @@ def check_intcolumn_typing():
 
     dm = DataMatrix(length=4, default_col_type=IntColumn)
     dm.f = 1.1, '1.8', 2, '2'
-    assert all(isinstance(v, int) for v in dm.f)
+    assert all(isinstance(v, (int, np.int32, np.int64)) for v in dm.f)
     def _():
         with pytest.raises(TypeError):
             dm.inf = INF, -INF, 'inf', '-inf'

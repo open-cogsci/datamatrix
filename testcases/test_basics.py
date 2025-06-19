@@ -80,7 +80,9 @@ def _test_numericcolumn(cls):
     dm.col = 1, 2, 3, 4, 5
     # int -> float
     val = dm.col[2]
-    assert isinstance(val, (int, float))
+    # In some versions of numpy, np.int32/64 don't match regular ints. For float
+    # this isn't an issue.
+    assert isinstance(val, (np.int64, np.int32, int, float))
     assert val == 3
     # (int, int) -> FloatColumn
     val = dm.col[1, 3]
