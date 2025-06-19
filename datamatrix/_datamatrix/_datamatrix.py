@@ -17,8 +17,7 @@ You should have received a copy of the GNU General Public License
 along with datamatrix.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import warnings
-from datamatrix import Row
+from datamatrix import Row, utils
 from datamatrix._datamatrix._basecolumn import BaseColumn
 from datamatrix._datamatrix._mixedcolumn import MixedColumn
 from datamatrix._datamatrix._index import Index
@@ -166,9 +165,9 @@ class DataMatrix(OrderedState):
         
         Use DataMatrix.columns instead.
         """        
-        warnings.warn(
+        utils.logger.warning(
             'DataMatrix.column_names is deprecated, use DataMatrix.columns '
-            'instead', DeprecationWarning)
+            'instead')
         return self._to_list(self._cols.keys())
 
     @property
@@ -529,7 +528,7 @@ class DataMatrix(OrderedState):
         """
 
         if isinstance(key, bytes):
-            key = safe_decode(key)
+            key = utils.safe_decode(key)
         col = self._cols.get(key, None)
         if col is None:
             raise AttributeError(u'No column named "%s"' % key)
@@ -587,7 +586,7 @@ class DataMatrix(OrderedState):
         
         # Check if this is a valid column name
         if isinstance(name, bytes):
-            name = safe_decode(name)
+            name = utils.safe_decode(name)
         if not isinstance(name, str):
             raise TypeError(u'Column names should be str, not %s' % type(name))
         # Create a new column by column type:
@@ -753,7 +752,7 @@ class DataMatrix(OrderedState):
     def __setattr__(self, name, value):
 
         if isinstance(name, bytes):
-            name = safe_decode(name)
+            name = utils.safe_decode(name)
         if name == u'length':
             self._setlength(value)
             return
@@ -900,12 +899,6 @@ class DataMatrix(OrderedState):
                 pass
         return a
 
-    def __dataframe__(self):
-        
-        from datamatrix import convert as cnv
-        
-        return cnv.to_pandas(self)
-
     def _instantiate(self):
         """Instantiates all uninstantiated columns"""
         for name, col in self._cols.items():
@@ -924,3 +917,11 @@ class DataMatrix(OrderedState):
         col = col.instantiate()
         self._cols[key] = col
         return col
+
+    # The functions below mimic the pandas.DataFrame API
+    
+    def __dataframe__(self):
+        
+        from datamatrix import convert as cnv
+        
+        return cnv.to_pandas(self)    

@@ -639,6 +639,14 @@ def test_resize():
         for x, y in zip(dm._rowid, range(l)):
             print(x, y)
             assert x == y
+            
+
+def test_assignment():
+    dm = DataMatrix(length=1)
+    dm.a = 1
+    dm['a'] = dm.a + 1
+    dm[b'a'] = dm.a + 1
+    assert dm.a[0] == 3
 
 
 def test_properties():
