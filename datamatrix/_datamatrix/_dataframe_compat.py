@@ -219,6 +219,7 @@ class DataFrameCompatMixin:
 ''')
         result = compare_classes(DataMatrix, pd.DataFrame)
         result['iterrows'] = 'function'
+        result['_get_numeric_data'] = 'function'
         result['index'] = 'property'
         result['__dataframe__'] = 'function'
         for attr, attr_type in result.items():
@@ -228,5 +229,6 @@ class SeriesCompatMixin:
 ''')
         result = compare_classes(BaseColumn, pd.Series)
         result['index'] = 'property'
+        result['_get_numeric_data'] = 'function'
         for attr, attr_type in result.items():
             file.write(f"    {attr} = df_compat_{attr_type}('{attr}')\n")

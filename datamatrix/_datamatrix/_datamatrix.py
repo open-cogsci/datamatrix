@@ -23,6 +23,7 @@ from ._dataframe_compat_mixin import DataFrameCompatMixin
 from ._dataframe_compat import df_compat_function
 from ._basecolumn import BaseColumn
 from ._mixedcolumn import MixedColumn
+from ._where_index import WhereIndex
 from ._index import Index
 from ._uninstantiatedcolumn import UninstantiatedColumn
 try:
@@ -708,10 +709,11 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
             raise ValueError(
                 'Can only slice a DataMatrix with a subset of itself')
         try:
-            return [self._rowid.index(rowid) for rowid in other_dm._rowid]
+            indices = [self._rowid.index(rowid) for rowid in other_dm._rowid]
         except KeyError:
             raise ValueError(
                 'Can only slice a DataMatrix with a subset of itself')
+        return WhereIndex(self, indices)
         
     # Implemented syntax
 

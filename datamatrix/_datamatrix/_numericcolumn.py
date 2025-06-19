@@ -46,7 +46,7 @@ class NumericColumn(BaseColumn):
         directly.
     """
 
-    dtype = float
+    dtype = np.dtype(float)
     invalid = nan
 
     def __init__(self, datamatrix, **kwargs):
@@ -220,7 +220,7 @@ class NumericColumn(BaseColumn):
 
     def _getintkey(self, key):
 
-        return self.dtype(self._seq[key])
+        return self.dtype.type(self._seq[key])
 
     def _getrowidkey(self, key, dm=None):
 
@@ -307,7 +307,7 @@ class IntColumn(NumericColumn):
         A column of numeric int values. Does not support invalid values.
     """
 
-    dtype = int
+    dtype = np.dtype(int)
     invalid = 0
 
     def _tosequence(self, value, length=None):
