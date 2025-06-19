@@ -29,6 +29,63 @@ def test_dict_initialization():
         assert set(obj.columns if cls is pd.DataFrame else obj.column_names) == {"A", "B", "C"}
 
 
+def test_list_of_dicts_initialization():
+    """Data can be passed as a list of dicts at construction time."""
+    data = [
+        {"A": 1, "B": 4.1, "C": "x"},
+        {"A": 2, "B": 5, "C": "y"},
+        {"A": 3, "B": 6, "C": "z"},
+        {"A": 4, "B": 7, "C": "w"},
+    ]
+    
+    for cls in TEST_CLASSES:
+        obj = cls(data)
+        # Check column names
+        assert set(obj.columns if cls is pd.DataFrame else obj.column_names) == {"A", "B", "C"}
+        # Check data integrity
+        assert list(obj["A"]) == [1, 2, 3, 4]
+        assert obj['A'].dtype == int
+        assert list(obj["B"]) == [4.1, 5, 6, 7]
+        assert obj['B'].dtype == float
+        assert list(obj["C"]) == ["x", "y", "z", "w"]
+        assert obj['C'].dtype == object
+
+
+def test_list_of_dicts_with_missing_keys():
+    """Test list of dicts where some dicts have missing keys."""
+    data = [
+        {"A": 1, "B": 4, "C": "x"},
+        {"A": 2, "C": "y"},  # Missing "B"
+        {"B": 6, "C": "z"},  # Missing "A"
+        {"A": 4, "B": 7},    # Missing "C"
+    ]
+    
+    for cls in TEST_CLASSES:
+        obj = cls(data)
+        # Check column names
+        assert set(obj.columns if cls is pd.DataFrame else obj.column_names) == {"A", "B", "C"}
+        # Check that missing values are handled (None or NaN)
+        assert len(obj) == 4
+        # Note: DataFrame uses NaN for missing numeric values and None for objects
+        # DataMatrix should handle this similarly
+
+
+def test_empty_list_initialization():
+    """Test initialization with an empty list."""
+    for cls in TEST_CLASSES:
+        obj = cls([])
+        assert len(obj) == 0
+        assert len(obj.columns if cls is pd.DataFrame else obj.column_names) == 0
+
+
+def test_list_of_empty_dicts():
+    """Test initialization with a list of empty dicts."""
+    data = [{}, {}, {}]
+    for cls in TEST_CLASSES:
+        obj = cls(data)
+        assert len(obj) == 3
+        assert len(obj.columns if cls is pd.DataFrame else obj.column_names) == 0
+
 def test_multi_column_selection():
     """Selecting a list of columns returns the expected subset."""
     for cls in TEST_CLASSES:

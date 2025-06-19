@@ -202,6 +202,7 @@ class DataFrameCompatMixin:
     where = df_compat_function('where')
     xs = df_compat_function('xs')
     iterrows = df_compat_function('iterrows')
+    index = df_compat_property('index')
     __dataframe__ = df_compat_function('__dataframe__')
 
 class SeriesCompatMixin:
@@ -402,3 +403,4 @@ class SeriesCompatMixin:
     view = df_compat_function('view')
     where = df_compat_function('where')
     xs = df_compat_function('xs')
+    index = df_compat_property('index')

@@ -1044,3 +1044,6 @@ class BaseColumn(OrderedState, SeriesCompatMixin):
     def __matmul__(self, other):
         return self._map(other)
 
+    def __dataframe__(self):
+        import pandas as pd
+        return pd.Series(self)

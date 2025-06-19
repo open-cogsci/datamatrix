@@ -76,19 +76,39 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
         """
 
         global _id
-        # If a dict is provided, then we use this to initialize the datamatrix.
-        # This emulates DataFrame initialization. To preserve backwards
-        # compatibility, we use the first argument (length) for this, even
-        # though that's a bit ugly. The actual initialization happens at the
-        # end.
+        
+        # Initialize basic attributes first
+        object.__setattr__(self, '_cols', OrderedDict())
+        object.__setattr__(self, '_rowid', Index(0))  # Will be updated later
+        if default_col_type == float:
+            from datamatrix import FloatColumn
+            default_col_type = FloatColumn
+        elif default_col_type == int:
+            from datamatrix import IntColumn
+            default_col_type = IntColumn
+        object.__setattr__(self, '_default_col_type', default_col_type)
+        object.__setattr__(self, '_id', _id)
+        object.__setattr__(self, '_sorted', True)
+        object.__setattr__(self, 'metadata', metadata)
+        object.__setattr__(self, '_instantiate_on_select', True)
+        _id += 1
+        
+        # Handle different initialization methods
         if isinstance(length, dict):
-            init_dict = length
-            length = 0
-            if columns:
-                logger.warning('initializing from dict, ignoring columns list')
-                columns = 0
+            # Initialize from dict (columns as keys, lists as values)
+            self._init_from_dict(length)
+        elif isinstance(length, list) and length and isinstance(length[0], dict):
+            # Initialize from a non-empty list of dicts (rows)
+            self._init_from_list_of_dicts(length)
         else:
-            init_dict = None
+            # Standard initialization. We also arrive here when initializing 
+            # with an empty list, which is identical to length of 0
+            if isinstance(length, list):
+                length = 0
+            self._init_standard(length, columns)
+
+    def _init_standard(self, length, columns):
+        """Initialize DataMatrix with standard parameters."""
         # If column have been provided, verify that they are lists of equal
         # length. If a length has been explicitly provided, it should match
         # the column length. If not, the length is set to the column length.
@@ -102,29 +122,87 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
             if length != 0 and length != column_length:
                 raise ValueError('length does not match length of columns')
             length = column_length
+        
         try:
             length = int(length)
         except ValueError:
             raise TypeError('length should be an integer')
-        object.__setattr__(self, u'_cols', OrderedDict())
-        object.__setattr__(self, u'_rowid', Index(length))
-        if default_col_type == float:
-            from datamatrix import FloatColumn
-            default_col_type = FloatColumn
-        elif default_col_type == int:
-            from datamatrix import IntColumn
-            default_col_type = IntColumn
-        object.__setattr__(self, u'_default_col_type', default_col_type)
-        object.__setattr__(self, u'_id', _id)
-        object.__setattr__(self, u'_sorted', True)
-        object.__setattr__(self, u'metadata', metadata)
-        object.__setattr__(self, u'_instantiate_on_select', True)
-        _id += 1
+            
+        # Update the row index with the correct length
+        object.__setattr__(self, '_rowid', Index(length))
+        
+        # Add columns if provided
         for column_name, val in columns.items():
             self[column_name] = val
-        # If a dict was provided, initialize the datamatrix
-        if init_dict is not None:
-            self._fromdict(init_dict)
+
+    def _init_from_dict(self, init_dict):
+        """Initialize from a dictionary of columns."""
+        from .. import operations as ops
+        if not init_dict:
+            return
+            
+        # Get the length from the first column
+        first_key = next(iter(init_dict))
+        first_value = init_dict[first_key]
+        
+        try:
+            len(first_value)
+        except TypeError:
+            raise TypeError('Dictionary values should be lists')
+            
+        length = len(first_value)
+        
+        # Verify all columns have the same length
+        for key, value in init_dict.items():
+            try:
+                len(value)
+            except TypeError:
+                raise TypeError('Dictionary values should be lists')
+            if len(value) != length:
+                raise ValueError('All columns should have the same length')
+        
+        # Update the row index
+        object.__setattr__(self, '_rowid', Index(length))
+        
+        # Add columns
+        for column_name, values in init_dict.items():
+            self[column_name] = ops._best_fitting_col_type(values)
+            self[column_name] = values
+
+    def _init_from_list_of_dicts(self, list_of_dicts):
+        """Initialize from a list of dictionaries (each dict is a row)."""
+        from .. import operations as ops
+        if not list_of_dicts:
+            return
+            
+        # Collect all unique keys across all dictionaries
+        all_keys = set()
+        for row_dict in list_of_dicts:
+            if not isinstance(row_dict, dict):
+                raise TypeError('All elements should be dictionaries')
+            all_keys.update(row_dict.keys())
+        
+        # Sort keys for consistent column order
+        all_keys = sorted(all_keys)
+        
+        # Set the length
+        length = len(list_of_dicts)
+        object.__setattr__(self, '_rowid', Index(length))
+        
+        # Create columns
+        for key in all_keys:
+            # Collect values for this column, using None for missing values
+            column_values = []
+            for row_dict in list_of_dicts:
+                column_values.append(row_dict.get(key, None))
+            
+            # Add the column
+            self[key] = ops._best_fitting_col_type(column_values)
+            self[key] = column_values
+
+    def _fromdict(self, d):
+        """Legacy method for dict initialization - now calls _init_from_dict."""
+        self._init_from_dict(d)
 
     @property
     def shape(self):
@@ -180,7 +258,7 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
     def is_2d(self):
 
         for name in self.columns:
-            if hasattr(self[name], u'depth'):
+            if hasattr(self[name], 'depth'):
                 return False
         return True
         
@@ -209,19 +287,19 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
         if old == new:
             return
         if old not in self._cols:
-            raise ValueError(u'Column name does not exist')
+            raise ValueError('Column name does not exist')
         if new in self._cols:
-            raise ValueError(u'Column name already exists')
+            raise ValueError('Column name already exists')
         try:
-            exec(u'%s = None' % new)
+            exec('%s = None' % new)
         except SyntaxError:
-            raise ValueError(u'Invalid column name')
+            raise ValueError('Invalid column name')
         # A rename recipe that preservers order.
         _cols = OrderedDict([
             (new, v) if k == old else (k, v)
             for k, v in self._cols.items()
         ])
-        object.__setattr__(self, u'_cols', _cols)
+        object.__setattr__(self, '_cols', _cols)
         self._mutate()
 
     # Private functions. These can also be called by the BaseColumn (and
@@ -267,8 +345,8 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
         """
 
         dm = DataMatrix(len(_rowid))
-        object.__setattr__(dm, u'_rowid', _rowid)
-        object.__setattr__(dm, u'_id', self._id)
+        object.__setattr__(dm, '_rowid', _rowid)
+        object.__setattr__(dm, '_id', self._id)
         for name, col in self._cols.items():
             # By default we create new columns with a copy of the selected data 
             if not hasattr(self, '_instantiate_on_select') or \
@@ -309,8 +387,8 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
                 return self._getcolbyname(key[0])[key[1:]]
         _rowid = self._rowid[key]
         dm = DataMatrix(len(_rowid))
-        object.__setattr__(dm, u'_rowid', _rowid)
-        object.__setattr__(dm, u'_id', self._id)
+        object.__setattr__(dm, '_rowid', _rowid)
+        object.__setattr__(dm, '_id', self._id)
         for name, col in self._cols.items():
             dm._cols[name] = self._cols[name][key]
             dm._cols[name]._datamatrix = dm
@@ -341,13 +419,13 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
         """
         self._instantiate()
         if value < len(self):
-            object.__setattr__(self, u'_rowid', self._rowid[:value])
+            object.__setattr__(self, '_rowid', self._rowid[:value])
             for name, col in self._cols.items():
                 self._cols[name] = self._cols[name][:value]
         else:
             startid = 0 if not len(self) else self._rowid.max+1
             rowid = Index([i+startid for i in range(value-len(self))])
-            object.__setattr__(self, u'_rowid', self._rowid.copy()+rowid)
+            object.__setattr__(self, '_rowid', self._rowid.copy()+rowid)
             for name in self._cols:
                 self._cols[name]._addrowid(rowid)
         self._mutate()
@@ -368,8 +446,8 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
             not isinstance(col_type, type) or
             not issubclass(col_type, BaseColumn)
         ):
-            raise Exception(u'Not a valid column type')
-        object.__setattr__(self, u'_default_col_type', col_type)
+            raise Exception('Not a valid column type')
+        object.__setattr__(self, '_default_col_type', col_type)
 
     def _merge(self, other, _rowid):
 
@@ -391,8 +469,8 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
         if self != other:
             raise Exception('Can only merge related datamatrices')
         dm = DataMatrix(len(_rowid))
-        object.__setattr__(dm, u'_rowid', _rowid)
-        object.__setattr__(dm, u'_id', self._id)
+        object.__setattr__(dm, '_rowid', _rowid)
+        object.__setattr__(dm, '_id', self._id)
         for name, col in self._cols.items():
             dm._cols[name] = self._cols[name]._merge(other._cols[name], _rowid)
             dm._cols[name]._datamatrix = dm
@@ -439,7 +517,7 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
         """
 
         global _id
-        object.__setattr__(self, u'_id', self._id)
+        object.__setattr__(self, '_id', self._id)
         _id += 1
 
     def _getcolbyobject(self, key):
@@ -484,7 +562,7 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
             key = utils.safe_decode(key)
         col = self._cols.get(key, None)
         if col is None:
-            raise AttributeError(u'No column named "%s"' % key)
+            raise AttributeError('No column named "%s"' % key)
         return self._instantiate_column(key, col)
 
     def _getrow(self, key):
@@ -525,7 +603,7 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
         try:
             exec('%s = None' % name)
         except SyntaxError:
-            raise ValueError(u'Invalid column name: %s' % name)
+            raise ValueError('Invalid column name: %s' % name)
 
     def _set_col(self, name, value):
 
@@ -541,7 +619,7 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
         if isinstance(name, bytes):
             name = utils.safe_decode(name)
         if not isinstance(name, str):
-            raise TypeError(u'Column names should be str, not %s' % type(name))
+            raise TypeError('Column names should be str, not %s' % type(name))
         # Create a new column by column type:
         # dm[name] = IntColumn
         # dm[name] = float
@@ -576,7 +654,7 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
             # column of the same type
             if len(value) != len(self):
                 raise ValueError(
-                    u'Column should have the same length as the DataMatrix'
+                    'Column should have the same length as the DataMatrix'
                 )
             self._cols[name] = value._empty_col(datamatrix=self)
         if name not in self:
@@ -646,19 +724,19 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
 
         # Is used by pickle.dump. To make sure that identical datamatrices with
         # different _ids are considered identical, we strip the _id property.
-        return OrderedState.__getstate__(self, ignore=u'_id')
+        return OrderedState.__getstate__(self, ignore='_id')
 
     def __setstate__(self, state):
 
         if isinstance(state, dict):
-            warn(u'Unpickling an old datamatrix')
+            warn('Unpickling an old datamatrix')
             self.__dict__.update(state)
             return
         # Is used by pickle.load. Because __getstate__() strips the _id, we
         # need to generate a new id for the DataMatrix upon unpickling.
         global _id
         OrderedState.__setstate__(self, state)
-        object.__setattr__(self, u'_id', _id)
+        object.__setattr__(self, '_id', _id)
         for name in self.columns:
             self[name]._datamatrix = self
         _id += 1
@@ -701,20 +779,20 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
     def __delattr__(self, name):
 
         if name not in self._cols:
-            raise AttributeError(u'No column named %s' % name)
+            raise AttributeError('No column named %s' % name)
         del self._cols[name]
 
     def __setattr__(self, name, value):
 
         if isinstance(name, bytes):
             name = utils.safe_decode(name)
-        if name == u'length':
+        if name == 'length':
             self._setlength(value)
             return
-        if name == u'sorted':
-            object.__setattr__(self, u'_sorted', value)
+        if name == 'sorted':
+            object.__setattr__(self, '_sorted', value)
             return
-        if name == u'default_col_type':
+        if name == 'default_col_type':
             self._set_default_col_type(value)
             return
         self._set_col(name, value)
@@ -740,8 +818,8 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
         if isinstance(value, int):
             value = value,
         _slice = self[value] ^ self
-        object.__setattr__(self, u'_cols', _slice._cols)
-        object.__setattr__(self, u'_rowid', _slice._rowid)
+        object.__setattr__(self, '_cols', _slice._cols)
+        object.__setattr__(self, '_rowid', _slice._rowid)
 
     def __setitem__(self, name, value):
 
@@ -776,7 +854,7 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
 
         self._instantiate()
         if len(self) > PRINT_MAX_ROWS:
-            return str(self[:PRINT_MAX_ROWS]) + u'\n(+ %d rows not shown)' \
+            return str(self[:PRINT_MAX_ROWS]) + '\n(+ %d rows not shown)' \
                 % (len(self) - PRINT_MAX_ROWS)
         import prettytable
         t = prettytable.PrettyTable()
@@ -793,13 +871,13 @@ class DataMatrix(OrderedState, DataFrameCompatMixin):
                 ]
             )
         if len(self._cols) > PRINT_MAX_COLUMNS:
-            return str(t) + u'\n(+ %d columns not shown)' \
+            return str(t) + '\n(+ %d columns not shown)' \
                 % (len(self._cols) - PRINT_MAX_COLUMNS)
         return str(t)
 
     def __repr__(self):
 
-        return u'DataMatrix[%d, 0x%x]\n%s' % (self._id, id(self), str(self))
+        return 'DataMatrix[%d, 0x%x]\n%s' % (self._id, id(self), str(self))
 
     def _repr_html_(self):
 
