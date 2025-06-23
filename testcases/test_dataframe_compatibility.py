@@ -26,7 +26,7 @@ def test_dict_initialization():
     """Data can be passed as a dict at construction time."""
     for cls in TEST_CLASSES:
         obj = _make_sample(cls)
-        assert set(obj.columns if cls is pd.DataFrame else obj.column_names) == {"A", "B", "C"}
+        assert set(obj.columns if cls is pd.DataFrame else obj.columns) == {"A", "B", "C"}
 
 
 def test_list_of_dicts_initialization():
@@ -41,7 +41,7 @@ def test_list_of_dicts_initialization():
     for cls in TEST_CLASSES:
         obj = cls(data)
         # Check column names
-        assert set(obj.columns if cls is pd.DataFrame else obj.column_names) == {"A", "B", "C"}
+        assert set(obj.columns if cls is pd.DataFrame else obj.columns) == {"A", "B", "C"}
         # Check data integrity
         assert list(obj["A"]) == [1, 2, 3, 4]
         assert obj['A'].dtype == int
@@ -63,7 +63,7 @@ def test_list_of_dicts_with_missing_keys():
     for cls in TEST_CLASSES:
         obj = cls(data)
         # Check column names
-        assert set(obj.columns if cls is pd.DataFrame else obj.column_names) == {"A", "B", "C"}
+        assert set(obj.columns if cls is pd.DataFrame else obj.columns) == {"A", "B", "C"}
         # Check that missing values are handled (None or NaN)
         assert len(obj) == 4
         # Note: DataFrame uses NaN for missing numeric values and None for objects
@@ -75,7 +75,7 @@ def test_empty_list_initialization():
     for cls in TEST_CLASSES:
         obj = cls([])
         assert len(obj) == 0
-        assert len(obj.columns if cls is pd.DataFrame else obj.column_names) == 0
+        assert len(obj.columns if cls is pd.DataFrame else obj.columns) == 0
 
 
 def test_list_of_empty_dicts():
@@ -84,7 +84,7 @@ def test_list_of_empty_dicts():
     for cls in TEST_CLASSES:
         obj = cls(data)
         assert len(obj) == 3
-        assert len(obj.columns if cls is pd.DataFrame else obj.column_names) == 0
+        assert len(obj.columns if cls is pd.DataFrame else obj.columns) == 0
 
 def test_multi_column_selection():
     """Selecting a list of columns returns the expected subset."""

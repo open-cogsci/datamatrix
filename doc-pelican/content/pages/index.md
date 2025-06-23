@@ -70,5 +70,5 @@ for colname in dm.columns:
     for cell in dm[colname]: # Loop through all cells in the column
         print(cell) # do something with the cell
 # Or just see which columns exist
-print(dm.column_names)
+print(dm.columns)
 ~~~

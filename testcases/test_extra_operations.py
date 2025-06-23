@@ -368,13 +368,13 @@ def test_keep_only():
     dm.c = 'y', 'z'
     for cols in (['b', 'c'], [dm.b, dm.c]):
         dm = ops.keep_only(dm, *cols)
-        assert 'a' not in dm.column_names
-        assert 'b' in dm.column_names
-        assert 'c' in dm.column_names
+        assert 'a' not in dm.columns
+        assert 'b' in dm.columns
+        assert 'c' in dm.columns
         dm = dm[cols]
-        assert 'a' not in dm.column_names
-        assert 'b' in dm.column_names
-        assert 'c' in dm.column_names
+        assert 'a' not in dm.columns
+        assert 'b' in dm.columns
+        assert 'c' in dm.columns
 
 
 def test_auto_type():

@@ -48,6 +48,10 @@ class Row(object):
     @property
     def column_names(self):
         return self._datamatrix.column_names
+        
+    @property
+    def columns(self):
+        return self._datamatrix.columns
 
     def equals(self, other):
         
@@ -67,7 +71,7 @@ class Row(object):
         
     def __dir__(self):
         
-        return self.column_names + object.__dir__(self)
+        return self.columns + object.__dir__(self)
 
     def __len__(self):
 
@@ -80,7 +84,7 @@ class Row(object):
     def __getitem__(self, key):
 
         if isinstance(key, int):
-            key = self._datamatrix.column_names[key]
+            key = self._datamatrix.columns[key]
         return self._datamatrix[key][self._index]
 
     def __setattr__(self, key, value):
@@ -90,11 +94,11 @@ class Row(object):
     def __setitem__(self, key, value):
 
         if isinstance(key, int):
-            key = self._datamatrix.column_names[key]
+            key = self._datamatrix.columns[key]
         elif isinstance(key, str):
             # Create a new column with default values if the column does not
             # exist yet
-            if key not in self._datamatrix.column_names:
+            if key not in self._datamatrix.columns:
                 self._datamatrix[key] = \
                     self._datamatrix._default_col_type.default_value
         self._datamatrix[key][self._index] = value
@@ -109,5 +113,5 @@ class Row(object):
 
     def __iter__(self):
 
-        for col in self._datamatrix.column_names:
+        for col in self._datamatrix.columns:
             yield col, self[col]

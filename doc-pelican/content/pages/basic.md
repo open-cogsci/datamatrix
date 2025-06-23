@@ -42,7 +42,7 @@ for colname in dm.columns:
     for cell in dm[colname]: # Loop through all cells in the column
         print(cell) # do something with the cell
 # Or just see which columns exist
-print(dm.column_names)
+print(dm.columns)
 ~~~
 
 __Important note:__ Because of a limitation (or feature, if you will) of the Python language, the behavior of `and`, `or`, and chained (`x < y < z`) comparisons cannot be modified. These therefore do not work with `DataMatrix` objects as you would expect them to:
@@ -548,7 +548,7 @@ The `column_names` property gives a sorted list of all column names (without the
 
 
 ```python
-print(dm.column_names)
+print(dm.columns)
 ```
 
 

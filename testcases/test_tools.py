@@ -34,7 +34,7 @@ def all_nan(*l):
 
 def check_dm(dm, ref):
 
-    assert dm.column_names == ref.column_names
+    assert dm.columns == ref.columns
     for column_name in dm.columns:
         assert not isinstance(column_name, bytes)
     for colname in dm.columns:

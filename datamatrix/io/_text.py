@@ -114,6 +114,6 @@ def writetxt(dm, path, delimiter=',', quotechar='"'):
             quotechar=quotechar,
             lineterminator='\n'
         )
-        writer.writerow([utils.safe_decode(colname) for colname in dm.column_names])
+        writer.writerow([utils.safe_decode(colname) for colname in dm.columns])
         for row in dm:
             writer.writerow([utils.safe_decode(value) for colname, value in row])

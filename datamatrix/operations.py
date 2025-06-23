@@ -309,7 +309,7 @@ def weight(col):
                 % (weight, type(weight))
             )
         for c in range(weight):
-            for colname in dm1.column_names:
+            for colname in dm1.columns:
                 dm2[colname][i2] = dm1[colname][i1]
             i2 += 1
     return dm2
@@ -555,11 +555,11 @@ def fullfactorial(dm, ignore=u''):
     a = _fullfact(design)
     # Create an DataMatrix with empty columns
     fdm = DataMatrix(a.shape[0])
-    for name in dm.column_names:
+    for name in dm.columns:
         fdm[name] = u''
     for i in range(a.shape[0]):
         row = a[i]
-        for rownr, name in enumerate(dm.column_names):
+        for rownr, name in enumerate(dm.columns):
             fdm[name][i] = dm[name][int(row[rownr])]
     return fdm
 
@@ -888,9 +888,9 @@ def keep_only(dm, *cols):
                 ) % colname
             )
     for colname in colnames:
-        if colname not in dm.column_names:
+        if colname not in dm.columns:
             utils.logger.warning('no column named {}'.format(colname))
-    for colname in dm.column_names:
+    for colname in dm.columns:
         if colname not in colnames:
             del dm[colname]
     return dm
