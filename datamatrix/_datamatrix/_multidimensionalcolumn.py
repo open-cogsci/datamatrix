@@ -631,6 +631,8 @@ class TouchHistory:
         # If the current column is loaded, then we return right away, because
         # there is no need to free up additional memory by unloading other
         # columns
+        if col.loaded:
+            return
         if col._sufficient_free_memory():
             if try_to_load:
                 col.loaded = True
