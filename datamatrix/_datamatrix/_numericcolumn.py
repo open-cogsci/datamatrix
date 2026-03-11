@@ -277,9 +277,9 @@ class NumericColumn(BaseColumn):
 
     def _merge(self, other, _rowid):
 
-        i_other = ~np.in1d(other._rowid, self._rowid) \
-            & np.in1d(other._rowid, _rowid)
-        i_self = np.in1d(self._rowid, _rowid)
+        i_other = ~np.isin(other._rowid, self._rowid) \
+            & np.isin(other._rowid, _rowid)
+        i_self = np.isin(self._rowid, _rowid)
         rowid = np.concatenate(
             (self._rowid[i_self], other._rowid[i_other]))
         seq = np.concatenate((self._seq[i_self], other._seq[i_other]))
