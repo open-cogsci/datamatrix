@@ -136,12 +136,7 @@ conda install datamatrix -c conda-forge
 
 ### Ubuntu
 
-~~~
-sudo add-apt-repository ppa:smathot/cogscinl  # for stable releases
-sudo add-apt-repository ppa:smathot/rapunzel  # for development releases
-sudo apt-get update
-sudo apt install python3-datamatrix
-~~~
+Ubuntu packages are no longer provided. Instead, you can use the PyPi package as described above.
 
 
 ## License
