@@ -111,6 +111,19 @@ class BaseColumn(OrderedState):
             self._init_seq()
         else:
             self._seq = seq
+            
+    def __setstate__(self, state):
+
+        """
+        desc:
+            Restores the object's state when loaded from a pickle. This
+            performs the same global DataMatrix import that __init__ does,
+            because __init__ is not called during unpickling.
+        """
+
+        global DataMatrix
+        from datamatrix import DataMatrix
+        super().__setstate__(state)            
     
     @property
     def loaded(self):
