@@ -62,7 +62,7 @@ def from_mne_epochs(epochs, ch_avg=False):
             # First read a simple dataset that contains data from three occipital EEG
             # channels (O1, O2, Oz). `events` is an mne style array with event codes
             # and timestamps. `dm` is a datamatrix with trial information.
-            with open('data/eeg-data.pkl', 'rb') as fd:
+            with open('../../doc-pelican/data/eeg-data.pkl', 'rb') as fd:
                 raw, events, dm = pickle.loads(fd.read())
             # Create an Epochs object and convert it to a multidimensional column (dm.erp)
             epochs = mne.Epochs(raw, events, tmin=-.05, tmax=1.5,
